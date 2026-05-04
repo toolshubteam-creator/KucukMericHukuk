@@ -25,6 +25,7 @@
     <ProjectReference Include="..\..\src\KucukMericHukuk.Business\KucukMericHukuk.Business.csproj" />
     <ProjectReference Include="..\..\src\KucukMericHukuk.DataAccess\KucukMericHukuk.DataAccess.csproj" />
     <ProjectReference Include="..\..\src\KucukMericHukuk.Infrastructure\KucukMericHukuk.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\KucukMericHukuk.Web\KucukMericHukuk.Web.csproj" />
   </ItemGroup>
 
 </Project>

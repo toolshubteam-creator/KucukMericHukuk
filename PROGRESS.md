@@ -50,6 +50,33 @@
   - `.gitattributes` eklendi (`* text=auto eol=lf` + binary/script kuralları)
   - `feature/faz-1-altyapi` branch GitHub'a push edildi
 
+- ✅ **Adım 4:** Çok dilli (i18n) altyapısı
+  - **Web:**
+    - `Localization/CultureRouteConstraint` — `LanguageCodes.Supported` üzerinden geçerli culture kontrolü; geçersiz culture'da route eşleşmesi başarısız olup 404 döner
+    - `Resources/SharedResource.cs` — `IStringLocalizer<SharedResource>` marker class
+    - `Resources/SharedResource.tr-TR.resx` — 5 örnek key (`HomeTitle`, `ContactTitle`, `ReadMore`, `BackToHome`, `WelcomeMessage`)
+  - **Program.cs:**
+    - `AddLocalization(ResourcesPath = "Resources")`
+    - `RequestLocalizationOptions`: default `tr-TR`, supported `[tr-TR]`, provider önceliği Route → Cookie → Accept-Language (default'lar temizlenip yeniden eklendi)
+    - `ConstraintMap.Add("culture", typeof(CultureRouteConstraint))`
+    - `AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)` + `AddDataAnnotationsLocalization()`
+    - Middleware sırası: `UseHttpsRedirection → UseStaticFiles → UseRouting → UseRequestLocalization → UseAuthentication → UseAuthorization`
+    - Kök URL `/` → `/tr-TR` 302 redirect (`MapGet("/")`)
+    - Default route: `{culture:culture}/{controller=Home}/{action=Index}/{id?}`
+    - Admin route: `admin/{controller=Home}/{action=Index}/{id?}` (culture-bağımsız)
+    - Testing env'de `AddDbContext<AppDbContext>` atlanır (entegrasyon testi kendi SQLite provider'ını ekler — multi-provider conflict önlenir)
+    - `public partial class Program { }` — `WebApplicationFactory<Program>` için
+  - **HomeController:**
+    - `IStringLocalizer<SharedResource> _localizer` constructor injection
+    - `Index`: `ViewData["Title"] = _localizer["HomeTitle"]`, `ViewData["Welcome"] = _localizer["WelcomeMessage"]`
+    - `Views/Home/Index.cshtml` — `@System.Globalization.CultureInfo.CurrentCulture.Name` ile mevcut culture'ı gösteriyor
+  - **Tests:**
+    - `tests/KucukMericHukuk.Tests` → `KucukMericHukuk.Web.csproj` proje referansı eklendi
+    - `LocalizationIntegrationTests`: `WebApplicationFactory<Program>` + `UseEnvironment("Testing")` + SQLite in-memory
+    - 3 entegrasyon testi: `RootUrl_ShouldRedirectToDefaultCulture`, `DefaultCultureUrl_ShouldReturnSuccess`, `InvalidCulture_ShouldReturn404`
+  - **Test sonucu:** 11/11 PASSED (5 repo + 3 mapping + 3 localization), 0 failed, 4s
+  - **Build:** 0 Uyarı / 0 Hata
+
 - ✅ **Adım 3.A.3:** DTO'lar + Mapster IRegister'lar + DI wiring + mapping testleri
   - **Core DTOs (24 dosya):**
     - Common: `TranslationDto`, `LookupDto`, `PagedResult<T>` (önceki adımda)
