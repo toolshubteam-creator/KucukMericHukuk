@@ -1,4 +1,5 @@
 using KucukMericHukuk.Core.Entities.Identity;
+using KucukMericHukuk.DataAccess;
 using KucukMericHukuk.DataAccess.Context;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,9 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
+
+// Repository + UnitOfWork
+builder.Services.AddDataAccess();
 
 builder.Services.AddControllersWithViews();
 

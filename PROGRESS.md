@@ -50,6 +50,28 @@
   - `.gitattributes` eklendi (`* text=auto eol=lf` + binary/script kuralları)
   - `feature/faz-1-altyapi` branch GitHub'a push edildi
 
+- ✅ **Adım 3.A.2:** Generic Repository + UnitOfWork + 6 özel repository + birim testler
+  - **Core:**
+    - `PagedResult<T>` (Items, TotalCount, PageNumber, PageSize, TotalPages, HasPrevious, HasNext)
+    - `IGenericRepository<T> where T : BaseEntity` — read/write/delete (soft+hard)/restore + `Query()`/`QueryWithDeleted()` escape hatchleri
+    - 6 özel repository interface (`IPageRepository`, `IServiceRepository`, `IAttorneyRepository`, `ICategoryRepository`, `ITagRepository`, `IArticleRepository`)
+    - `IUnitOfWork` (6 repo property + SaveChangesAsync + transaction methodları + IDisposable + IAsyncDisposable)
+  - **DataAccess:**
+    - `QueryableExtensions.ToPagedListAsync<T>` (Skip/Take + total count)
+    - `GenericRepository<T>` — soft delete `IsDeleted=true + DeletedAt=now`, `HardDelete` `Remove`, `Restore` `IsDeleted=false + DeletedAt=null`
+    - 6 özel repository (Page, Service, Attorney, Category, Tag, Article) — translation-aware include'lar (`Include(Translations.Where(t => t.LanguageCode == languageCode))`)
+    - `Article.IncrementViewCountAsync`: `ExecuteUpdateAsync` ile transactional increment (tracking yok)
+    - `UnitOfWork`: lazy-init repo property'ler, `BeginTransactionAsync/CommitTransactionAsync/RollbackTransactionAsync`
+    - `DependencyInjection.AddDataAccess()`: open generic + 6 özel + UoW kayıt (Scoped lifetime)
+  - **Web:**
+    - `Program.cs` — `builder.Services.AddDataAccess()` Identity'den sonra çağrılıyor
+  - **Tests:**
+    - SQLite in-memory provider tercih edildi (EF InMemory query filter desteği yetersiz)
+    - `TestDbContextFactory` — `Filename=:memory:` connection, `EnsureCreated()` ile schema kurulur
+    - 5 birim testi: `AddAsync`, soft delete (filter çalışıyor), hard delete, restore, pagination
+  - **Test sonucu:** 5/5 PASSED, 0 failed, 6s
+  - **Build:** 0 Uyarı / 0 Hata
+
 - ✅ **Adım 3.A.1:** Domain entity'leri (Page, Service, Attorney, Article, Category, Tag) + translation tabloları + AddDomainEntities migration uygulandı
   - **Core:**
     - `ArticleStatus` enum (`Draft=0`, `Published=1`, `Archived=2`)
