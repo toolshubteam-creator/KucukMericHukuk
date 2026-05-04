@@ -427,3 +427,9 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Claude Code local state (per-project settings, transcripts)
+.claude/
+
+# ASP.NET local development settings (CLAUDE.md kuralı: bağlantı dizesi burada tutulur)
+**/appsettings.Development.json

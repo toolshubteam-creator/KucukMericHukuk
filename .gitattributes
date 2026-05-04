@@ -1,0 +1,24 @@
+# Auto-detect text files and normalize line endings to LF in repo
+* text=auto eol=lf
+
+# Explicit binary files (no LF normalization)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.docx binary
+*.xlsx binary
+*.pptx binary
+*.zip binary
+*.tar.gz binary
+
+# Windows-specific scripts (force CRLF)
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Unix-specific scripts (force LF)
+*.sh text eol=lf

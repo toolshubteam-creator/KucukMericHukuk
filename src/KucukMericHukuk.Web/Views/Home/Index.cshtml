@@ -1,0 +1,9 @@
+@{
+    ViewData["Title"] = ViewData["Title"] ?? "Anasayfa";
+}
+
+<div class="text-center">
+    <h1 class="display-4">@ViewData["Title"]</h1>
+    <p>@ViewData["Welcome"]</p>
+    <p>Mevcut culture: @System.Globalization.CultureInfo.CurrentCulture.Name</p>
+</div>
