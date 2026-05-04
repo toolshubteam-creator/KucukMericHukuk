@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
     <ProjectReference Include="..\KucukMericHukuk.Core\KucukMericHukuk.Core.csproj" />
@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <PropertyGroup>
+    <UserSecretsId>ec9bfee5-0aa3-4c77-8b06-22aa85b9fe43</UserSecretsId>
   </PropertyGroup>
 
 </Project>

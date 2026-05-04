@@ -46,9 +46,41 @@
   - `Mapster` 10.0.7 + `Mapster.DependencyInjection` 10.0.7 (MIT, vuln-free) eklendi
   - CLAUDE.md teknoloji stack tablosu güncellendi
 
+- ✅ **Adım 1.D:** Line ending normalize + push
+  - `.gitattributes` eklendi (`* text=auto eol=lf` + binary/script kuralları)
+  - `feature/faz-1-altyapi` branch GitHub'a push edildi
+
+- ✅ **Adım 2:** BaseEntity + Identity entegrasyonu + AppDbContext + InitialIdentity migration
+  - **Core:**
+    - `BaseEntity` (audit kolonları + soft delete: `Id`, `CreatedAt`, `UpdatedAt`, `IsDeleted`, `DeletedAt`)
+    - `ITranslatable<T>` + `ITranslation` interface'leri (çok dilli altyapı)
+    - `LanguageCodes` constants (`tr-TR`, `en-US`, `de-DE`; şu an sadece `tr-TR` Supported)
+    - `ApplicationUser : IdentityUser<int>` (FullName + audit + soft delete)
+    - `ApplicationRole : IdentityRole<int>` (Description + audit)
+    - `Microsoft.Extensions.Identity.Stores 10.0.0` paketi (EF bağımlılığı olmadan Identity model sınıfları)
+  - **DataAccess:**
+    - `AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>`
+    - Identity tablo isimleri sadeleştirildi (Users, Roles, UserRoles, UserClaims, UserLogins, UserTokens, RoleClaims — `AspNet` prefix kaldırıldı)
+    - Soft delete global query filter `BaseEntity` türevleri için reflection ile uygulanıyor (şu an domain entity yok, altyapı hazır)
+    - `SaveChangesAsync` override: `UpdatedAt` audit alanı otomatik dolduruluyor (`BaseEntity`, `ApplicationUser`, `ApplicationRole` için)
+    - `ApplicationUserConfiguration` (FullName max 150, IsDeleted index)
+    - `ApplicationRoleConfiguration` (Description max 250)
+    - `ApplyConfigurationsFromAssembly` ile tüm `IEntityTypeConfiguration<T>` otomatik yüklenir
+  - **Web:**
+    - `Program.cs`: `AddDbContext<AppDbContext>(UseSqlServer)`, `AddIdentity<...>` + `AddEntityFrameworkStores<AppDbContext>` + `AddDefaultTokenProviders`
+    - Identity ayarları: password ≥8, lockout 5 başarısızlık → 15 dk, email unique, email confirmation şu an kapalı (Adım 5'te açılacak)
+    - `app.UseAuthentication()` + `UseAuthorization()` pipeline'a eklendi
+    - .NET 10 `MapStaticAssets` / `WithStaticAssets` korundu
+  - **Connection string:**
+    - `appsettings.json`'da placeholder (`""`)
+    - User Secrets'ta gerçek değer: `Server=(localdb)\MSSQLLocalDB;Database=KucukMericHukukDb;Trusted_Connection=True;...`
+    - User Secrets ID: `ec9bfee5-0aa3-4c77-8b06-22aa85b9fe43`
+  - **Migration:** `20260504112905_InitialIdentity` — 7 Identity tablosu DB'ye uygulandı (`KucukMericHukukDb` LocalDB'de oluştu)
+
 ### Build Durumu
 
 - `dotnet build`: **0 Uyarı / 0 Hata**
+- Migration: `InitialIdentity` uygulandı, 8 tablo (`__EFMigrationsHistory` + 7 Identity) oluştu.
 
 ### Bilinen Sorunlar / Geçici Çözümler
 
@@ -56,9 +88,10 @@
 
 ### Bir Sonraki Adıma Aktarılan Notlar
 
-- Mapster için DI kaydı (`AddMapster` veya `services.AddSingleton<TypeAdapterConfig>` + `services.AddScoped<IMapper, ServiceMapper>`) Adım 2'de Business `DependencyInjection.cs` içinde yapılacak.
-- `Mapping/` klasörü (Business altında) tarafsız bırakıldı; ileride Mapster `IRegister` implementasyonları buraya gelir.
-- Web projesinde `Microsoft.EntityFrameworkCore.Design` paketi var (CLAUDE.md migration komutu `--startup-project src/KucukMericHukuk.Web` kullandığı için gerekli) — DbContext'e doğrudan dokunulmaz, sadece migration tooling.
+- Mapster için DI kaydı (`services.AddSingleton<TypeAdapterConfig>` + `services.AddScoped<IMapper, ServiceMapper>`) Business `DependencyInjection.cs` içinde yapılacak (Adım 3+).
+- Domain entity'ler (Article, Attorney, vb.) eklendiğinde otomatik soft delete query filter onlara da uygulanacak (zaten `OnModelCreating` reflection ile).
+- Layer-modül DI registration sınıfları (`Web/DependencyInjection.cs`, `Business/DependencyInjection.cs`, `DataAccess/DependencyInjection.cs`, `Infrastructure/DependencyInjection.cs`) Adım 3'te oluşturulacak — şu an `Program.cs` doğrudan kayıt yapıyor.
+- Email confirmation, RateLimit, AntiForgery konfigürasyonu Adım 5'te.
 
 ---
 
