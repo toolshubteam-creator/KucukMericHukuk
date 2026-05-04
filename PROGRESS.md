@@ -9,7 +9,7 @@
 | Faz | İçerik | Süre | Durum |
 | --- | --- | --- | --- |
 | 0 | Hazırlık (içerik, marka, kararlar) | 3-5 gün | 🔄 Devam ediyor |
-| 1 | Proje kurulumu & mimari | 1 hafta | 🔄 Devam ediyor |
+| 1 | Proje kurulumu & mimari | 1 hafta | ✅ Tamamlandı |
 | 2 | Yönetim paneli iskelet & temel modüller | 2 hafta | ⏳ Beklemede |
 | 3 | İçerik yönetimi modülleri | 2 hafta | ⏳ Beklemede |
 | 4 | Frontend tasarım & geliştirme | 3 hafta | ⏳ Beklemede |
@@ -20,10 +20,46 @@
 
 ---
 
-## FAZ 1 — Proje Kurulumu & Mimari — 🔄 DEVAM EDİYOR
+## FAZ 1 — Proje Kurulumu & Mimari — ✅ TAMAMLANDI
 
 **Başlama Tarihi:** 04.05.2026
-**Hedef Bitiş:** [Tarih girilecek]
+**Tamamlanma Tarihi:** 05.05.2026
+**Süre:** ~1 gün (planlanan 1 hafta — yoğun çalışma ile hızlandırıldı)
+
+### Özet
+
+| Adım | Açıklama | Commit |
+| --- | --- | --- |
+| 1.1 | 5 katmanlı solution iskeleti | `9b48888` |
+| 1.B/1.C | Vulnerability fix + AutoMapper → Mapster geçişi | (1.1 sonrası inline) |
+| 1.D | `.gitattributes` line ending normalize | `265af7a` |
+| 1.2 | BaseEntity + Identity + AppDbContext + InitialIdentity migration | `da75a54` |
+| 1.3.A.1 | 6 domain entity + 6 translation + AddDomainEntities migration | `7dcb096` |
+| 1.3.A.2 | Generic Repository + UnitOfWork + 6 özel repository + 5 birim test | `1275a37` |
+| 1.3.A.3 | 24 DTO + 6 Mapster IRegister + DI wiring + 3 mapping testi | `7406cdc` |
+| 1.4 | Çok dilli (i18n) altyapısı + 3 entegrasyon testi | `fac8c07` |
+
+### İstatistikler
+
+- **Toplam commit (Faz 1):** 7 feature/chore commit
+- **Test sayısı:** 11 PASSED (5 repository + 3 mapping + 3 localization), 0 failed
+- **DB tablo sayısı:** 22 (history dahil; 21 history hariç — 7 Identity + 14 domain)
+- **Build durumu:** 0 error, 0 warning
+- **Kod katmanları:** 6 proje (Core, DataAccess, Business, Infrastructure, Web, Tests)
+
+### Faz 2'ye Aktarılan Notlar
+
+- **Service katmanı henüz yazılmadı** — Faz 2'de admin paneli ile birlikte use-case driven yazılacak (örn. `IArticleService.CreateAsync`, `IPageService.UpdateAsync`)
+- **Slug otomatik üretimi** service katmanında implement edilecek (entity ve repository nötr)
+- **Email confirmation, RateLimit, AntiForgery konfigürasyonu** Adım 5 (sonraki fazlarda)
+- **Soft delete filter** statik HasQueryFilter pattern ile her configuration'da; `AppDbContextModelSnapshot.cs` filter'ları yazmaz (EF Core 10 davranışı), runtime'da OnModelCreating uyguluyor
+- **Test environment için** `Program.cs` environment-aware DbContext check zorunlu (multi-provider conflict)
+- **Admin Area culture-bağımsız** tutuldu (`/admin/...`); Faz 2'de admin sayfaları yapılırken karar gözden geçirilebilir
+- **Frontend page-bazlı resource files** Faz 4'te eklenecek; şu an sadece `SharedResource.tr-TR.resx` (5 örnek key) var
+- **AutoMapper yerine Mapster** lisans + güvenlik açığı sebebiyle (NU1903 GHSA-rvv3-g6hj-g44x)
+- **LocalDB** development ortamı için; production deployment'ta full SQL Server'a geçiş
+
+
 
 ### Tamamlanan Adımlar
 

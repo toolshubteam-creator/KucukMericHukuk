@@ -81,9 +81,22 @@ Web → Business → DataAccess → Core
 
 Tüm servisler `Program.cs`'te kayıtlı modüller üzerinden register edilir:
 - `Web/DependencyInjection.cs`
-- `Business/DependencyInjection.cs`
-- `DataAccess/DependencyInjection.cs`
+- `Business/DependencyInjection.cs` — `AddBusiness()` (Mapster scan + service'ler)
+- `DataAccess/DependencyInjection.cs` — `AddDataAccess()` (repositories + UoW)
 - `Infrastructure/DependencyInjection.cs`
+
+### Repository Pattern
+
+Generic Repository + Özel Repository hybrid yapısı:
+- `IGenericRepository<T> where T : BaseEntity` (Core/Interfaces): Standart CRUD + Pagination + Soft/Hard Delete + Restore
+- `I<Entity>Repository : IGenericRepository<T>` (Core/Interfaces/Repositories): Entity-specific sorgular (örn. `IArticleRepository.GetPublishedPagedAsync`)
+- Implementations: `DataAccess/Repositories/`
+- `IUnitOfWork` (Core/Interfaces): 6 özel repository property + `SaveChangesAsync` + transaction methodları
+- DI: open generic + concrete repos + UoW, hepsi `AddScoped`
+
+**IQueryable kuralı:** `Query()` ve `QueryWithDeleted()` metodları `IQueryable<T>` döner. Bunlar SADECE DataAccess katmanı içinde özel repository sorgularında kullanılır. Service katmanına IQueryable LEAK ETMEZ — service sadece materialized koleksiyonlar (`IReadOnlyList<T>`, `PagedResult<T>`, single entity) görür.
+
+**Soft delete:** `Delete(entity)` = `IsDeleted=true + DeletedAt=now` (default davranış). Fiziksel silme için `HardDelete(entity)`. Geri getirmek için `Restore(entity)`.
 
 ---
 
@@ -123,12 +136,28 @@ Tüm servisler `Program.cs`'te kayıtlı modüller üzerinden register edilir:
 - Web katmanında global exception middleware (`ExceptionHandlingMiddleware`).
 - Kullanıcıya gösterilen mesaj ile log mesajı **ayrı** olmalı.
 
-### Çok Dilli Altyapı
+### Mapster Kullanımı
 
-- Tüm metin içerikli entity'ler `LanguageCode` kolonu içerir (örn. `tr-TR`, `de-DE`).
-- Route prefix'i: `/{culture}/...` (varsayılan `tr-TR`).
-- Resource dosyaları: `Resources/SharedResource.tr.resx`, `SharedResource.de.resx`.
-- Şu an yalnızca Türkçe içerik üretilecek; altyapı çok dile hazır olacak.
+- Entity başına 1 IRegister sınıfı: `Business/Mappings/<Entity>MappingConfig.cs`
+- Tüm yönler (Read DTO + Write DTO) tek dosyada
+- Frontend DTO'lar **translation flatten**: `src.Translations.Select(t => t.X).FirstOrDefault()` — repository sorgusu zaten dil filtreliyor
+- Admin DTO'lar `List<TranslationDto>` içerir — birden fazla dil aynı anda yönetilir
+- Recursive entity'lerde (örn. `Category.SubCategories`): `PreserveReference(true)` zorunlu
+- Input → Entity mapping: `BaseEntity` audit alanları (`CreatedAt`, `UpdatedAt`, `IsDeleted`, `DeletedAt`) ve M:N nav property'leri `Ignore`
+- DI: `AddBusiness()` extension `Assembly.Scan` ile `IRegister`'ları otomatik bulur
+
+### Çok Dilli Altyapı (i18n)
+
+- Tüm metin içerikli entity'ler `LanguageCode` kolonu içerir (örn. `tr-TR`, `de-DE`)
+- Default culture: `tr-TR`, supported: `LanguageCodes.Supported`
+- URL pattern: `/{culture:culture}/{controller}/{action}` — culture **ZORUNLU** (geçersiz culture'da `CultureRouteConstraint` 404 verir)
+- Admin Area culture-bağımsız: `/admin/...`
+- Kök URL `/` → `/tr-TR` 302 redirect (`MapGet("/")`)
+- Culture algılama önceliği: Route → Cookie → Accept-Language → Default
+- Resource files: `Web/Resources/SharedResource.<culture>.resx` (örn. `SharedResource.tr-TR.resx`)
+- Razor view'larda: `@inject IViewLocalizer Localizer` veya `@inject IStringLocalizer<SharedResource> Localizer`
+- Middleware sırası kritik: `UseRouting → UseRequestLocalization → UseAuthentication → UseAuthorization`
+- Şu an yalnızca Türkçe içerik üretilecek; altyapı çok dile hazır
 
 ---
 
@@ -230,6 +259,36 @@ Admin panelinde "silinmiş kayıtları göster" senaryolarında `query.IgnoreQue
 | `AttorneyServices` (M:N) | `Cascade` | Attorney veya Service silinince join kaydı silinir |
 | `ArticleTags` (M:N) | `Cascade` | Article veya Tag silinince join kaydı silinir |
 
+### Test Ortamı (Integration Tests)
+
+Integration testlerde production'da kullanılan SQL Server yerine **SQLite in-memory** kullanılır (gerçek SQL davranışı simüle eder, soft delete query filter'ları doğru çalışır).
+
+1. **Program.cs'de environment-aware DbContext registration:**
+   ```csharp
+   if (!builder.Environment.IsEnvironment("Testing"))
+   {
+       builder.Services.AddDbContext<AppDbContext>(options =>
+           options.UseSqlServer(...));
+   }
+   ```
+   Test fixture `UseEnvironment("Testing")` çağırarak production DbContext kaydını atlatır. Bu environment check'i **SİLMEYİN** — testler çoklu provider hatası verir (`Microsoft.EntityFrameworkCore.SqlServer` + `Microsoft.EntityFrameworkCore.Sqlite` çakışması).
+
+2. **Test fixture'da SQLite registration:**
+   ```csharp
+   builder.UseEnvironment("Testing");
+   builder.ConfigureServices(services =>
+   {
+       var connection = new SqliteConnection("Filename=:memory:");
+       connection.Open();
+       services.AddDbContext<AppDbContext>(o => o.UseSqlite(connection));
+       // ... EnsureCreated()
+   });
+   ```
+
+3. **Unit testlerde `TestDbContextFactory`:** `tests/.../Infrastructure/TestDbContextFactory.cs` — repository testlerinde standalone SQLite context.
+
+4. `Program.cs` sonunda `public partial class Program { }` zorunlu — `WebApplicationFactory<Program>` generic'i için.
+
 ---
 
 ## 8. Güvenlik Kuralları
@@ -287,9 +346,12 @@ Border radius: `4px` (küçük), `8px` (kart), `16px` (büyük blok).
 
 ## 11. Faz Durumu
 
-**Mevcut Faz:** Faz 0 — Hazırlık
+**Mevcut Faz:** Faz 2 — Yönetim Paneli (başlamaya hazır)
 
-Faz tamamlama bilgileri için `PROGRESS.md` dosyasına bakınız.
+- ✅ **Faz 1 — Proje Kurulumu & Mimari** tamamlandı (05.05.2026): 5 katmanlı solution, BaseEntity + Identity, 6 domain entity + translation, Generic Repository + UoW + 6 özel repository, 24 DTO + 6 Mapster mapping config, çok dilli altyapı, 11 test PASSED
+- 🔄 **Faz 0 — Hazırlık** kısmen sürüyor (müşteri içerik beklentisi)
+
+Faz tamamlama detayları için `PROGRESS.md` dosyasına bakınız.
 
 ---
 
