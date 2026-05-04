@@ -1,3 +1,4 @@
+using KucukMericHukuk.Business;
 using KucukMericHukuk.Core.Entities.Identity;
 using KucukMericHukuk.DataAccess;
 using KucukMericHukuk.DataAccess.Context;
@@ -25,6 +26,9 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 
 // Repository + UnitOfWork
 builder.Services.AddDataAccess();
+
+// Mapster + Business services
+builder.Services.AddBusiness();
 
 builder.Services.AddControllersWithViews();
 

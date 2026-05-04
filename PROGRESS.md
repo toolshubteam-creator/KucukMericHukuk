@@ -50,6 +50,32 @@
   - `.gitattributes` eklendi (`* text=auto eol=lf` + binary/script kuralları)
   - `feature/faz-1-altyapi` branch GitHub'a push edildi
 
+- ✅ **Adım 3.A.3:** DTO'lar + Mapster IRegister'lar + DI wiring + mapping testleri
+  - **Core DTOs (24 dosya):**
+    - Common: `TranslationDto`, `LookupDto`, `PagedResult<T>` (önceki adımda)
+    - Page: `PageDetailDto`, `PageAdminDto` + `PageTranslationDto`, `PageInputDto` + `PageTranslationInputDto`
+    - Service: `ServiceListDto`, `ServiceDetailDto`, `ServiceAdminDto` + `ServiceTranslationDto`, `ServiceInputDto` + `ServiceTranslationInputDto`
+    - Attorney: `AttorneyListDto`, `AttorneyDetailDto`, `AttorneyAdminDto` + `AttorneyTranslationDto`, `AttorneyInputDto` + `AttorneyTranslationInputDto`
+    - Category: `CategoryListDto` (recursive SubCategories), `CategoryAdminDto` + `CategoryTranslationDto`, `CategoryInputDto` + `CategoryTranslationInputDto`
+    - Tag: `TagListDto`, `TagAdminDto` + `TagTranslationDto`, `TagInputDto` + `TagTranslationInputDto`
+    - Article: `ArticleListDto`, `ArticleDetailDto`, `ArticleAdminDto` + `ArticleTranslationDto`, `ArticleInputDto` + `ArticleTranslationInputDto`
+    - Frontend DTO'lar **flatten** (tek dilli, Translation listesi yok); Admin DTO'lar `List<TranslationDto>` içerir; Input DTO `Id` nullable (null=create, dolu=update)
+  - **Business Mappings (6 IRegister):**
+    - `PageMappingConfig`, `ServiceMappingConfig`, `AttorneyMappingConfig`, `CategoryMappingConfig`, `TagMappingConfig`, `ArticleMappingConfig`
+    - Frontend mapping pattern: `src.Translations.Select(t => t.X).FirstOrDefault()` (repository sorgusu zaten dil filtreliyor)
+    - Admin mapping: nested entity'ler (`Author`, `Category`, `Services`, `Tags`) için özel `Map(...)` ifadeleri; `LookupDto` collection'lar manuel
+    - Input → Entity: `BaseEntity` audit alanları (`CreatedAt`, `UpdatedAt`, `IsDeleted`, `DeletedAt`) ve M2M nav'ları `Ignore`
+    - Category recursive mapping: `PreserveReference(true)` ile sonsuz döngü engelleniyor
+  - **Business DI:**
+    - `Business/DependencyInjection.cs` — `AddBusiness()`: `TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly())` + `AddSingleton(config)` + `AddScoped<IMapper, ServiceMapper>()`
+  - **Web:**
+    - `Program.cs` — `builder.Services.AddBusiness()` AddDataAccess sonrası
+  - **Tests:**
+    - 3 mapping unit testi (`MappingTests.cs`): `Service_To_ServiceListDto_ShouldFlattenTranslation`, `Article_To_ArticleListDto_ShouldFlattenTranslationAndAuthor`, `Article_To_ArticleAdminDto_ShouldIncludeAllTranslations`
+    - Test mapper: `new Mapper(config)` — Mapster 10.0.7 `ServiceMapper` her zaman `IServiceProvider` istiyor; `Mapper` basit alternatif (DI gerektirmez)
+  - **Test sonucu:** 8/8 PASSED (5 repo + 3 mapping), 0 failed, 8s
+  - **Build:** 0 Uyarı / 0 Hata
+
 - ✅ **Adım 3.A.2:** Generic Repository + UnitOfWork + 6 özel repository + birim testler
   - **Core:**
     - `PagedResult<T>` (Items, TotalCount, PageNumber, PageSize, TotalPages, HasPrevious, HasNext)
