@@ -197,9 +197,38 @@ dotnet ef database update --project src/KucukMericHukuk.DataAccess --startup-pro
 - Foreign key: `<Entity>Id` (örn. `CategoryId`).
 - Tarih kolonları: `CreatedAt`, `UpdatedAt`, `DeletedAt` (soft delete).
 
-### Soft Delete
+### Soft Delete Davranışı
 
-Tüm ana entity'ler `IsDeleted` (bool) ve `DeletedAt` (DateTime?) içerir. Global query filter ile silinmiş kayıtlar otomatik gizlenir.
+Tüm `BaseEntity` türevleri (Page, Service, Attorney, Article, Category, Tag) `IsDeleted` (bool) ve `DeletedAt` (DateTime?) içerir. Soft delete query filter ile silinmiş kayıtlar EF sorgularında otomatik gizlenir.
+
+- Filter her entity'nin `EntityTypeConfiguration` sınıfında **statik typed lambda** olarak tanımlıdır:
+  `builder.HasQueryFilter(x => !x.IsDeleted);`
+- `AppDbContext.OnModelCreating` içinde dinamik reflection ile filter eklenmez — bu pattern EF Core 10'da snapshot tutarsızlığına yol açıyor (PendingModelChangesWarning).
+
+**Translation tablolarında cascade soft-delete:**
+
+Translation tabloları parent entity'nin `IsDeleted` durumuna göre filtrelenir:
+- `ArticleTranslation` → `!t.Article.IsDeleted`
+- `PageTranslation` → `!t.Page.IsDeleted`
+- (`Service`, `Attorney`, `Category`, `Tag` translation'ları aynı pattern)
+
+Bu, soft-deleted bir parent'ın translation'larının da otomatik gizlenmesini ve required navigation'ın bozulmamasını sağlar. Restore edildiğinde translation'lar otomatik tekrar görünür.
+
+**Filter bypass:**
+
+Admin panelinde "silinmiş kayıtları göster" senaryolarında `query.IgnoreQueryFilters()` kullanılır. Hem ana entity hem translation sorgularında bypass etmek gerekir.
+
+### Cascade Davranışı (FK OnDelete)
+
+| İlişki | Davranış | Sebep |
+| --- | --- | --- |
+| `Attorney.UserId → ApplicationUser` | `SetNull` | Kullanıcı silinince attorney kaydı korunur |
+| `Article.AuthorId → ApplicationUser` | `SetNull` | Yazar silinince makale korunur |
+| `Article.CategoryId → Category` | `SetNull` | Kategori silinince makaleler orphan kalır (manuel taşıma) |
+| `Category.ParentCategoryId → Category` | `Restrict` | Alt kategorisi olan kategori silinemez |
+| Translation → Parent (Page/Service/Attorney/Category/Tag/Article) | `Cascade` | Parent silinince translation'lar SQL düzeyinde de silinir (hard delete) |
+| `AttorneyServices` (M:N) | `Cascade` | Attorney veya Service silinince join kaydı silinir |
+| `ArticleTags` (M:N) | `Cascade` | Article veya Tag silinince join kaydı silinir |
 
 ---
 

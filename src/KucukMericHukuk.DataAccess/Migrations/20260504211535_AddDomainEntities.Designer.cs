@@ -4,6 +4,7 @@ using KucukMericHukuk.DataAccess.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KucukMericHukuk.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260504211535_AddDomainEntities")]
+    partial class AddDomainEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,7 +37,7 @@ namespace KucukMericHukuk.DataAccess.Migrations
 
                     b.HasIndex("TagsId");
 
-                    b.ToTable("ArticleTags", (string)null);
+                    b.ToTable("ArticleTags");
                 });
 
             modelBuilder.Entity("AttorneyServices", b =>
@@ -49,7 +52,7 @@ namespace KucukMericHukuk.DataAccess.Migrations
 
                     b.HasIndex("ServicesId");
 
-                    b.ToTable("AttorneyServices", (string)null);
+                    b.ToTable("AttorneyServices");
                 });
 
             modelBuilder.Entity("KucukMericHukuk.Core.Entities.Article", b =>

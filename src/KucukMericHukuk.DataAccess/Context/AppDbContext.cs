@@ -23,21 +23,10 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
         builder.Entity<IdentityUserToken<int>>().ToTable("UserTokens");
         builder.Entity<IdentityRoleClaim<int>>().ToTable("RoleClaims");
 
-        // Soft delete global filter — BaseEntity türevleri için
-        // Şu an domain entity yok, ama altyapı hazır
-        foreach (var entityType in builder.Model.GetEntityTypes())
-        {
-            if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
-            {
-                var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
-                var prop = System.Linq.Expressions.Expression.Property(parameter, nameof(BaseEntity.IsDeleted));
-                var notDeleted = System.Linq.Expressions.Expression.Not(prop);
-                var lambda = System.Linq.Expressions.Expression.Lambda(notDeleted, parameter);
-                builder.Entity(entityType.ClrType).HasQueryFilter(lambda);
-            }
-        }
-
-        // Configurations assembly'sinden tüm IEntityTypeConfiguration<T>'leri uygula
+        // Configurations assembly'sinden tüm IEntityTypeConfiguration<T>'leri uygula.
+        // Soft delete global query filter'ları her BaseEntity türevinin kendi config'inde
+        // statik typed lambda olarak tanımlıdır (her configuration: HasQueryFilter(x => !x.IsDeleted)).
+        // Translation tabloları parent.IsDeleted üzerinden eşleştirilmiştir.
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 
