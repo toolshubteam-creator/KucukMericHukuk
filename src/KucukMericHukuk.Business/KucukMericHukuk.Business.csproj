@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\KucukMericHukuk.Core\KucukMericHukuk.Core.csproj" />
+    <ProjectReference Include="..\KucukMericHukuk.DataAccess\KucukMericHukuk.DataAccess.csproj" />
+    <ProjectReference Include="..\KucukMericHukuk.Infrastructure\KucukMericHukuk.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="11.10.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="Mapster" Version="10.0.7" />
+    <PackageReference Include="Mapster.DependencyInjection" Version="10.0.7" />
+  </ItemGroup>
+
+  <PropertyGroup>
+  </PropertyGroup>
+
+</Project>

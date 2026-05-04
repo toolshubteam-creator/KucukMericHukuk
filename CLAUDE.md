@@ -22,7 +22,7 @@
 | Veritabanı | Microsoft SQL Server | 2022+ |
 | Kimlik Doğrulama | ASP.NET Identity Core | 10 |
 | Loglama | Serilog | son sürüm |
-| Mapping | AutoMapper | son sürüm |
+| Mapping | Mapster (+ Mapster.DependencyInjection) | 10.0.7 |
 | Validasyon | FluentValidation | son sürüm |
 | WYSIWYG Editör | Quill | 2.x |
 | CSS Framework | Bootstrap 5 + custom | 5.3+ |

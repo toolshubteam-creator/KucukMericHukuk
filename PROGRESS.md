@@ -9,7 +9,7 @@
 | Faz | İçerik | Süre | Durum |
 | --- | --- | --- | --- |
 | 0 | Hazırlık (içerik, marka, kararlar) | 3-5 gün | 🔄 Devam ediyor |
-| 1 | Proje kurulumu & mimari | 1 hafta | ⏳ Beklemede |
+| 1 | Proje kurulumu & mimari | 1 hafta | 🔄 Devam ediyor |
 | 2 | Yönetim paneli iskelet & temel modüller | 2 hafta | ⏳ Beklemede |
 | 3 | İçerik yönetimi modülleri | 2 hafta | ⏳ Beklemede |
 | 4 | Frontend tasarım & geliştirme | 3 hafta | ⏳ Beklemede |
@@ -17,6 +17,48 @@
 | 6 | Test, düzeltme, yayına alma | 1 hafta | ⏳ Beklemede |
 
 **Toplam:** 10 hafta (+2 hafta tampon önerisi)
+
+---
+
+## FAZ 1 — Proje Kurulumu & Mimari — 🔄 DEVAM EDİYOR
+
+**Başlama Tarihi:** 04.05.2026
+**Hedef Bitiş:** [Tarih girilecek]
+
+### Tamamlanan Adımlar
+
+- ✅ **Adım 1 (1.A):** 5 katmanlı solution iskeleti
+  - 6 proje (`Core`, `DataAccess`, `Business`, `Infrastructure`, `Web`, `Tests`)
+  - N-Layer referans yapısı kuruldu (Web → DataAccess referansı YOK — CLAUDE.md kuralı)
+  - `Directory.Build.props` ile merkezi proje ayarı (TargetFramework `net10.0`, Nullable, ImplicitUsings)
+  - NuGet paketleri sabit sürümlerle kuruldu
+  - Klasör iskelet `.gitkeep` ile korundu
+  - Class library template'lerinin `Class1.cs` dosyaları silindi
+
+- ✅ **Adım 1.B:** Güvenlik açığı paketleri yamalı sürümlere yükseltildi
+  - `MailKit` 4.8.0 → **4.16.0** (NU1902 GHSA-9j88-vvj5-vhgr fix)
+  - `MimeKit` 4.8.0 → **4.16.0** (NU1902 GHSA-g7hc-96xr-gvvx fix)
+  - `System.Security.Cryptography.Xml` (transitive 9.0.0) → **10.0.7** explicit override (NU1903 GHSA-37gx-xxp4-5rgx + GHSA-w3x6-4m5h-cxqf fix)
+
+- ✅ **Adım 1.C:** Mapping kütüphanesi değişikliği — AutoMapper → Mapster
+  - **Sebep:** AutoMapper 13/14'te NU1903 (GHSA-rvv3-g6hj-g44x) açığı, fix ancak 15+ commercial Sponsorware sürümünde
+  - `AutoMapper` paketi Business projesinden kaldırıldı
+  - `Mapster` 10.0.7 + `Mapster.DependencyInjection` 10.0.7 (MIT, vuln-free) eklendi
+  - CLAUDE.md teknoloji stack tablosu güncellendi
+
+### Build Durumu
+
+- `dotnet build`: **0 Uyarı / 0 Hata**
+
+### Bilinen Sorunlar / Geçici Çözümler
+
+- Yok
+
+### Bir Sonraki Adıma Aktarılan Notlar
+
+- Mapster için DI kaydı (`AddMapster` veya `services.AddSingleton<TypeAdapterConfig>` + `services.AddScoped<IMapper, ServiceMapper>`) Adım 2'de Business `DependencyInjection.cs` içinde yapılacak.
+- `Mapping/` klasörü (Business altında) tarafsız bırakıldı; ileride Mapster `IRegister` implementasyonları buraya gelir.
+- Web projesinde `Microsoft.EntityFrameworkCore.Design` paketi var (CLAUDE.md migration komutu `--startup-project src/KucukMericHukuk.Web` kullandığı için gerekli) — DbContext'e doğrudan dokunulmaz, sadece migration tooling.
 
 ---
 

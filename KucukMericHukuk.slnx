@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/KucukMericHukuk.Business/KucukMericHukuk.Business.csproj" />
+    <Project Path="src/KucukMericHukuk.Core/KucukMericHukuk.Core.csproj" />
+    <Project Path="src/KucukMericHukuk.DataAccess/KucukMericHukuk.DataAccess.csproj" />
+    <Project Path="src/KucukMericHukuk.Infrastructure/KucukMericHukuk.Infrastructure.csproj" />
+    <Project Path="src/KucukMericHukuk.Web/KucukMericHukuk.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/KucukMericHukuk.Tests/KucukMericHukuk.Tests.csproj" />
+  </Folder>
+</Solution>
