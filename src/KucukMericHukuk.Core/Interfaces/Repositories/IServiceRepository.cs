@@ -7,4 +7,5 @@ public interface IServiceRepository : IGenericRepository<Service>
     Task<IReadOnlyList<Service>> GetActiveOrderedAsync(string languageCode, CancellationToken ct = default);
     Task<Service?> GetBySlugAsync(string languageCode, string slug, CancellationToken ct = default);
     Task<Service?> GetByIdWithTranslationsAsync(int id, CancellationToken ct = default);
+    Task<bool> SlugExistsAsync(string slug, string languageCode, int? excludeId = null, CancellationToken ct = default);
 }

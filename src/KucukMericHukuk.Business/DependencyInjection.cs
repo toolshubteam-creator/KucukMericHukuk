@@ -1,4 +1,7 @@
 using System.Reflection;
+using FluentValidation;
+using KucukMericHukuk.Business.Services;
+using KucukMericHukuk.Core.Interfaces.Services;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +19,15 @@ public static class DependencyInjection
         services.AddSingleton(config);
         services.AddScoped<IMapper, ServiceMapper>();
 
-        // Service'ler buraya gelecek (Faz 2'de)
+        // FluentValidation: tüm IValidator<T>'leri assembly'den tara.
+        // Auto MVC validation YOK — service'lerde manuel ValidateAsync.
+        services.AddValidatorsFromAssembly(
+            Assembly.GetExecutingAssembly(),
+            ServiceLifetime.Scoped,
+            includeInternalTypes: false);
+
+        // Service'ler
+        services.AddScoped<ISlugService, SlugService>();
 
         return services;
     }

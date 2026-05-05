@@ -14,4 +14,5 @@ public interface IArticleRepository : IGenericRepository<Article>
     Task<PagedResult<Article>> GetByAuthorAsync(int authorId, string languageCode, int pageNumber, int pageSize, CancellationToken ct = default);
     Task<IReadOnlyList<Article>> GetRecentAsync(string languageCode, int count, CancellationToken ct = default);
     Task IncrementViewCountAsync(int articleId, CancellationToken ct = default);
+    Task<bool> SlugExistsAsync(string slug, string languageCode, int? excludeId = null, CancellationToken ct = default);
 }

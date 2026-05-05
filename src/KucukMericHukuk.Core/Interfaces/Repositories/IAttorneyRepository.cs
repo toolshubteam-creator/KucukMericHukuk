@@ -8,4 +8,5 @@ public interface IAttorneyRepository : IGenericRepository<Attorney>
     Task<Attorney?> GetBySlugAsync(string languageCode, string slug, CancellationToken ct = default);
     Task<Attorney?> GetByIdWithDetailsAsync(int id, string languageCode, CancellationToken ct = default);
     Task<IReadOnlyList<Attorney>> GetByServiceIdAsync(int serviceId, string languageCode, CancellationToken ct = default);
+    Task<bool> SlugExistsAsync(string slug, string languageCode, int? excludeId = null, CancellationToken ct = default);
 }

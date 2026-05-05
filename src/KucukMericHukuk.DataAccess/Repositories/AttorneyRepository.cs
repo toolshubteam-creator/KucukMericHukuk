@@ -1,4 +1,5 @@
 using KucukMericHukuk.Core.Entities;
+using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Interfaces.Repositories;
 using KucukMericHukuk.DataAccess.Context;
 using Microsoft.EntityFrameworkCore;
@@ -33,4 +34,17 @@ public class AttorneyRepository : GenericRepository<Attorney>, IAttorneyReposito
             .Include(a => a.Translations.Where(t => t.LanguageCode == languageCode))
             .OrderBy(a => a.DisplayOrder)
             .ToListAsync(ct);
+
+    public Task<bool> SlugExistsAsync(string slug, string languageCode, int? excludeId = null, CancellationToken ct = default)
+    {
+        var query = _context.Set<AttorneyTranslation>()
+            .Where(t => t.Slug == slug && t.LanguageCode == languageCode);
+
+        if (excludeId.HasValue)
+        {
+            query = query.Where(t => t.AttorneyId != excludeId.Value);
+        }
+
+        return query.AnyAsync(ct);
+    }
 }

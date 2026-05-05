@@ -1,4 +1,5 @@
 using KucukMericHukuk.Core.Entities;
+using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Interfaces.Repositories;
 using KucukMericHukuk.DataAccess.Context;
 using Microsoft.EntityFrameworkCore;
@@ -21,4 +22,17 @@ public class PageRepository : GenericRepository<Page>, IPageRepository
         => Query().AsNoTracking()
             .Include(p => p.Translations.Where(t => t.LanguageCode == languageCode))
             .FirstOrDefaultAsync(p => p.Translations.Any(t => t.LanguageCode == languageCode && t.Slug == slug), ct);
+
+    public Task<bool> SlugExistsAsync(string slug, string languageCode, int? excludeId = null, CancellationToken ct = default)
+    {
+        var query = _context.Set<PageTranslation>()
+            .Where(t => t.Slug == slug && t.LanguageCode == languageCode);
+
+        if (excludeId.HasValue)
+        {
+            query = query.Where(t => t.PageId != excludeId.Value);
+        }
+
+        return query.AnyAsync(ct);
+    }
 }

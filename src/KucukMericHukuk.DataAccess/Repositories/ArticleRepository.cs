@@ -1,5 +1,6 @@
 using KucukMericHukuk.Core.DTOs.Common;
 using KucukMericHukuk.Core.Entities;
+using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Enums;
 using KucukMericHukuk.Core.Interfaces.Repositories;
 using KucukMericHukuk.DataAccess.Context;
@@ -83,4 +84,17 @@ public class ArticleRepository : GenericRepository<Article>, IArticleRepository
         => _dbSet
             .Where(a => a.Id == articleId)
             .ExecuteUpdateAsync(setters => setters.SetProperty(a => a.ViewCount, a => a.ViewCount + 1), ct);
+
+    public Task<bool> SlugExistsAsync(string slug, string languageCode, int? excludeId = null, CancellationToken ct = default)
+    {
+        var query = _context.Set<ArticleTranslation>()
+            .Where(t => t.Slug == slug && t.LanguageCode == languageCode);
+
+        if (excludeId.HasValue)
+        {
+            query = query.Where(t => t.ArticleId != excludeId.Value);
+        }
+
+        return query.AnyAsync(ct);
+    }
 }

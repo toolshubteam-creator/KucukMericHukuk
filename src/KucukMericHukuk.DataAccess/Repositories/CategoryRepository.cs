@@ -1,4 +1,5 @@
 using KucukMericHukuk.Core.Entities;
+using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Interfaces.Repositories;
 using KucukMericHukuk.DataAccess.Context;
 using Microsoft.EntityFrameworkCore;
@@ -29,4 +30,17 @@ public class CategoryRepository : GenericRepository<Category>, ICategoryReposito
         => Query().AsNoTracking()
             .Include(c => c.Translations.Where(t => t.LanguageCode == languageCode))
             .FirstOrDefaultAsync(c => c.Translations.Any(t => t.LanguageCode == languageCode && t.Slug == slug), ct);
+
+    public Task<bool> SlugExistsAsync(string slug, string languageCode, int? excludeId = null, CancellationToken ct = default)
+    {
+        var query = _context.Set<CategoryTranslation>()
+            .Where(t => t.Slug == slug && t.LanguageCode == languageCode);
+
+        if (excludeId.HasValue)
+        {
+            query = query.Where(t => t.CategoryId != excludeId.Value);
+        }
+
+        return query.AnyAsync(ct);
+    }
 }

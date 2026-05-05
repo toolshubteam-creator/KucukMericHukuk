@@ -1,4 +1,5 @@
 using KucukMericHukuk.Core.Entities;
+using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Interfaces.Repositories;
 using KucukMericHukuk.DataAccess.Context;
 using Microsoft.EntityFrameworkCore;
@@ -24,4 +25,17 @@ public class TagRepository : GenericRepository<Tag>, ITagRepository
             .Where(tag => tag.Articles.Any(a => a.Id == articleId))
             .Include(tag => tag.Translations.Where(t => t.LanguageCode == languageCode))
             .ToListAsync(ct);
+
+    public Task<bool> SlugExistsAsync(string slug, string languageCode, int? excludeId = null, CancellationToken ct = default)
+    {
+        var query = _context.Set<TagTranslation>()
+            .Where(t => t.Slug == slug && t.LanguageCode == languageCode);
+
+        if (excludeId.HasValue)
+        {
+            query = query.Where(t => t.TagId != excludeId.Value);
+        }
+
+        return query.AnyAsync(ct);
+    }
 }
