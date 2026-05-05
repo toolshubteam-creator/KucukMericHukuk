@@ -1,0 +1,6 @@
+/* Page details — content preview block */
+.page-content-preview {
+    white-space: pre-wrap;
+    font-family: inherit;
+    margin: 0;
+}

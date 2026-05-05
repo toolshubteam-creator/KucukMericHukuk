@@ -21,6 +21,20 @@
   - Tetik: 2.5c, Quill çıktısı server-side sanitize edilecek
   - CLAUDE.md güvenlik kuralı (Bölüm 8)
 
+- **Page Index "Yeni Sayfa", "Düzenle", "Sil" butonlarının aktif edilmesi**
+  - Şu an placeholder `href="#"` + `disabled` class (Faz 2.5b)
+  - 2.5c'de Create/Edit/Delete action method'ları ile bağlanacak
+
+- **Page Details "Düzenle", "Geri Yükle", "Sil", "Tamamen Sil" butonlarının
+  aktif edilmesi**
+  - Aynı şekilde — 2.5c'de form ve POST endpoint'leri açıldıkça
+  - HardDelete + Restore için confirm dialog gerekli (SweetAlert2 — CLAUDE.md'de var)
+
+- **Page Details içerik (Content) preview**
+  - Şu an plain `<pre>` ile gösteriliyor (XSS riski yok, Razor encode ediyor — Faz 2.5b)
+  - 2.5c'de Quill HTML olarak girilen içerik HtmlSanitizer'dan geçirilip
+    `@Html.Raw(sanitized)` ile render edilecek
+
 ### 2.10 — Faz 2 Cleanup
 
 - **FluentValidation client-side adapter**

@@ -1,0 +1,35 @@
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Shared.PaginationViewModel
+
+@if (Model.TotalPages > 1)
+{
+    <ul class="pagination m-0">
+        <li class="page-item @(Model.HasPrevious ? "" : "disabled")">
+            <a class="page-link"
+               href="@(Model.HasPrevious ? Model.GetPageUrl(Model.PageNumber - 1) : "#")"
+               tabindex="@(Model.HasPrevious ? 0 : -1)">
+                <i class="ti ti-chevron-left"></i> Önceki
+            </a>
+        </li>
+
+        @{
+            var startPage = Math.Max(1, Model.PageNumber - 2);
+            var endPage = Math.Min(Model.TotalPages, startPage + 4);
+            startPage = Math.Max(1, endPage - 4);
+        }
+
+        @for (int i = startPage; i <= endPage; i++)
+        {
+            <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                <a class="page-link" href="@Model.GetPageUrl(i)">@i</a>
+            </li>
+        }
+
+        <li class="page-item @(Model.HasNext ? "" : "disabled")">
+            <a class="page-link"
+               href="@(Model.HasNext ? Model.GetPageUrl(Model.PageNumber + 1) : "#")"
+               tabindex="@(Model.HasNext ? 0 : -1)">
+                Sonraki <i class="ti ti-chevron-right"></i>
+            </a>
+        </li>
+    </ul>
+}

@@ -1,0 +1,164 @@
+@using KucukMericHukuk.Web.Areas.Admin.ViewModels.Shared
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Pages.PageListViewModel
+@{
+    ViewData["Title"] = "Sayfalar";
+
+    var paginationVm = new PaginationViewModel
+    {
+        PageNumber = Model.PageNumber,
+        TotalPages = Model.TotalPages,
+        HasPrevious = Model.HasPrevious,
+        HasNext = Model.HasNext,
+        GetPageUrl = pageNum => Url.Action("Index", "Pages", new
+        {
+            area = "Admin",
+            keyword = Model.Query.Keyword,
+            page = pageNum,
+            pageSize = Model.Query.PageSize,
+            languageCode = Model.Query.LanguageCode,
+            includeDeleted = Model.Query.IncludeDeleted
+        }) ?? "#"
+    };
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">Sayfalar</h2>
+            <div class="text-secondary">Toplam @Model.TotalCount kayıt</div>
+        </div>
+        <div class="col-auto">
+            @* TODO Faz 2.5c — "Yeni Sayfa" butonu *@
+            <a href="#" class="btn btn-primary disabled">
+                <i class="ti ti-plus me-1"></i> Yeni Sayfa
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Error"] is string errorMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">
+        @errorMsg
+    </div>
+}
+
+<div class="card mt-3">
+    <div class="card-body border-bottom">
+        <form asp-action="Index" asp-controller="Pages" asp-area="Admin" method="get">
+            <div class="row g-2">
+                <div class="col-md">
+                    <input type="search" name="keyword" value="@Model.Query.Keyword"
+                           class="form-control" placeholder="Sayfa başlığında ara..." />
+                </div>
+                <div class="col-md-auto">
+                    <label class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox"
+                               name="includeDeleted" value="true"
+                               @(Model.Query.IncludeDeleted ? "checked" : "") />
+                        <span class="form-check-label">Silinmişleri göster</span>
+                    </label>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="ti ti-search me-1"></i> Ara
+                    </button>
+                    <a asp-action="Index" asp-controller="Pages" asp-area="Admin"
+                       class="btn btn-outline-secondary">Temizle</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">Sayfa bulunamadı</p>
+            <p class="empty-subtitle text-secondary">
+                @if (!string.IsNullOrWhiteSpace(Model.Query.Keyword))
+                {
+                    <text>"@Model.Query.Keyword" araması için sonuç yok. Aramayı temizleyip tekrar deneyin.</text>
+                }
+                else
+                {
+                    <text>Henüz hiç sayfa eklenmemiş.</text>
+                }
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Anahtar</th>
+                        <th>Başlık</th>
+                        <th>Sıra</th>
+                        <th>Durum</th>
+                        <th class="w-1">Eylemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        var firstTranslation = item.Translations?.FirstOrDefault(t => t.LanguageCode == Model.Query.LanguageCode)
+                                            ?? item.Translations?.FirstOrDefault();
+                        var title = firstTranslation?.Title ?? "(başlıksız)";
+
+                        <tr>
+                            <td>
+                                <code>@item.PageKey</code>
+                                @if (item.IsSystem)
+                                {
+                                    <span class="badge bg-info-lt ms-1" title="Sistem sayfası">SYS</span>
+                                }
+                            </td>
+                            <td>@title</td>
+                            <td>@item.DisplayOrder</td>
+                            <td>
+                                @if (item.IsDeleted)
+                                {
+                                    <span class="badge bg-danger-lt">Silinmiş</span>
+                                }
+                                else if (item.IsActive)
+                                {
+                                    <span class="badge bg-success-lt">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-lt">Pasif</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-controller="Pages" asp-area="Admin"
+                                   asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary"
+                                   title="Detay">
+                                    <i class="ti ti-eye"></i>
+                                </a>
+                                @* TODO Faz 2.5c — Düzenle ve Sil butonları *@
+                                <a href="#" class="btn btn-sm btn-outline-primary disabled" title="Düzenle">
+                                    <i class="ti ti-edit"></i>
+                                </a>
+                                <a href="#" class="btn btn-sm btn-outline-danger disabled" title="Sil">
+                                    <i class="ti ti-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                <strong>@((Model.PageNumber - 1) * Model.PageSize + 1)</strong> -
+                <strong>@Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)</strong>
+                arası, toplam <strong>@Model.TotalCount</strong> kayıt
+            </p>
+            <div class="ms-auto">
+                <partial name="_Pagination" model="paginationVm" />
+            </div>
+        </div>
+    }
+</div>
