@@ -118,6 +118,17 @@ DEFERRED.md repo kökünde tutulan, "şimdi yapılmıyor, sonra yapılacak" işl
 - Erteleme formatı: madde başlığı + kısa bağlam + tetik faz/adım
 - Yeni konuşma başlangıcında okunan doküman seti: CLAUDE.md, PROGRESS.md, WORKING_STYLE.md, DEFERRED.md (bu dördü zorunlu)
 
+# 12. Commit disiplini
+
+Her adım sonunda kod değişiklikleri ilgili adımın commit'i olarak push edilir.
+
+- Adım sonu commit YOK = adım tamamlanmamış sayılır
+- Bir sonraki adıma working tree'de unstaged değişiklik bırakılarak GEÇİLMEZ
+- Commit mesaj formatı: `feat: faz-X.Y kisa aciklama` (diakritiksiz, mevcut konvansiyon)
+- Adım raporunun "RAPOR" bölümünde commit hash'i belirtilir
+- Doc-only değişiklikler `docs:` prefix'i ile ayrı commit
+- Birden çok adımın değişikliği aynı dosyada birikirse: dosyayı son adımın commit'ine bütün halinde koymak kabul edilir (granülerlik kaybı, hunk staging riski yerine pragmatik tercih)
+
 ═══════════════════════════════════════════════════════════════════
 YENİ KONUŞMA BAŞLANGICI — CHECKLIST
 ═══════════════════════════════════════════════════════════════════
