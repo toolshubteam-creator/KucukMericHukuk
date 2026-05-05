@@ -1,0 +1,59 @@
+@*
+    Topbar — sol tarafta breadcrumb alanı (ViewData["Breadcrumb"]), sağda kullanıcı dropdown'u.
+    FullName claim'i AppUserClaimsPrincipalFactory tarafından login'de eklenir.
+*@
+<header class="navbar navbar-expand-md d-print-none">
+    <div class="container-xl">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-nav flex-row order-md-last">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                var fullName = User.FindFirst("FullName")?.Value;
+                var displayName = !string.IsNullOrWhiteSpace(fullName)
+                    ? fullName
+                    : User.Identity?.Name ?? "Kullanıcı";
+
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link d-flex lh-1 text-reset p-0 px-2" data-bs-toggle="dropdown" aria-label="Kullanıcı menüsü">
+                        <span class="avatar avatar-sm">
+                            <i class="ti ti-user"></i>
+                        </span>
+                        <div class="d-none d-xl-block ps-2">
+                            <div>@displayName</div>
+                            <div class="mt-1 small text-secondary">Yönetici</div>
+                        </div>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                        <a href="#" class="dropdown-item">
+                            <i class="ti ti-user-circle me-2"></i>Profilim
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <form asp-action="Logout" asp-controller="Account" asp-area="Admin" method="post" class="m-0">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="dropdown-item">
+                                <i class="ti ti-logout me-2"></i>Çıkış Yap
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <a asp-action="Login" asp-controller="Account" asp-area="Admin" class="btn btn-primary btn-sm">
+                    <i class="ti ti-login me-1"></i>Giriş Yap
+                </a>
+            }
+        </div>
+        <div class="navbar-nav me-auto">
+            @{
+                var breadcrumb = ViewData["Breadcrumb"] as string;
+            }
+            @if (!string.IsNullOrWhiteSpace(breadcrumb))
+            {
+                <span class="text-secondary">@breadcrumb</span>
+            }
+        </div>
+    </div>
+</header>

@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\KucukMericHukuk.Core\KucukMericHukuk.Core.csproj" />
     <ProjectReference Include="..\KucukMericHukuk.Business\KucukMericHukuk.Business.csproj" />
+    <ProjectReference Include="..\KucukMericHukuk.Infrastructure\KucukMericHukuk.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
