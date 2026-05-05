@@ -7,6 +7,7 @@ public class CategoryAdminDto
     public int Id { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsActive { get; set; }
+    public bool IsDeleted { get; set; }
     public int? ParentCategoryId { get; set; }
     public string? ParentCategoryName { get; set; }
     public DateTime CreatedAt { get; set; }

@@ -38,6 +38,12 @@
   - 2.10'da `SqlException.Number` (2627/2601) kontrolüne çevrilecek
   - Dosya: `Business/Services/PageService.cs`
 
+- **CategoryService.RestoreAsync parent IsDeleted kontrolü**
+  - Şu an child Restore edilince parent soft-deleted ise orphan parent
+    referansı kalır (FK doğru ama UI/UX kafa karıştırıcı, Faz 2.8a)
+  - Çözüm: Restore'da parent.IsDeleted=true ise warning + Restore engellensin
+    VEYA cascade restore. 2.10'da değerlendir.
+
 - **PageService Translation full-replace stratejisi gözden geçirilsin**
   - Şu an `UpdateAsync`'te `page.Translations.Clear()` + `Add(...)`
   - Alternatif: id-bazlı merge (var olanı update, yenisini insert, kayıpları sil)
@@ -69,7 +75,9 @@
   - ✅ Tag tarafı 2.6a'da kapatıldı
   - ✅ Service tarafı 2.7a'da kapatıldı (3 metod + AttorneyRepository'ye
     AttorneysExistAsync + GetByIdsAsync)
-  - Category/Attorney tarafları 2.8a/2.9a'da kapatılacak
+  - ✅ Category tarafı 2.8a'da kapatıldı (3 admin metod + 2 hiyerarşi
+    guard: GetDescendantIdsAsync, HasChildrenAsync)
+  - Attorney tarafı 2.9a'da kapatılacak
   - Entity-spesifik unique kontrol metodu (varsa, örn. ServiceKey)
 
 ---

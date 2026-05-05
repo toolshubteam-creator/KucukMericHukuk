@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<IPageService, PageService>();
         services.AddScoped<ITagService, TagService>();
         services.AddScoped<IServiceService, ServiceService>();
+        services.AddScoped<ICategoryService, CategoryService>();
 
         return services;
     }

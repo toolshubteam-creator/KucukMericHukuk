@@ -45,6 +45,7 @@ public static class ErrorCodes
         public const string SlugExists = "Category.SlugExists";
         public const string CircularParent = "Category.CircularParent";
         public const string HasChildren = "Category.HasChildren";
+        public const string ParentNotFound = "Category.ParentNotFound";
     }
 
     public static class Tag
