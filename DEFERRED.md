@@ -11,20 +11,6 @@
 
 ## Faz 2 → İleri Adımlar
 
-### 2.5c-ii — Page write akışı (destructive eylemler)
-
-- **Page Index "Sil" butonu aktif edilecek**
-  - Soft delete, confirm dialog (SweetAlert2)
-
-- **Page Details "Sil", "Geri Yükle", "Tamamen Sil" butonları aktif**
-  - Sil → POST /admin/pages/delete/{id} (soft)
-  - Geri Yükle → POST /admin/pages/restore/{id}
-  - Tamamen Sil → POST /admin/pages/hard-delete/{id} (irreversible, double confirm)
-
-- **SweetAlert2 entegrasyonu**
-  - CDN, confirm dialog'lar için
-  - js/admin/sweet-alert-init.js veya inline init
-
 ### 2.10 — Faz 2 Cleanup
 
 - **FluentValidation client-side adapter**

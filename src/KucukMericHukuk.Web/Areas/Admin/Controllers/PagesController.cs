@@ -176,4 +176,67 @@ public class PagesController : Controller
         TempData["Success"] = "Sayfa başarıyla güncellendi.";
         return RedirectToAction(nameof(Details), new { id });
     }
+
+    [HttpPost("delete/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id, CancellationToken ct)
+    {
+        var result = await _pageService.DeleteAsync(id, ct);
+
+        if (result.IsFailure)
+        {
+            if (result.FirstError?.Code == ErrorCodes.Page.NotFound)
+                return NotFound();
+
+            _logger.LogError("Sayfa silinemedi: id={Id}, errors={Errors}",
+                id, string.Join("; ", result.Errors.Select(e => e.Message)));
+            TempData["Error"] = "Sayfa silinirken bir sorun oluştu.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        TempData["Success"] = "Sayfa silindi.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost("restore/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Restore(int id, CancellationToken ct)
+    {
+        var result = await _pageService.RestoreAsync(id, ct);
+
+        if (result.IsFailure)
+        {
+            if (result.FirstError?.Code == ErrorCodes.Page.NotFound)
+                return NotFound();
+
+            _logger.LogError("Sayfa geri yüklenemedi: id={Id}, errors={Errors}",
+                id, string.Join("; ", result.Errors.Select(e => e.Message)));
+            TempData["Error"] = "Sayfa geri yüklenirken bir sorun oluştu.";
+            return RedirectToAction(nameof(Index), new { includeDeleted = true });
+        }
+
+        TempData["Success"] = "Sayfa geri yüklendi.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost("hard-delete/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> HardDelete(int id, CancellationToken ct)
+    {
+        var result = await _pageService.HardDeleteAsync(id, ct);
+
+        if (result.IsFailure)
+        {
+            if (result.FirstError?.Code == ErrorCodes.Page.NotFound)
+                return NotFound();
+
+            _logger.LogError("Sayfa kalıcı olarak silinemedi: id={Id}, errors={Errors}",
+                id, string.Join("; ", result.Errors.Select(e => e.Message)));
+            TempData["Error"] = "Sayfa kalıcı olarak silinirken bir sorun oluştu.";
+            return RedirectToAction(nameof(Index), new { includeDeleted = true });
+        }
+
+        TempData["Success"] = "Sayfa kalıcı olarak silindi.";
+        return RedirectToAction(nameof(Index));
+    }
 }
