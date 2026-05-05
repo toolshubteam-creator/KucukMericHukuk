@@ -20,6 +20,51 @@
 
 ---
 
+## FAZ 2 — Yönetim Paneli & Temel Modüller — 🔄 DEVAM EDİYOR
+
+**Başlama Tarihi:** 05.05.2026
+**Hedef Bitiş:** Faz 2 toplam 2 hafta planlı
+
+### Tamamlanan Adımlar
+
+| Adım | Açıklama | Commit |
+| --- | --- | --- |
+| 2.1 | Admin Area iskeleti + Tabler.io 1.4.0 entegrasyonu | `d10e3b6` |
+| 2.2 | Cookie auth + Login/Logout + AntiForgery | `08f9a35` |
+| 2.3 | DbInitializer + 3 rol seed + ilk admin + Claims factory | `2255a87` |
+| 2.4a | Result<T> + Error + FluentValidation altyapısı | `c0cc332` |
+| 2.4b | Slug helper + SlugService + 6 repo SlugExistsAsync | `7fa445a` |
+
+### İstatistikler
+
+- **Yeni commit (Faz 2):** 5 feature commit + 1 docs commit (DEFERRED.md, `c69907f`)
+- **Toplam test:** 51 PASSED, 0 failed (11 Faz 1 + 40 Faz 2)
+- **Build durumu:** 0 error, 0 warning
+- **Yeni dosya:** ~50, **Modified:** ~20
+
+### Bilinen Sorunlar / Geçici Çözümler
+
+- Soft-deleted parent translation slug'ı `SlugExistsAsync` tarafından görülmez; silinen sayfa slug'ı yeniden kullanılabilir, restore'da unique index ihlali riski. DEFERRED.md "Belirsiz Zamanlama" bölümünde takip ediliyor.
+
+### Faz 2 Sonraki Adımlara Aktarılan Notlar
+
+- Quill 2.x + HtmlSanitizer entegrasyonu Adım 2.5c'de (Page Content)
+- FluentValidation client-side adapter Adım 2.10 cleanup'ta
+- Sidebar ViewComponent refactor Adım 2.10
+- HTTPS profil zorunlu kuralı CLAUDE.md'ye Adım 2.10'da
+
+### Tamamlanmamış Adımlar (Sıradaki)
+
+- 2.5a: PageService + Validator + birim test (referans modül başlangıcı)
+- 2.5b: PageController + Index/Details view (read-only)
+- 2.5c: Page Create/Edit/Delete + dil sekme partial + Quill
+- 2.6-2.9: Service/Attorney/Category/Tag modülleri (Page pattern kopyası)
+- 2.10: Dashboard + ortak listing partial'ları + Faz 2 cleanup
+- 2.11: Integration testler (Login flow, Authorize, Page CRUD)
+- 2.12: PROGRESS.md final güncelleme + v0.2.0 tag
+
+---
+
 ## FAZ 1 — Proje Kurulumu & Mimari — ✅ TAMAMLANDI
 
 **Başlama Tarihi:** 04.05.2026
