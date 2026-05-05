@@ -3,6 +3,7 @@ namespace KucukMericHukuk.Core.DTOs.Tag;
 public class TagInputDto
 {
     public int? Id { get; set; }
+    public bool IsActive { get; set; } = true;
     public List<TagTranslationInputDto> Translations { get; set; } = new();
 }
 

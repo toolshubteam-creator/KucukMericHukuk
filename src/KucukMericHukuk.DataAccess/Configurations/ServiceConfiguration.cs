@@ -14,6 +14,14 @@ public class ServiceConfiguration : IEntityTypeConfiguration<Service>
         builder.Property(s => s.Icon).HasMaxLength(50);
         builder.Property(s => s.FeaturedImage).HasMaxLength(500);
 
+        builder.Property(s => s.IsActive)
+            .IsRequired()
+            .HasDefaultValue(true);
+
+        builder.Property(s => s.DisplayOrder)
+            .IsRequired()
+            .HasDefaultValue(0);
+
         builder.HasIndex(s => s.IsDeleted);
         builder.HasIndex(s => s.DisplayOrder);
 

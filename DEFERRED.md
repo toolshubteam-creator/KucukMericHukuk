@@ -64,15 +64,6 @@
 
 ### 2.6-2.9 Modülleri için ön kontrol
 
-- **Service/Attorney/Category/Tag entity'lerinde `IsActive` + `DisplayOrder`
-  var mı kontrolü**
-  - Faz 1 PROGRESS.md raporundan: Article'da Status/IsFeatured var ama
-    Page'de yoktu (Faz 2.5a'da eklendi)
-  - Service/Attorney/Category/Tag entity'leri Faz 1'de tanımlandı
-  - 2.6 başlamadan önce her entity'nin alan listesi kontrol edilecek
-  - Eksik alan varsa Page örneğindeki gibi (Faz 2.5a) entity güncelleme +
-    migration + DTO genişletmesi yapılır
-
 - **5 repository'ye eksik admin metodlarının eklenmesi**
   - `GetByIdWithTranslationsAsync`
   - `GetAdminPagedAsync(keyword, languageCode, page, pageSize, includeDeleted, ct)`

@@ -11,6 +11,10 @@ public class TagConfiguration : IEntityTypeConfiguration<Tag>
         builder.ToTable("Tags");
         builder.HasQueryFilter(t => !t.IsDeleted);
 
+        builder.Property(t => t.IsActive)
+            .IsRequired()
+            .HasDefaultValue(true);
+
         builder.HasIndex(t => t.IsDeleted);
 
         builder.HasMany(t => t.Articles)

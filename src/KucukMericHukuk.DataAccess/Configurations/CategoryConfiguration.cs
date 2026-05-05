@@ -11,6 +11,14 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.ToTable("Categories");
         builder.HasQueryFilter(c => !c.IsDeleted);
 
+        builder.Property(c => c.IsActive)
+            .IsRequired()
+            .HasDefaultValue(true);
+
+        builder.Property(c => c.DisplayOrder)
+            .IsRequired()
+            .HasDefaultValue(0);
+
         builder.HasIndex(c => c.IsDeleted);
         builder.HasIndex(c => c.DisplayOrder);
 

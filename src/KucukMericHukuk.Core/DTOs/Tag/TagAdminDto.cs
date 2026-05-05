@@ -5,6 +5,7 @@ namespace KucukMericHukuk.Core.DTOs.Tag;
 public class TagAdminDto
 {
     public int Id { get; set; }
+    public bool IsActive { get; set; }
     public int ArticleCount { get; set; }
     public DateTime CreatedAt { get; set; }
     public List<TagTranslationDto> Translations { get; set; } = new();

@@ -18,6 +18,14 @@ public class AttorneyConfiguration : IEntityTypeConfiguration<Attorney>
         builder.Property(a => a.LinkedInUrl).HasMaxLength(500);
         builder.Property(a => a.ProfileImageUrl).HasMaxLength(500);
 
+        builder.Property(a => a.IsActive)
+            .IsRequired()
+            .HasDefaultValue(true);
+
+        builder.Property(a => a.DisplayOrder)
+            .IsRequired()
+            .HasDefaultValue(0);
+
         builder.HasIndex(a => a.IsDeleted);
         builder.HasIndex(a => a.DisplayOrder);
 
