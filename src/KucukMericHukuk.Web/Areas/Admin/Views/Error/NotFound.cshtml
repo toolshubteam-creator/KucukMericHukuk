@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = "404 — Sayfa Bulunamadı";
+    Layout = "_AdminLayout";
+}
+
+<div class="page page-center">
+    <div class="container-tight py-4">
+        <div class="empty">
+            <div class="empty-header">404</div>
+            <p class="empty-title">Sayfa Bulunamadı</p>
+            <p class="empty-subtitle text-secondary">
+                Aradığınız yönetim paneli sayfası mevcut değil.
+            </p>
+            <div class="empty-action">
+                <a asp-area="Admin" asp-controller="Admin" asp-action="Index" class="btn btn-primary">
+                    <i class="ti ti-arrow-left me-2"></i>Kontrol Paneline Dön
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

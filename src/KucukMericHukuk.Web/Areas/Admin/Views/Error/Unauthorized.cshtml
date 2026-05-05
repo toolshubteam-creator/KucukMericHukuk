@@ -1,0 +1,22 @@
+@{
+    ViewData["Title"] = "401 — Yetkisiz Erişim";
+    Layout = "_AdminLayout";
+}
+
+<div class="page page-center">
+    <div class="container-tight py-4">
+        <div class="empty">
+            <div class="empty-header">401</div>
+            <p class="empty-title">Yetkisiz Erişim</p>
+            <p class="empty-subtitle text-secondary">
+                Bu sayfayı görüntülemek için giriş yapmalısınız.
+            </p>
+            <div class="empty-action">
+                @* TODO (Faz 2.2): asp-area="Admin" asp-controller="Account" asp-action="Login" *@
+                <a href="#" class="btn btn-primary">
+                    <i class="ti ti-login me-2"></i>Giriş Yap
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,33 @@
+@*
+    Tabler.io v1.4.0 — pinned 2026-05-05
+    Tabler icons-webfont v3.42.0 — pinned 2026-05-05
+    Inline CSS yasaktır; tüm stiller wwwroot/css/admin/admin.css ve components/'tadır.
+*@
+<!DOCTYPE html>
+<html lang="tr" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(ViewData["Title"] ?? "Yönetim Paneli") — Küçükmeriç Hukuk</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@tabler/core@@1.4.0/dist/css/tabler.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@tabler/icons-webfont@@3.42.0/dist/tabler-icons.min.css" />
+    <link rel="stylesheet" href="~/css/admin/admin.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <div class="page">
+        <partial name="_AdminSidebar" />
+        <div class="page-wrapper">
+            <partial name="_AdminTopbar" />
+            <div class="page-body">
+                <div class="container-xl">
+                    @RenderBody()
+                </div>
+            </div>
+            <partial name="_AdminFooter" />
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@@tabler/core@@1.4.0/dist/js/tabler.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,58 @@
+/* ============================================================
+   Küçükmeriç Hukuk — Admin Panel
+   Inline CSS yasak; tüm stiller bu dosyada veya components/'ta.
+   Tabler.io v1.4.0 + tabler-icons-webfont v3.42.0 üzerine override.
+   ============================================================ */
+
+:root {
+    --color-primary: #0F2A23;
+    --color-primary-dark: #081814;
+    --color-primary-light: #1F4438;
+    --color-accent: #C9A961;
+    --color-accent-dark: #A88A45;
+    --color-accent-light: #D9BD7C;
+    --color-bg: #FAF7F2;
+    --color-bg-alt: #FFFFFF;
+    --color-text: #2C2C2A;
+    --color-text-muted: #6B6B6B;
+    --color-border: #E5E0D5;
+}
+
+/* Tabler navbar-vertical — marka rengi */
+.navbar-vertical.navbar-dark {
+    background-color: var(--color-primary);
+}
+
+.navbar-vertical.navbar-dark .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.navbar-vertical.navbar-dark .nav-link:hover,
+.navbar-vertical.navbar-dark .nav-link.active {
+    color: var(--color-accent);
+}
+
+.navbar-brand-image-text {
+    color: var(--color-accent);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+}
+
+.navbar-brand-image-text:hover {
+    color: var(--color-accent-light);
+}
+
+/* Page header sade çizgi */
+.page-header {
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+/* Card — daha yumuşak gölge */
+.page-body .card {
+    border-color: var(--color-border);
+}
+
+/* (Modül-özel stiller components/ altına ileride eklenecek) */

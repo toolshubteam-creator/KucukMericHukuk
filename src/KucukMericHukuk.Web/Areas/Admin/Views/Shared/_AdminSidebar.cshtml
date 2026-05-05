@@ -1,0 +1,92 @@
+@*
+    Statik sidebar. Faz 2 ileri adımlarında ViewComponent'e refactor edilecek (active state + role-based filter).
+*@
+<aside class="navbar navbar-vertical navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <h1 class="navbar-brand navbar-brand-autodark">
+            <a asp-area="Admin" asp-controller="Admin" asp-action="Index" class="navbar-brand-image-text">
+                Küçükmeriç Hukuk
+            </a>
+        </h1>
+        <div class="collapse navbar-collapse" id="sidebar-menu">
+            <ul class="navbar-nav pt-lg-3">
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-controller="Admin" asp-action="Index">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                            <i class="ti ti-dashboard"></i>
+                        </span>
+                        <span class="nav-link-title">Kontrol Paneli</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                            <i class="ti ti-file-text"></i>
+                        </span>
+                        <span class="nav-link-title">Sayfalar</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                            <i class="ti ti-briefcase"></i>
+                        </span>
+                        <span class="nav-link-title">Hizmetler</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                            <i class="ti ti-users"></i>
+                        </span>
+                        <span class="nav-link-title">Avukatlar</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                            <i class="ti ti-article"></i>
+                        </span>
+                        <span class="nav-link-title">Makaleler</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                            <i class="ti ti-category"></i>
+                        </span>
+                        <span class="nav-link-title">Kategoriler</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                            <i class="ti ti-tag"></i>
+                        </span>
+                        <span class="nav-link-title">Etiketler</span>
+                    </a>
+                </li>
+                <li class="nav-item nav-item-separator"></li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                            <i class="ti ti-user-shield"></i>
+                        </span>
+                        <span class="nav-link-title">Kullanıcılar</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                            <i class="ti ti-settings"></i>
+                        </span>
+                        <span class="nav-link-title">Ayarlar</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</aside>
