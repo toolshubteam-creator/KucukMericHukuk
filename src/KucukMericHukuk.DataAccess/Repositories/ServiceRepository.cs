@@ -1,7 +1,9 @@
+using KucukMericHukuk.Core.DTOs.Common;
 using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Interfaces.Repositories;
 using KucukMericHukuk.DataAccess.Context;
+using KucukMericHukuk.DataAccess.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace KucukMericHukuk.DataAccess.Repositories;
@@ -23,9 +25,11 @@ public class ServiceRepository : GenericRepository<Service>, IServiceRepository
             .FirstOrDefaultAsync(s => s.Translations.Any(t => t.LanguageCode == languageCode && t.Slug == slug), ct);
 
     public Task<Service?> GetByIdWithTranslationsAsync(int id, CancellationToken ct = default)
-        => Query().AsNoTracking()
+        => _dbSet
             .Include(s => s.Translations)
             .Include(s => s.Attorneys)
+                .ThenInclude(a => a.Translations)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(s => s.Id == id, ct);
 
     public Task<bool> SlugExistsAsync(string slug, string languageCode, int? excludeId = null, CancellationToken ct = default)
@@ -40,4 +44,41 @@ public class ServiceRepository : GenericRepository<Service>, IServiceRepository
 
         return query.AnyAsync(ct);
     }
+
+    public async Task<PagedResult<Service>> GetAdminPagedAsync(
+        string? keyword,
+        string languageCode,
+        int page,
+        int pageSize,
+        bool includeDeleted,
+        CancellationToken ct = default)
+    {
+        var query = includeDeleted
+            ? _dbSet.IgnoreQueryFilters()
+            : _dbSet.AsQueryable();
+
+        query = query
+            .Include(s => s.Translations.Where(tr => tr.LanguageCode == languageCode))
+            .Include(s => s.Attorneys)
+                .ThenInclude(a => a.Translations.Where(tr => tr.LanguageCode == languageCode))
+            .AsSplitQuery();
+
+        if (!string.IsNullOrWhiteSpace(keyword))
+        {
+            query = query.Where(s =>
+                s.Translations.Any(tr =>
+                    tr.LanguageCode == languageCode &&
+                    tr.Name.Contains(keyword)));
+        }
+
+        query = query
+            .OrderBy(s => s.DisplayOrder)
+            .ThenByDescending(s => s.Id);
+
+        return await query.AsNoTracking().ToPagedListAsync(page, pageSize, ct);
+    }
+
+    public Task<Service?> GetByIdIncludingDeletedAsync(int id, CancellationToken ct = default)
+        => _dbSet.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(s => s.Id == id, ct);
 }

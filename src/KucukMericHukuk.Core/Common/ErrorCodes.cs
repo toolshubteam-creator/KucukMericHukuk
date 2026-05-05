@@ -29,6 +29,7 @@ public static class ErrorCodes
     {
         public const string NotFound = "Service.NotFound";
         public const string SlugExists = "Service.SlugExists";
+        public const string AttorneyNotFound = "Service.AttorneyNotFound";
     }
 
     public static class Attorney

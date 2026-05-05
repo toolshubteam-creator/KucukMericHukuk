@@ -47,4 +47,26 @@ public class AttorneyRepository : GenericRepository<Attorney>, IAttorneyReposito
 
         return query.AnyAsync(ct);
     }
+
+    public async Task<bool> AttorneysExistAsync(IEnumerable<int> attorneyIds, CancellationToken ct = default)
+    {
+        var ids = attorneyIds.Distinct().ToList();
+        if (ids.Count == 0) return true;
+
+        var existingCount = await _dbSet
+            .Where(a => ids.Contains(a.Id))
+            .CountAsync(ct);
+
+        return existingCount == ids.Count;
+    }
+
+    public async Task<List<Attorney>> GetByIdsAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    {
+        var idList = ids.Distinct().ToList();
+        if (idList.Count == 0) return new List<Attorney>();
+
+        return await _dbSet
+            .Where(a => idList.Contains(a.Id))
+            .ToListAsync(ct);
+    }
 }

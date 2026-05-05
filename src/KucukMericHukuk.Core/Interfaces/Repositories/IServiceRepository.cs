@@ -1,3 +1,4 @@
+using KucukMericHukuk.Core.DTOs.Common;
 using KucukMericHukuk.Core.Entities;
 
 namespace KucukMericHukuk.Core.Interfaces.Repositories;
@@ -8,4 +9,13 @@ public interface IServiceRepository : IGenericRepository<Service>
     Task<Service?> GetBySlugAsync(string languageCode, string slug, CancellationToken ct = default);
     Task<Service?> GetByIdWithTranslationsAsync(int id, CancellationToken ct = default);
     Task<bool> SlugExistsAsync(string slug, string languageCode, int? excludeId = null, CancellationToken ct = default);
+
+    Task<PagedResult<Service>> GetAdminPagedAsync(
+        string? keyword,
+        string languageCode,
+        int page,
+        int pageSize,
+        bool includeDeleted,
+        CancellationToken ct = default);
+    Task<Service?> GetByIdIncludingDeletedAsync(int id, CancellationToken ct = default);
 }

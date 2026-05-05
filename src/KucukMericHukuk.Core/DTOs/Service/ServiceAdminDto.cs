@@ -8,6 +8,7 @@ public class ServiceAdminDto
     public string? Icon { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsActive { get; set; }
+    public bool IsDeleted { get; set; }
     public string? FeaturedImage { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
