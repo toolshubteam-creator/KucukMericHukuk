@@ -1,0 +1,78 @@
+@using KucukMericHukuk.Core.Constants
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Pages.PageFormViewModel
+@{
+    var supportedLanguages = LanguageCodes.Supported;
+}
+
+<ul class="nav nav-tabs mb-3" role="tablist">
+    @{
+        var firstTab = true;
+        foreach (var lang in supportedLanguages)
+        {
+            var tabId = $"lang-{lang.Replace("-", "_")}";
+            <li class="nav-item" role="presentation">
+                <a class="nav-link @(firstTab ? "active" : "")"
+                   data-bs-toggle="tab"
+                   href="#@tabId"
+                   role="tab">@lang</a>
+            </li>
+            firstTab = false;
+        }
+    }
+</ul>
+
+<div class="tab-content">
+    @{
+        var firstPane = true;
+        for (var i = 0; i < Model.Translations.Count; i++)
+        {
+            var t = Model.Translations[i];
+            var tabId = $"lang-{t.LanguageCode.Replace("-", "_")}";
+
+            <div class="tab-pane fade @(firstPane ? "show active" : "")"
+                 id="@tabId"
+                 role="tabpanel">
+                <input type="hidden" asp-for="Translations[i].LanguageCode" />
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].Title" class="form-label required"></label>
+                    <input asp-for="Translations[i].Title" class="form-control" />
+                    <span asp-validation-for="Translations[i].Title" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].Slug" class="form-label"></label>
+                    <input asp-for="Translations[i].Slug" class="form-control"
+                           placeholder="boş bırakılırsa başlıktan otomatik üretilir" />
+                    <span asp-validation-for="Translations[i].Slug" class="invalid-feedback d-block"></span>
+                    <small class="form-hint">Yalnızca küçük harf, rakam ve tire. Örn: <code>icra-hukuku</code></small>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].Content" class="form-label required"></label>
+                    <textarea asp-for="Translations[i].Content"
+                              class="form-control"
+                              data-quill-target="true"
+                              rows="10"></textarea>
+                    <span asp-validation-for="Translations[i].Content" class="invalid-feedback d-block"></span>
+                </div>
+
+                <h4 class="mt-4">SEO</h4>
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].MetaTitle" class="form-label"></label>
+                    <input asp-for="Translations[i].MetaTitle" class="form-control" maxlength="200" />
+                    <span asp-validation-for="Translations[i].MetaTitle" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].MetaDescription" class="form-label"></label>
+                    <textarea asp-for="Translations[i].MetaDescription" class="form-control"
+                              maxlength="500" rows="3"></textarea>
+                    <span asp-validation-for="Translations[i].MetaDescription" class="invalid-feedback d-block"></span>
+                </div>
+            </div>
+            firstPane = false;
+        }
+    }
+</div>

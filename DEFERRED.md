@@ -11,29 +11,19 @@
 
 ## Faz 2 → İleri Adımlar
 
-### 2.5c — Page UI'a entegre edilecekler
+### 2.5c-ii — Page write akışı (destructive eylemler)
 
-- **Quill 2.x WYSIWYG editör** Page Content alanına entegre edilecek
-  - Tetik: 2.5c (Create/Edit view)
-  - Bağlam: 2.5a service Content'i string olarak alır, editör tipi UI tercihi
+- **Page Index "Sil" butonu aktif edilecek**
+  - Soft delete, confirm dialog (SweetAlert2)
 
-- **HtmlSanitizer.NET** entegrasyonu
-  - Tetik: 2.5c, Quill çıktısı server-side sanitize edilecek
-  - CLAUDE.md güvenlik kuralı (Bölüm 8)
+- **Page Details "Sil", "Geri Yükle", "Tamamen Sil" butonları aktif**
+  - Sil → POST /admin/pages/delete/{id} (soft)
+  - Geri Yükle → POST /admin/pages/restore/{id}
+  - Tamamen Sil → POST /admin/pages/hard-delete/{id} (irreversible, double confirm)
 
-- **Page Index "Yeni Sayfa", "Düzenle", "Sil" butonlarının aktif edilmesi**
-  - Şu an placeholder `href="#"` + `disabled` class (Faz 2.5b)
-  - 2.5c'de Create/Edit/Delete action method'ları ile bağlanacak
-
-- **Page Details "Düzenle", "Geri Yükle", "Sil", "Tamamen Sil" butonlarının
-  aktif edilmesi**
-  - Aynı şekilde — 2.5c'de form ve POST endpoint'leri açıldıkça
-  - HardDelete + Restore için confirm dialog gerekli (SweetAlert2 — CLAUDE.md'de var)
-
-- **Page Details içerik (Content) preview**
-  - Şu an plain `<pre>` ile gösteriliyor (XSS riski yok, Razor encode ediyor — Faz 2.5b)
-  - 2.5c'de Quill HTML olarak girilen içerik HtmlSanitizer'dan geçirilip
-    `@Html.Raw(sanitized)` ile render edilecek
+- **SweetAlert2 entegrasyonu**
+  - CDN, confirm dialog'lar için
+  - js/admin/sweet-alert-init.js veya inline init
 
 ### 2.10 — Faz 2 Cleanup
 
@@ -70,6 +60,22 @@
   - 2.10 cleanup'ta veya Service/Attorney/Article modüllerinde performans
     sorunu çıkarsa revize
 
+- **Create.cshtml + Edit.cshtml ortak `_PageForm` partial refactor**
+  - Şu an form body iki view'da kopya (Faz 2.5c-i)
+  - 2.10'da partial'a alın, sadece outer container + breadcrumb +
+    submit label farklı olur
+
+- **`Web/DependencyInjection.cs` oluşturulacak**
+  - Şu an `Program.cs`'te direkt `TypeAdapterConfig.GlobalSettings.Scan` çağrısı
+  - `AddWeb()` extension'ına taşı, Mapster scan + ileride filter conventions
+
+- **MVC implicit-required vs FluentValidation duplicate mesaj**
+  - Non-nullable string property'lere ASP.NET Core implicit `[Required]`
+    uyguluyor → "The X field is required." mesajı. FluentValidation aynı kuralı
+    daha açıklayıcı Türkçe mesajla veriyor — 2 mesaj birden gözüküyor (Faz 2.5c-i)
+  - Çözüm: ya `MvcOptions.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true`
+    ya da DTO property'lerini nullable yap. 2.10'da karar verilir.
+
 ### 2.6-2.9 Modülleri için ön kontrol
 
 - **Service/Attorney/Category/Tag entity'lerinde `IsActive` + `DisplayOrder`
@@ -104,6 +110,11 @@
 - **SEO meta alanları UI**
   - Entity'lerde alanlar var (Faz 1)
   - Admin form bileşeni Faz 3 (her modülde tekrar kullanılan partial)
+
+- **`<img>` tag'ı HtmlSanitizer whitelist'e**
+  - Şu an HtmlSanitizer whitelist'inde `<img>` yok (Faz 2.5c-i)
+  - Medya yöneticisi entegrasyonu sırasında (Faz 3): `src` + `alt` attribute,
+    scheme genişletmesi (`data:` dikkatle — XSS riski)
 
 ---
 

@@ -18,17 +18,20 @@ public class PageService : IPageService
     private readonly ISlugService _slugService;
     private readonly IMapper _mapper;
     private readonly IValidator<PageInputDto> _validator;
+    private readonly IHtmlSanitizerService _sanitizer;
 
     public PageService(
         IUnitOfWork uow,
         ISlugService slugService,
         IMapper mapper,
-        IValidator<PageInputDto> validator)
+        IValidator<PageInputDto> validator,
+        IHtmlSanitizerService sanitizer)
     {
         _uow = uow;
         _slugService = slugService;
         _mapper = mapper;
         _validator = validator;
+        _sanitizer = sanitizer;
     }
 
     public async Task<Result<PageDetailDto>> GetByPageKeyAsync(
@@ -129,7 +132,7 @@ public class PageService : IPageService
                 LanguageCode = t.LanguageCode,
                 Title = t.Title,
                 Slug = t.Slug,
-                Content = t.Content,
+                Content = _sanitizer.Sanitize(t.Content),
                 MetaTitle = t.MetaTitle,
                 MetaDescription = t.MetaDescription,
                 CreatedAt = DateTime.UtcNow,
@@ -201,7 +204,7 @@ public class PageService : IPageService
                 LanguageCode = t.LanguageCode,
                 Title = t.Title,
                 Slug = t.Slug,
-                Content = t.Content,
+                Content = _sanitizer.Sanitize(t.Content),
                 MetaTitle = t.MetaTitle,
                 MetaDescription = t.MetaDescription,
                 CreatedAt = DateTime.UtcNow,

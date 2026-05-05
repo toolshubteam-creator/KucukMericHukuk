@@ -10,6 +10,7 @@ using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.DataAccess.Context;
 using KucukMericHukuk.DataAccess.UnitOfWork;
+using KucukMericHukuk.Infrastructure.Security;
 using KucukMericHukuk.Tests.Infrastructure;
 using Mapster;
 using MapsterMapper;
@@ -38,7 +39,8 @@ public class PageServiceTests : IDisposable
     {
         var uow = new UnitOfWork(context);
         var slugService = new SlugService(uow);
-        return new PageService(uow, slugService, _mapper, _validator);
+        var sanitizer = new HtmlSanitizerService();
+        return new PageService(uow, slugService, _mapper, _validator, sanitizer);
     }
 
     private static PageInputDto BuildValidInput(
@@ -338,6 +340,27 @@ public class PageServiceTests : IDisposable
 
         result.IsFailure.Should().BeTrue();
         result.FirstError!.Code.Should().Be(ErrorCodes.Page.NotFound);
+    }
+
+    [Fact]
+    public async Task CreateAsync_ContentWithScript_ShouldSanitize()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var input = BuildValidInput(pageKey: "xss-test");
+        input.Translations[0].Content = "<p>OK</p><script>alert('xss')</script>";
+
+        var result = await sut.CreateAsync(input);
+
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var translation = verify.Set<PageTranslation>()
+            .First(t => t.PageId == result.Value);
+        translation.Content.Should().Contain("<p>OK</p>");
+        translation.Content.Should().NotContain("script");
+        translation.Content.Should().NotContain("alert");
     }
 
     [Fact]

@@ -1,6 +1,13 @@
-/* Page details — content preview block */
+/* Page details — content preview block (HTML render) */
 .page-content-preview {
-    white-space: pre-wrap;
     font-family: inherit;
     margin: 0;
+}
+
+.page-content-preview p {
+    margin-bottom: 0.5rem;
+}
+
+.page-content-preview p:last-child {
+    margin-bottom: 0;
 }

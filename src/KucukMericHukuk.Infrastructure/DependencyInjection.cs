@@ -1,4 +1,6 @@
+using KucukMericHukuk.Core.Interfaces.Services;
 using KucukMericHukuk.Infrastructure.Initialization;
+using KucukMericHukuk.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,6 +14,9 @@ public static class DependencyInjection
     {
         services.Configure<SeedOptions>(configuration.GetSection(SeedOptions.SectionName));
         services.AddScoped<IDbInitializer, DbInitializer>();
+
+        // HtmlSanitizer thread-safe (paket dokümantasyonu) — Singleton
+        services.AddSingleton<IHtmlSanitizerService, HtmlSanitizerService>();
 
         return services;
     }

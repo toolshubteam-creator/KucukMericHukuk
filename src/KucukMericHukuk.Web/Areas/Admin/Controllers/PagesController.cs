@@ -1,7 +1,10 @@
 using KucukMericHukuk.Core.Common;
+using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.DTOs.Page;
 using KucukMericHukuk.Core.Interfaces.Services;
 using KucukMericHukuk.Web.Areas.Admin.ViewModels.Pages;
+using KucukMericHukuk.Web.Extensions;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -77,5 +80,100 @@ public class PagesController : Controller
         }
 
         return View(result.Value);
+    }
+
+    [HttpGet("create")]
+    public IActionResult Create()
+    {
+        ViewData["Title"] = "Yeni Sayfa";
+
+        var vm = new PageFormViewModel
+        {
+            IsActive = true,
+            DisplayOrder = 0,
+            Translations = LanguageCodes.Supported
+                .Select(lang => new PageTranslationFormViewModel { LanguageCode = lang })
+                .ToList()
+        };
+
+        return View(vm);
+    }
+
+    [HttpPost("create")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(PageFormViewModel form, CancellationToken ct)
+    {
+        ViewData["Title"] = "Yeni Sayfa";
+
+        var input = form.Adapt<PageInputDto>();
+        var result = await _pageService.CreateAsync(input, ct);
+
+        if (result.IsFailure)
+        {
+            ModelState.AddErrors(result);
+            return View(form);
+        }
+
+        TempData["Success"] = "Sayfa başarıyla oluşturuldu.";
+        return RedirectToAction(nameof(Details), new { id = result.Value });
+    }
+
+    [HttpGet("edit/{id:int}")]
+    public async Task<IActionResult> Edit(int id, CancellationToken ct)
+    {
+        ViewData["Title"] = "Sayfa Düzenle";
+
+        var result = await _pageService.GetByIdAsync(id, ct);
+
+        if (result.IsFailure)
+        {
+            if (result.FirstError?.Code == ErrorCodes.Page.NotFound)
+                return NotFound();
+            TempData["Error"] = "Sayfa yüklenirken bir sorun oluştu.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var vm = result.Value.Adapt<PageFormViewModel>();
+
+        var existingLangs = vm.Translations.Select(t => t.LanguageCode).ToHashSet();
+        foreach (var lang in LanguageCodes.Supported)
+        {
+            if (!existingLangs.Contains(lang))
+            {
+                vm.Translations.Add(new PageTranslationFormViewModel { LanguageCode = lang });
+            }
+        }
+
+        vm.Translations = vm.Translations
+            .OrderBy(t => Array.IndexOf(LanguageCodes.Supported, t.LanguageCode))
+            .ToList();
+
+        return View(vm);
+    }
+
+    [HttpPost("edit/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, PageFormViewModel form, CancellationToken ct)
+    {
+        ViewData["Title"] = "Sayfa Düzenle";
+
+        if (form.Id != id)
+        {
+            return BadRequest();
+        }
+
+        var input = form.Adapt<PageInputDto>();
+        input.Id = id;
+
+        var result = await _pageService.UpdateAsync(input, ct);
+
+        if (result.IsFailure)
+        {
+            ModelState.AddErrors(result);
+            return View(form);
+        }
+
+        TempData["Success"] = "Sayfa başarıyla güncellendi.";
+        return RedirectToAction(nameof(Details), new { id });
     }
 }

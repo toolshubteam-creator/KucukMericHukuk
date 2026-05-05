@@ -22,20 +22,20 @@
             <h2 class="page-title">@firstTitle</h2>
         </div>
         <div class="col-auto">
-            @* TODO Faz 2.5c — Düzenle butonu aktif edilecek *@
-            <a href="#" class="btn btn-primary disabled">
+            <a asp-action="Edit" asp-controller="Pages" asp-area="Admin"
+               asp-route-id="@Model.Id" class="btn btn-primary">
                 <i class="ti ti-edit me-1"></i> Düzenle
             </a>
             @if (Model.IsDeleted)
             {
-                @* TODO Faz 2.5c — Restore + HardDelete butonları *@
+                @* TODO Faz 2.5c-ii — Geri Yükle + Tamamen Sil butonları *@
                 <a href="#" class="btn btn-outline-success disabled ms-1">
                     <i class="ti ti-restore me-1"></i> Geri Yükle
                 </a>
             }
             else
             {
-                @* TODO Faz 2.5c — Soft delete butonu *@
+                @* TODO Faz 2.5c-ii — Soft delete butonu *@
                 <a href="#" class="btn btn-outline-danger disabled ms-1">
                     <i class="ti ti-trash me-1"></i> Sil
                 </a>
@@ -43,6 +43,20 @@
         </div>
     </div>
 </div>
+
+@if (TempData["Success"] is string successMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">
+        @successMsg
+    </div>
+}
+
+@if (TempData["Error"] is string errorMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">
+        @errorMsg
+    </div>
+}
 
 <div class="row mt-3">
     <div class="col-12 col-lg-4">
@@ -136,11 +150,12 @@
 
                                             <dt class="col-3">İçerik</dt>
                                             <dd class="col-9">
-                                                @* İçerik şu an plain string — 2.5c'de Quill HTML olacak.
-                                                   XSS riski olmasın diye Razor'un default HTML encoding'ine bırakıyoruz.
-                                                   2.5c'de HtmlSanitizer'dan geçince Html.Raw güvenli olur. *@
+                                                @* İçerik service tarafında HtmlSanitizer'dan geçti (Faz 2.5c-i).
+                                                   Burada Html.Raw güvenli — script/on-attr/javascript: yok. *@
                                                 <div class="border rounded p-2 bg-light">
-                                                    <pre class="page-content-preview">@t.Content</pre>
+                                                    <div class="page-content-preview">
+                                                        @Html.Raw(t.Content)
+                                                    </div>
                                                 </div>
                                             </dd>
                                         </dl>

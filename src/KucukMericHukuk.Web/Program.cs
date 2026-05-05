@@ -69,6 +69,9 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // Mapster + Business services
 builder.Services.AddBusiness();
 
+// Web katmanindaki Mapster IRegister'lari (PageFormMappingConfig vb.) GlobalSettings'e ekle
+Mapster.TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
+
 // Localization
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 

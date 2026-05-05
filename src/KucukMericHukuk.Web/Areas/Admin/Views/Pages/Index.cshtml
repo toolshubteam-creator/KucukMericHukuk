@@ -28,13 +28,19 @@
             <div class="text-secondary">Toplam @Model.TotalCount kayıt</div>
         </div>
         <div class="col-auto">
-            @* TODO Faz 2.5c — "Yeni Sayfa" butonu *@
-            <a href="#" class="btn btn-primary disabled">
+            <a asp-action="Create" asp-controller="Pages" asp-area="Admin" class="btn btn-primary">
                 <i class="ti ti-plus me-1"></i> Yeni Sayfa
             </a>
         </div>
     </div>
 </div>
+
+@if (TempData["Success"] is string successMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">
+        @successMsg
+    </div>
+}
 
 @if (TempData["Error"] is string errorMsg)
 {
@@ -136,10 +142,12 @@
                                    title="Detay">
                                     <i class="ti ti-eye"></i>
                                 </a>
-                                @* TODO Faz 2.5c — Düzenle ve Sil butonları *@
-                                <a href="#" class="btn btn-sm btn-outline-primary disabled" title="Düzenle">
+                                <a asp-action="Edit" asp-controller="Pages" asp-area="Admin"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-outline-primary" title="Düzenle">
                                     <i class="ti ti-edit"></i>
                                 </a>
+                                @* TODO Faz 2.5c-ii — Sil butonu *@
                                 <a href="#" class="btn btn-sm btn-outline-danger disabled" title="Sil">
                                     <i class="ti ti-trash"></i>
                                 </a>
