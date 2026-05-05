@@ -136,6 +136,36 @@ Generic Repository + Özel Repository hybrid yapısı:
 - Web katmanında global exception middleware (`ExceptionHandlingMiddleware`).
 - Kullanıcıya gösterilen mesaj ile log mesajı **ayrı** olmalı.
 
+### Service Katmanı Sözleşmesi
+
+- Tüm service metotları `Task<Result>` veya `Task<Result<T>>` döner (`Core/Common/Result.cs`).
+- Service içinde input validation: FluentValidation `IValidator<TInput>` enjeksiyonu, `await validator.ValidateAsync(input)`.
+- Validation hatası: `validationResult.ToFailureResult<T>()` ile `Result.Failure`'a çevrilir (`Business/Common/ValidationResultExtensions.cs`).
+- İş kuralı hatası: `Result.Failure(new Error(ErrorCodes.X.Y, "Mesaj", field))`. Field opsiyonel — varsa ilgili form alanına bağlanır, yoksa validation summary'ye düşer.
+- Error code'ları `Core/Common/ErrorCodes.cs` altında entity başına grup halinde tutulur. Yeni hata türü eklenirken bu sınıfa eklenir.
+- Repository'den `NotFoundException` yakalanır → `Result.Failure(ErrorCodes.X.NotFound)`.
+- Beklenmedik exception (DB down, network) yakalanmaz, global middleware'e (Faz 5'te) bırakılır.
+- **FluentValidation auto-MVC YOK.** `AddFluentValidationAutoValidation` çağrılmaz; validation `Action` katmanında değil **service** katmanında manuel yapılır. `AddBusiness()` sadece `AddValidatorsFromAssembly` çağırır.
+- Controller pattern:
+
+  ```csharp
+  var result = await _service.CreateAsync(input);
+  if (result.IsFailure)
+  {
+      ModelState.AddErrors(result);     // Web/Extensions/ModelStateExtensions.cs
+      return View(input);
+  }
+  TempData["Success"] = "Kayıt oluşturuldu.";
+  return RedirectToAction(nameof(Index));
+  ```
+
+### Custom Exception Kullanımı
+
+- `NotFoundException` (`Core/Exceptions/`): Repository/DB seviyesinde "olmazsa olmaz" kayıt bulunamadığında fırlatılır.
+- `BusinessException` (`Core/Exceptions/`): Bir service'ten başka bir service'e iş kuralı sinyali (örn. `Article` create sırasında `CategoryService.EnsureExistsAsync` bunu fırlatır).
+- **Controller bu exception'ları görmez** — service yakalar, `Result.Failure` döner.
+- `Result<T>.Value`, `IsFailure` durumunda erişilirse `InvalidOperationException` fırlatır — programcı hatasıdır, mutlaka `IsSuccess`/`IsFailure` ile koru.
+
 ### Mapster Kullanımı
 
 - Entity başına 1 IRegister sınıfı: `Business/Mappings/<Entity>MappingConfig.cs`
@@ -346,9 +376,13 @@ Border radius: `4px` (küçük), `8px` (kart), `16px` (büyük blok).
 
 ## 11. Faz Durumu
 
-**Mevcut Faz:** Faz 2 — Yönetim Paneli (başlamaya hazır)
+**Mevcut Faz:** Faz 2 — Yönetim Paneli (Adım 2.4a tamamlandı, sıradaki: 2.4b — Slug helper + ISlugService)
 
 - ✅ **Faz 1 — Proje Kurulumu & Mimari** tamamlandı (05.05.2026): 5 katmanlı solution, BaseEntity + Identity, 6 domain entity + translation, Generic Repository + UoW + 6 özel repository, 24 DTO + 6 Mapster mapping config, çok dilli altyapı, 11 test PASSED
+- ✅ **Faz 2.1 — Admin Area iskeleti** tamamlandı: Tabler.io v1.4.0 entegrasyonu, `_AdminLayout` + sidebar/topbar/footer, AdminController + ErrorController, brand admin.css
+- ✅ **Faz 2.2 — Authentication** tamamlandı: Cookie auth pipeline, AccountController login/logout (POST + AntiForgery), Login.cshtml, `[Authorize]`/`[AllowAnonymous]`, open-redirect koruması
+- ✅ **Faz 2.3 — Authorization** tamamlandı: `IDbInitializer` + 3 rol (Admin/Editor/Author) + ilk admin kullanıcı seed (configuration'dan, idempotent), `AppUserClaimsPrincipalFactory` (FullName claim), Topbar claim okuma
+- ✅ **Faz 2.4a — Service katmanı altyapısı** tamamlandı: `Result`/`Result<T>`/`Error`/`ErrorCodes` (Core/Common), `NotFoundException`/`BusinessException` (Core/Exceptions), FluentValidation DI scan (auto-MVC YOK), `ValidationResultExtensions` (Business/Common), `ModelStateExtensions` (Web/Extensions), 18 yeni unit test (toplam 29 PASSED)
 - 🔄 **Faz 0 — Hazırlık** kısmen sürüyor (müşteri içerik beklentisi)
 
 Faz tamamlama detayları için `PROGRESS.md` dosyasına bakınız.
@@ -364,3 +398,4 @@ Faz tamamlama detayları için `PROGRESS.md` dosyasına bakınız.
 5. **Türkiye Barolar Birliği reklam yasağı** — "Müvekkil yorumları" sayfasında müvekkil ismi/davası ifşa edilmez. "Başarılarımız" yerine "Çalışma alanları" vurgusu yapılır.
 6. **KVKK uyumu** — İletişim formu submit'inde aydınlatma onayı checkbox'ı zorunlu, onay tarih-saat ile loglanır.
 7. **Çok dilli altyapı şimdi kurulacak** — Sonradan eklemek pahalı olur.
+8. **DEFERRED.md kontrolü** — Her adım başında DEFERRED.md oku, o adımda kapatılabilecek erteleme var mı raporla. Adım sonunda DEFERRED.md güncellenir (kapatılanlar silinir, yeniler eklenir). Detay WORKING_STYLE.md madde 11'de.

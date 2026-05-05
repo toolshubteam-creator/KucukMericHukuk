@@ -107,6 +107,17 @@ Yeni asistana ortamı sorman önemli. Genel olarak bilmen gerekenler:
 - Geçmiş konuşma transcript'leri varsa tarama yap, önceki kararları unutma
 - Yeni karar verirken eski kararla çelişme — varsa açıkça belirt ve tartış
 
+# 11. Ertelenen işler — DEFERRED.md
+
+DEFERRED.md repo kökünde tutulan, "şimdi yapılmıyor, sonra yapılacak" işlerin canlı listesidir. Geçmiş kayıt değil, gelecek-bakışlı.
+
+- Her adım BAŞINDA DEFERRED.md okunur. O adımda kapatılabilecek madde var mı kontrol edilir; varsa "bu adıma dahil edilsin mi?" kararı için raporla
+- Her adım SONUNDA DEFERRED.md güncellenir:
+  * Adımda kapatılan ertelemeler SİLİNİR (PROGRESS.md'deki "Yapılanlar" bölümüne taşınır)
+  * Adımda doğan yeni ertelemeler EKLENIR (kategori: hangi faz/adımda kapatılması bekleniyor)
+- Erteleme formatı: madde başlığı + kısa bağlam + tetik faz/adım
+- Yeni konuşma başlangıcında okunan doküman seti: CLAUDE.md, PROGRESS.md, WORKING_STYLE.md, DEFERRED.md (bu dördü zorunlu)
+
 ═══════════════════════════════════════════════════════════════════
 YENİ KONUŞMA BAŞLANGICI — CHECKLIST
 ═══════════════════════════════════════════════════════════════════
@@ -115,7 +126,7 @@ Yeni bir konuşmaya başladığında, ben sana proje durumunu anlatacağım. Ön
 
 1. Mevcut durum: hangi adım tamam, hangisi sıradaki?
 2. Çalışma ortamı: OS, shell, runner
-3. Repo'daki ilgili döküman dosyaları (CLAUDE.md, PROGRESS.md, WORKING_STYLE.md, docs/) okundu mu?
+3. Repo'daki ilgili döküman dosyaları (CLAUDE.md, PROGRESS.md, WORKING_STYLE.md, DEFERRED.md, docs/) okundu mu?
 
 Doğrudan komut verme. Önce strateji konuşalım — kapsam, risk, alternatifler. Komut DEĞİL, plan tartışması.
 
