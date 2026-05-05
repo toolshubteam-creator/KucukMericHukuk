@@ -120,4 +120,16 @@ public class CategoryRepository : GenericRepository<Category>, ICategoryReposito
 
     public Task<bool> HasChildrenAsync(int categoryId, CancellationToken ct = default)
         => _dbSet.AnyAsync(c => c.ParentCategoryId == categoryId, ct);
+
+    public async Task<List<Category>> GetAllActiveWithTranslationsAsync(
+        string languageCode, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .Where(c => c.IsActive)
+            .Include(c => c.Translations.Where(tr => tr.LanguageCode == languageCode))
+            .OrderBy(c => c.DisplayOrder)
+            .ThenBy(c => c.Id)
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
 }

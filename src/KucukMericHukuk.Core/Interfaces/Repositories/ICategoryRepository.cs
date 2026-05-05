@@ -22,4 +22,5 @@ public interface ICategoryRepository : IGenericRepository<Category>
     Task<Category?> GetByIdIncludingDeletedAsync(int id, CancellationToken ct = default);
     Task<List<int>> GetDescendantIdsAsync(int categoryId, CancellationToken ct = default);
     Task<bool> HasChildrenAsync(int categoryId, CancellationToken ct = default);
+    Task<List<Category>> GetAllActiveWithTranslationsAsync(string languageCode, CancellationToken ct = default);
 }
