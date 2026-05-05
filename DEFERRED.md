@@ -43,6 +43,37 @@
   - .git/hooks veya husky benzeri
   - Düşük öncelik (code review yeterli olabilir)
 
+- **`IsUniqueConstraintViolation` helper refactor (PageService)**
+  - Şu an `InnerException.Message` string kontrolü ("UNIQUE", "duplicate")
+  - 2.10'da `SqlException.Number` (2627/2601) kontrolüne çevrilecek
+  - Dosya: `Business/Services/PageService.cs`
+
+- **PageService Translation full-replace stratejisi gözden geçirilsin**
+  - Şu an `UpdateAsync`'te `page.Translations.Clear()` + `Add(...)`
+  - Alternatif: id-bazlı merge (var olanı update, yenisini insert, kayıpları sil)
+  - Trade-off: full-replace EF tracking açısından basit, az satır;
+    merge daha "SQL-friendly" ama karmaşık
+  - 2.10 cleanup'ta veya Service/Attorney/Article modüllerinde performans
+    sorunu çıkarsa revize
+
+### 2.6-2.9 Modülleri için ön kontrol
+
+- **Service/Attorney/Category/Tag entity'lerinde `IsActive` + `DisplayOrder`
+  var mı kontrolü**
+  - Faz 1 PROGRESS.md raporundan: Article'da Status/IsFeatured var ama
+    Page'de yoktu (Faz 2.5a'da eklendi)
+  - Service/Attorney/Category/Tag entity'leri Faz 1'de tanımlandı
+  - 2.6 başlamadan önce her entity'nin alan listesi kontrol edilecek
+  - Eksik alan varsa Page örneğindeki gibi (Faz 2.5a) entity güncelleme +
+    migration + DTO genişletmesi yapılır
+
+- **5 repository'ye eksik admin metodlarının eklenmesi**
+  - `GetByIdWithTranslationsAsync`
+  - `GetAdminPagedAsync(keyword, languageCode, page, pageSize, includeDeleted, ct)`
+  - `GetByIdIncludingDeletedAsync`
+  - Entity-spesifik unique kontrol metodu (varsa, örn. ServiceKey)
+  - Tetik: 2.6 (Service modülü) başlarken Page repository pattern'i kopyalanır
+
 ---
 
 ## Faz 3 → İçerik Yönetimi

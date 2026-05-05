@@ -28,6 +28,7 @@ public static class DependencyInjection
 
         // Service'ler
         services.AddScoped<ISlugService, SlugService>();
+        services.AddScoped<IPageService, PageService>();
 
         return services;
     }

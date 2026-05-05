@@ -5,6 +5,8 @@ public class PageInputDto
     public int? Id { get; set; }
     public string PageKey { get; set; } = string.Empty;
     public bool IsSystem { get; set; }
+    public bool IsActive { get; set; } = true;
+    public int DisplayOrder { get; set; } = 0;
     public List<PageTranslationInputDto> Translations { get; set; } = new();
 }
 

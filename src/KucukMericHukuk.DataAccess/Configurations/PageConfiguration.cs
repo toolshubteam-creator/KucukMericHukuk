@@ -15,6 +15,10 @@ public class PageConfiguration : IEntityTypeConfiguration<Page>
         builder.HasIndex(p => p.PageKey).IsUnique();
         builder.HasIndex(p => p.IsDeleted);
 
+        builder.Property(p => p.IsActive).HasDefaultValue(true);
+        builder.Property(p => p.DisplayOrder).HasDefaultValue(0);
+        builder.HasIndex(p => p.DisplayOrder);
+
         builder.HasMany(p => p.Translations)
             .WithOne(t => t.Page)
             .HasForeignKey(t => t.PageId)

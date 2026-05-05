@@ -7,6 +7,9 @@ public class PageAdminDto
     public int Id { get; set; }
     public string PageKey { get; set; } = string.Empty;
     public bool IsSystem { get; set; }
+    public bool IsActive { get; set; }
+    public int DisplayOrder { get; set; }
+    public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public List<PageTranslationDto> Translations { get; set; } = new();
