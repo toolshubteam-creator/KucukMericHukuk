@@ -109,3 +109,9 @@
 - **AppClaimTypes constants sınıfı**
   - Şu an "FullName" claim adı string sabit (Faz 2.3)
   - Yeni claim tipleri eklendikçe `Core/Constants/AppClaimTypes.cs` oluşturulur
+
+- **SluggedEntityType enum dosya organizasyonu**
+  - Şu an `Core/Interfaces/Services/ISlugService.cs` içinde tanımlı (Faz 2.4b)
+  - Başka tüketici (örn. URL routing, Sitemap üretici) bağımsız ihtiyaç
+    duyarsa ayrı dosyaya taşınır: `Core/Common/SluggedEntityType.cs`
+  - Şu an taşımaya gerek yok — single-tenant interface tarafı

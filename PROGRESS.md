@@ -10,7 +10,7 @@
 | --- | --- | --- | --- |
 | 0 | Hazırlık (içerik, marka, kararlar) | 3-5 gün | 🔄 Devam ediyor |
 | 1 | Proje kurulumu & mimari | 1 hafta | ✅ Tamamlandı |
-| 2 | Yönetim paneli iskelet & temel modüller | 2 hafta | ⏳ Beklemede |
+| 2 | Yönetim paneli iskelet & temel modüller | 2 hafta | 🔄 Devam ediyor |
 | 3 | İçerik yönetimi modülleri | 2 hafta | ⏳ Beklemede |
 | 4 | Frontend tasarım & geliştirme | 3 hafta | ⏳ Beklemede |
 | 5 | SEO, entegrasyon, güvenlik | 1 hafta | ⏳ Beklemede |
