@@ -152,11 +152,44 @@
                                        class="btn btn-sm btn-outline-primary" title="Düzenle">
                                         <i class="ti ti-edit"></i>
                                     </a>
+                                    <form asp-action="Delete" asp-controller="Categories" asp-area="Admin"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="d-inline"
+                                          data-confirm="Bu kategoriyi silmek istediğinizden emin misiniz? Daha sonra geri yükleyebilirsiniz."
+                                          data-confirm-title="Kategoriyi Sil"
+                                          data-confirm-button="Sil">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </form>
                                 }
-                                @* TODO Faz 2.8c — Sil/Restore/HardDelete butonları *@
-                                <a href="#" class="btn btn-sm btn-outline-danger disabled" title="Sil">
-                                    <i class="ti ti-trash"></i>
-                                </a>
+                                else
+                                {
+                                    <form asp-action="Restore" asp-controller="Categories" asp-area="Admin"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Geri Yükle">
+                                            <i class="ti ti-restore"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-action="HardDelete" asp-controller="Categories" asp-area="Admin"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="d-inline"
+                                          data-confirm="Bu kategori ve tüm çevirileri KALICI olarak silinecek. Bu işlem GERİ ALINAMAZ. Devam edilsin mi?"
+                                          data-confirm-title="Kalıcı Silme"
+                                          data-confirm-button="Tamamen Sil"
+                                          data-confirm-variant="danger">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Tamamen Sil">
+                                            <i class="ti ti-x"></i>
+                                        </button>
+                                    </form>
+                                }
                             </td>
                         </tr>
                     }

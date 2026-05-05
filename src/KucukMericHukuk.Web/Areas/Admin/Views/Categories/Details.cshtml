@@ -24,11 +24,44 @@
                    asp-route-id="@Model.Id" class="btn btn-primary">
                     <i class="ti ti-edit me-1"></i> Düzenle
                 </a>
+                <form asp-action="Delete" asp-controller="Categories" asp-area="Admin"
+                      asp-route-id="@Model.Id"
+                      method="post"
+                      class="d-inline ms-1"
+                      data-confirm="Bu kategoriyi silmek istediğinizden emin misiniz? Daha sonra geri yükleyebilirsiniz."
+                      data-confirm-title="Kategoriyi Sil"
+                      data-confirm-button="Sil">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="ti ti-trash me-1"></i> Sil
+                    </button>
+                </form>
             }
-            @* TODO Faz 2.8c — Sil/Geri Yükle/Tamamen Sil butonları *@
-            <a href="#" class="btn btn-outline-danger disabled ms-1">
-                <i class="ti ti-trash me-1"></i> Sil
-            </a>
+            else
+            {
+                <form asp-action="Restore" asp-controller="Categories" asp-area="Admin"
+                      asp-route-id="@Model.Id"
+                      method="post"
+                      class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-success">
+                        <i class="ti ti-restore me-1"></i> Geri Yükle
+                    </button>
+                </form>
+                <form asp-action="HardDelete" asp-controller="Categories" asp-area="Admin"
+                      asp-route-id="@Model.Id"
+                      method="post"
+                      class="d-inline ms-1"
+                      data-confirm="Bu kategori ve tüm çevirileri KALICI olarak silinecek. Bu işlem GERİ ALINAMAZ. Devam edilsin mi?"
+                      data-confirm-title="Kalıcı Silme"
+                      data-confirm-button="Tamamen Sil"
+                      data-confirm-variant="danger">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="ti ti-x me-1"></i> Tamamen Sil
+                    </button>
+                </form>
+            }
         </div>
     </div>
 </div>

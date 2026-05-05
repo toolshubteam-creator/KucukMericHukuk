@@ -69,6 +69,20 @@
   - Çözüm: ya `MvcOptions.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true`
     ya da DTO property'lerini nullable yap. 2.10'da karar verilir.
 
+- **Page+Service controller'ları `FirstError.Message` kullanımına geç**
+  - Şu an `PagesController` ve `ServicesController` Delete/Restore/HardDelete'te
+    sabit mesaj ("silinirken bir sorun oluştu") `TempData["Error"]`'a yazıyor;
+    service'in user-friendly mesajı (örn. HasChildren) ignore ediliyor
+  - Category 2.8c'de iyileştirme yapıldı: `result.FirstError?.Message`
+    kullanılıyor (mesajlar service'in Result.Failure'ından sızıyor)
+  - 2.10'da Page+Service controller'larını da bu pattern'e hizala
+
+- **Controller log seviyesi: expected business outcome'lar `LogWarning` olsun**
+  - Şu an Page+Service Delete/Restore/HardDelete'te `LogError` kullanılıyor
+  - Category 2.8c'de `LogWarning` kullanıldı (HasChildren expected outcome,
+    Page/Service için de Translation full-replace race vb. expected outcomes)
+  - 2.10'da Page+Service controller'larını da `LogWarning`'e hizala
+
 ### 2.6-2.9 Modülleri için ön kontrol
 
 - **5 repository'ye eksik admin metodlarının eklenmesi**
