@@ -1,0 +1,117 @@
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Services.ServiceFormViewModel
+@{
+    ViewData["Title"] = "Yeni Hizmet";
+}
+
+@section Styles {
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/quill@@2.0.3/dist/quill.snow.css" />
+}
+
+<div class="page-header">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <nav aria-label="breadcrumbs">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-action="Index" asp-controller="Services" asp-area="Admin">Hizmetler</a>
+                    </li>
+                    <li class="breadcrumb-item active">Yeni Hizmet</li>
+                </ol>
+            </nav>
+            <h2 class="page-title">Yeni Hizmet</h2>
+        </div>
+    </div>
+</div>
+
+<form asp-action="Create" asp-controller="Services" asp-area="Admin" method="post" autocomplete="off" novalidate>
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+    <div class="row mt-3">
+        <div class="col-12 col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Genel Bilgiler</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="DisplayOrder" class="form-label"></label>
+                        <input asp-for="DisplayOrder" class="form-control" type="number" min="0" />
+                        <span asp-validation-for="DisplayOrder" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-check form-switch">
+                            <input asp-for="IsActive" class="form-check-input" />
+                            <span class="form-check-label">Aktif</span>
+                        </label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Icon" class="form-label"></label>
+                        <input asp-for="Icon" class="form-control" maxlength="50" />
+                        <span asp-validation-for="Icon" class="invalid-feedback d-block"></span>
+                        <small class="form-hint">Tabler icon adı (örn. ti-briefcase) veya görsel URL.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FeaturedImage" class="form-label"></label>
+                        <input asp-for="FeaturedImage" class="form-control" maxlength="500" />
+                        <span asp-validation-for="FeaturedImage" class="invalid-feedback d-block"></span>
+                        <small class="form-hint">Görsel URL (Faz 3'te medya yöneticisi eklenecek).</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3 class="card-title">Bağlı Avukatlar</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.AvailableAttorneys.Count == 0)
+                    {
+                        <p class="text-secondary mb-0">
+                            Henüz aktif avukat yok. (Avukat modülü Faz 2.9'da açılacak.)
+                        </p>
+                    }
+                    else
+                    {
+                        @foreach (var attorney in Model.AvailableAttorneys)
+                        {
+                            <label class="form-check">
+                                <input type="checkbox" name="AttorneyIds" value="@attorney.Id"
+                                       class="form-check-input"
+                                       @(Model.AttorneyIds.Contains(attorney.Id) ? "checked" : "") />
+                                <span class="form-check-label">@attorney.Name</span>
+                            </label>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Çeviriler</h3>
+                </div>
+                <div class="card-body">
+                    <partial name="_ServiceLanguageTabs" model="Model" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-footer mt-3 d-flex">
+        <a asp-action="Index" asp-controller="Services" asp-area="Admin" class="btn btn-link">Vazgeç</a>
+        <button type="submit" class="btn btn-primary ms-auto">
+            <i class="ti ti-plus me-1"></i> Oluştur
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/quill@@2.0.3/dist/quill.js"></script>
+    <script src="~/js/admin/quill-init.js" asp-append-version="true"></script>
+}

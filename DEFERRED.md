@@ -46,8 +46,9 @@
   - 2.10 cleanup'ta veya Service/Attorney/Article modüllerinde performans
     sorunu çıkarsa revize
 
-- **Create.cshtml + Edit.cshtml ortak `_PageForm` / `_TagForm` partial refactor**
-  - Page (Faz 2.5c-i) ve Tag (Faz 2.6b) için form body iki view'da kopya
+- **Create.cshtml + Edit.cshtml ortak `_PageForm` / `_TagForm` / `_ServiceForm` partial refactor**
+  - Page (Faz 2.5c-i), Tag (Faz 2.6b) ve Service (Faz 2.7b) için form body
+    iki view'da kopya
   - 2.10'da partial'a alın, sadece outer container + breadcrumb +
     submit label farklı olur
 
