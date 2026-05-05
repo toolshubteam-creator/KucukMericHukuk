@@ -4,6 +4,9 @@ using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.Entities.Identity;
 using KucukMericHukuk.DataAccess;
 using KucukMericHukuk.DataAccess.Context;
+using KucukMericHukuk.Infrastructure;
+using KucukMericHukuk.Infrastructure.Initialization;
+using KucukMericHukuk.Web.Areas.Admin.Identity;
 using KucukMericHukuk.Web.Localization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
@@ -34,8 +37,34 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
+// Identity'nin default claims factory'sini override et — FullName claim'ini ekler
+builder.Services.AddScoped<
+    IUserClaimsPrincipalFactory<ApplicationUser>,
+    AppUserClaimsPrincipalFactory>();
+
+// Cookie auth (Identity'nin application cookie'si)
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = "KucukMericHukuk.Auth";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+
+    options.LoginPath = "/admin/account/login";
+    options.LogoutPath = "/admin/account/logout";
+    options.AccessDeniedPath = "/admin/error/access-denied";
+
+    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    options.SlidingExpiration = true;
+
+    options.ReturnUrlParameter = "returnUrl";
+});
+
 // Repository + UnitOfWork
 builder.Services.AddDataAccess();
+
+// Infrastructure (SeedOptions + DbInitializer)
+builder.Services.AddInfrastructure(builder.Configuration);
 
 // Mapster + Business services
 builder.Services.AddBusiness();
@@ -109,9 +138,18 @@ app.MapControllerRoute(
     pattern: "{culture:culture}/{controller=Home}/{action=Index}/{id?}");
 
 // Admin Area route — culture-bağımsız (sadece TR olacak şimdilik)
-app.MapControllerRoute(
-    name: "admin",
-    pattern: "admin/{controller=Home}/{action=Index}/{id?}");
+app.MapAreaControllerRoute(
+    name: "AdminArea",
+    areaName: "Admin",
+    pattern: "admin/{controller=Admin}/{action=Index}/{id?}");
+
+// DbInitializer (Testing ortamında çalıştırma — testler izole DB kullanıyor)
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    using var scope = app.Services.CreateScope();
+    var initializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+    await initializer.InitializeAsync();
+}
 
 app.Run();
 
