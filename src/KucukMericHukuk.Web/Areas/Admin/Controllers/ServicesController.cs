@@ -183,6 +183,69 @@ public class ServicesController : Controller
         return RedirectToAction(nameof(Details), new { id });
     }
 
+    [HttpPost("delete/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id, CancellationToken ct)
+    {
+        var result = await _serviceService.DeleteAsync(id, ct);
+
+        if (result.IsFailure)
+        {
+            if (result.FirstError?.Code == ErrorCodes.Service.NotFound)
+                return NotFound();
+
+            _logger.LogError("Hizmet silinemedi: id={Id}, errors={Errors}",
+                id, string.Join("; ", result.Errors.Select(e => e.Message)));
+            TempData["Error"] = "Hizmet silinirken bir sorun oluştu.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        TempData["Success"] = "Hizmet silindi.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost("restore/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Restore(int id, CancellationToken ct)
+    {
+        var result = await _serviceService.RestoreAsync(id, ct);
+
+        if (result.IsFailure)
+        {
+            if (result.FirstError?.Code == ErrorCodes.Service.NotFound)
+                return NotFound();
+
+            _logger.LogError("Hizmet geri yüklenemedi: id={Id}, errors={Errors}",
+                id, string.Join("; ", result.Errors.Select(e => e.Message)));
+            TempData["Error"] = "Hizmet geri yüklenirken bir sorun oluştu.";
+            return RedirectToAction(nameof(Index), new { includeDeleted = true });
+        }
+
+        TempData["Success"] = "Hizmet geri yüklendi.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost("hard-delete/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> HardDelete(int id, CancellationToken ct)
+    {
+        var result = await _serviceService.HardDeleteAsync(id, ct);
+
+        if (result.IsFailure)
+        {
+            if (result.FirstError?.Code == ErrorCodes.Service.NotFound)
+                return NotFound();
+
+            _logger.LogError("Hizmet kalıcı olarak silinemedi: id={Id}, errors={Errors}",
+                id, string.Join("; ", result.Errors.Select(e => e.Message)));
+            TempData["Error"] = "Hizmet kalıcı olarak silinirken bir sorun oluştu.";
+            return RedirectToAction(nameof(Index), new { includeDeleted = true });
+        }
+
+        TempData["Success"] = "Hizmet kalıcı olarak silindi.";
+        return RedirectToAction(nameof(Index));
+    }
+
     private async Task LoadAvailableAttorneysAsync(
         ServiceFormViewModel vm, CancellationToken ct)
     {
