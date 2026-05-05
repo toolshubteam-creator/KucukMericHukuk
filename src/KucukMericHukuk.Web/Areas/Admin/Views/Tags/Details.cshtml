@@ -1,0 +1,149 @@
+@model KucukMericHukuk.Core.DTOs.Tag.TagAdminDto
+@{
+    ViewData["Title"] = "Etiket Detayı";
+    var firstName = Model.Translations?.FirstOrDefault()?.Name ?? "(adsız)";
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <nav aria-label="breadcrumbs">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-action="Index" asp-controller="Tags" asp-area="Admin">Etiketler</a>
+                    </li>
+                    <li class="breadcrumb-item active">@firstName</li>
+                </ol>
+            </nav>
+            <h2 class="page-title">@firstName</h2>
+        </div>
+        <div class="col-auto">
+            @if (!Model.IsDeleted)
+            {
+                <a asp-action="Edit" asp-controller="Tags" asp-area="Admin"
+                   asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="ti ti-edit me-1"></i> Düzenle
+                </a>
+                <form asp-action="Delete" asp-controller="Tags" asp-area="Admin"
+                      asp-route-id="@Model.Id" method="post" class="d-inline ms-1"
+                      data-confirm="Bu etiketi silmek istediğinizden emin misiniz?"
+                      data-confirm-title="Etiketi Sil"
+                      data-confirm-button="Sil">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="ti ti-trash me-1"></i> Sil
+                    </button>
+                </form>
+            }
+            else
+            {
+                <form asp-action="Restore" asp-controller="Tags" asp-area="Admin"
+                      asp-route-id="@Model.Id" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-success">
+                        <i class="ti ti-restore me-1"></i> Geri Yükle
+                    </button>
+                </form>
+                <form asp-action="HardDelete" asp-controller="Tags" asp-area="Admin"
+                      asp-route-id="@Model.Id" method="post" class="d-inline ms-1"
+                      data-confirm="Bu etiket KALICI olarak silinecek. Bu işlem GERİ ALINAMAZ. Devam edilsin mi?"
+                      data-confirm-title="Kalıcı Silme"
+                      data-confirm-button="Tamamen Sil"
+                      data-confirm-variant="danger">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="ti ti-x me-1"></i> Tamamen Sil
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string okMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@okMsg</div>
+}
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3 class="card-title">Etiket Bilgileri</h3>
+    </div>
+    <div class="card-body">
+        <dl class="row mb-3">
+            <dt class="col-sm-3">Durum</dt>
+            <dd class="col-sm-9">
+                @if (Model.IsDeleted)
+                {
+                    <span class="badge bg-danger-lt">Silinmiş</span>
+                }
+                else if (Model.IsActive)
+                {
+                    <span class="badge bg-success-lt">Aktif</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary-lt">Pasif</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">Makale Sayısı</dt>
+            <dd class="col-sm-9">@Model.ArticleCount</dd>
+
+            <dt class="col-sm-3">Oluşturulma</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+
+            @if (Model.UpdatedAt.HasValue)
+            {
+                <dt class="col-sm-3">Güncellenme</dt>
+                <dd class="col-sm-9">@Model.UpdatedAt.Value.ToString("dd.MM.yyyy HH:mm")</dd>
+            }
+        </dl>
+
+        <h4 class="mt-4">Çeviriler (@(Model.Translations?.Count ?? 0))</h4>
+
+        @if (Model.Translations is null || Model.Translations.Count == 0)
+        {
+            <p class="text-secondary mb-0">Henüz çeviri eklenmemiş.</p>
+        }
+        else
+        {
+            <div class="accordion" id="tagTranslationsAccordion">
+                @{ var idx = 0; }
+                @foreach (var t in Model.Translations)
+                {
+                    var collapseId = $"tagtrans-{idx}";
+                    <div class="accordion-item">
+                        <h5 class="accordion-header">
+                            <button class="accordion-button @(idx > 0 ? "collapsed" : "")"
+                                    type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#@collapseId"
+                                    aria-expanded="@(idx == 0 ? "true" : "false")">
+                                <span class="badge bg-blue-lt me-2">@t.LanguageCode</span>
+                                @t.Name
+                            </button>
+                        </h5>
+                        <div id="@collapseId"
+                             class="accordion-collapse collapse @(idx == 0 ? "show" : "")"
+                             data-bs-parent="#tagTranslationsAccordion">
+                            <div class="accordion-body">
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-3">Ad</dt>
+                                    <dd class="col-sm-9">@t.Name</dd>
+
+                                    <dt class="col-sm-3">Slug</dt>
+                                    <dd class="col-sm-9"><code>@t.Slug</code></dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    idx++;
+                }
+            </div>
+        }
+    </div>
+</div>

@@ -58,8 +58,10 @@ public class TagRepository : GenericRepository<Tag>, ITagRepository
             ? _dbSet.IgnoreQueryFilters()
             : _dbSet.AsQueryable();
 
-        query = query.Include(t =>
-            t.Translations.Where(tr => tr.LanguageCode == languageCode));
+        query = query
+            .Include(t => t.Translations.Where(tr => tr.LanguageCode == languageCode))
+            .Include(t => t.Articles)
+            .AsSplitQuery();
 
         if (!string.IsNullOrWhiteSpace(keyword))
         {
