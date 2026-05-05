@@ -1,0 +1,67 @@
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Account.LoginViewModel
+@{
+    ViewData["Title"] = "Giriş Yap";
+    Layout = null;
+}
+@*
+    Login sayfası AdminLayout kullanmaz — sade auth kartı (Tabler sign-in pattern).
+    Inline CSS yasak; tüm stiller wwwroot/css/admin/admin.css üzerinden.
+*@
+<!DOCTYPE html>
+<html lang="tr" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Giriş Yap — Küçükmeriç Hukuk</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@tabler/core@@1.4.0/dist/css/tabler.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@tabler/icons-webfont@@3.42.0/dist/tabler-icons.min.css" />
+    <link rel="stylesheet" href="~/css/admin/admin.css" asp-append-version="true" />
+</head>
+<body class="d-flex flex-column">
+    <div class="page page-center">
+        <div class="container container-tight py-4">
+            <div class="text-center mb-4">
+                <h1 class="navbar-brand-image-text">Küçükmeriç Hukuk</h1>
+            </div>
+            <div class="card card-md">
+                <div class="card-body">
+                    <h2 class="h2 text-center mb-4">Yönetim Paneli Girişi</h2>
+
+                    <form asp-action="Login" asp-controller="Account" asp-area="Admin" method="post" autocomplete="off" novalidate>
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ReturnUrl" />
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" placeholder="ornek@kucukmerichukuk.av.tr" autocomplete="username" />
+                            <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
+                        </div>
+
+                        <div class="mb-2">
+                            <label asp-for="Password" class="form-label"></label>
+                            <input asp-for="Password" class="form-control" placeholder="••••••••" autocomplete="current-password" />
+                            <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-check">
+                                <input asp-for="RememberMe" class="form-check-input" />
+                                <span class="form-check-label">@Html.DisplayNameFor(m => m.RememberMe)</span>
+                            </label>
+                        </div>
+
+                        <div class="form-footer">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="ti ti-login me-1"></i> Giriş Yap
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@@tabler/core@@1.4.0/dist/js/tabler.min.js"></script>
+</body>
+</html>
