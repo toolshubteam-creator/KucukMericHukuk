@@ -81,4 +81,19 @@ public class ServiceRepository : GenericRepository<Service>, IServiceRepository
     public Task<Service?> GetByIdIncludingDeletedAsync(int id, CancellationToken ct = default)
         => _dbSet.IgnoreQueryFilters()
             .FirstOrDefaultAsync(s => s.Id == id, ct);
+
+    public async Task<List<Service>> GetByIdsAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    {
+        var idList = ids.Distinct().ToList();
+        if (idList.Count == 0) return new List<Service>();
+        return await _dbSet.Where(s => idList.Contains(s.Id)).ToListAsync(ct);
+    }
+
+    public async Task<bool> ServicesExistAsync(IEnumerable<int> ids, CancellationToken ct = default)
+    {
+        var idList = ids.Distinct().ToList();
+        if (idList.Count == 0) return true;
+        var existingCount = await _dbSet.Where(s => idList.Contains(s.Id)).CountAsync(ct);
+        return existingCount == idList.Count;
+    }
 }

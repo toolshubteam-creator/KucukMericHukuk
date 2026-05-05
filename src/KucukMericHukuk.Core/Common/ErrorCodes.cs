@@ -37,6 +37,7 @@ public static class ErrorCodes
         public const string NotFound = "Attorney.NotFound";
         public const string SlugExists = "Attorney.SlugExists";
         public const string UserAlreadyLinked = "Attorney.UserAlreadyLinked";
+        public const string ServiceNotFound = "Attorney.ServiceNotFound";
     }
 
     public static class Category

@@ -18,4 +18,7 @@ public interface IServiceRepository : IGenericRepository<Service>
         bool includeDeleted,
         CancellationToken ct = default);
     Task<Service?> GetByIdIncludingDeletedAsync(int id, CancellationToken ct = default);
+
+    Task<List<Service>> GetByIdsAsync(IEnumerable<int> ids, CancellationToken ct = default);
+    Task<bool> ServicesExistAsync(IEnumerable<int> ids, CancellationToken ct = default);
 }

@@ -1,7 +1,9 @@
+using KucukMericHukuk.Core.DTOs.Common;
 using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Interfaces.Repositories;
 using KucukMericHukuk.DataAccess.Context;
+using KucukMericHukuk.DataAccess.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace KucukMericHukuk.DataAccess.Repositories;
@@ -68,5 +70,65 @@ public class AttorneyRepository : GenericRepository<Attorney>, IAttorneyReposito
         return await _dbSet
             .Where(a => idList.Contains(a.Id))
             .ToListAsync(ct);
+    }
+
+    public Task<Attorney?> GetByIdWithTranslationsAsync(int id, CancellationToken ct = default)
+        => _dbSet
+            .Include(a => a.Translations)
+            .Include(a => a.Services)
+                .ThenInclude(s => s.Translations)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(a => a.Id == id, ct);
+
+    public async Task<PagedResult<Attorney>> GetAdminPagedAsync(
+        string? keyword,
+        string languageCode,
+        int? serviceId,
+        int page,
+        int pageSize,
+        bool includeDeleted,
+        CancellationToken ct = default)
+    {
+        var query = includeDeleted
+            ? _dbSet.IgnoreQueryFilters()
+            : _dbSet.AsQueryable();
+
+        query = query
+            .Include(a => a.Translations.Where(tr => tr.LanguageCode == languageCode))
+            .Include(a => a.Services)
+            .AsSplitQuery();
+
+        if (serviceId.HasValue)
+        {
+            query = query.Where(a => a.Services.Any(s => s.Id == serviceId.Value));
+        }
+
+        if (!string.IsNullOrWhiteSpace(keyword))
+        {
+            query = query.Where(a =>
+                a.Translations.Any(tr =>
+                    tr.LanguageCode == languageCode &&
+                    tr.FullName.Contains(keyword)));
+        }
+
+        query = query
+            .OrderBy(a => a.DisplayOrder)
+            .ThenByDescending(a => a.Id);
+
+        return await query.AsNoTracking().ToPagedListAsync(page, pageSize, ct);
+    }
+
+    public Task<Attorney?> GetByIdIncludingDeletedAsync(int id, CancellationToken ct = default)
+        => _dbSet.IgnoreQueryFilters()
+            .FirstOrDefaultAsync(a => a.Id == id, ct);
+
+    public async Task<bool> UserIdExistsAsync(int userId, int? excludeAttorneyId, CancellationToken ct = default)
+    {
+        var query = _dbSet.Where(a => a.UserId == userId);
+        if (excludeAttorneyId.HasValue)
+        {
+            query = query.Where(a => a.Id != excludeAttorneyId.Value);
+        }
+        return await query.AnyAsync(ct);
     }
 }

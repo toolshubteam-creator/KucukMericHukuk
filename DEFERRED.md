@@ -83,17 +83,6 @@
     Page/Service için de Translation full-replace race vb. expected outcomes)
   - 2.10'da Page+Service controller'larını da `LogWarning`'e hizala
 
-### 2.6-2.9 Modülleri için ön kontrol
-
-- **5 repository'ye eksik admin metodlarının eklenmesi**
-  - ✅ Tag tarafı 2.6a'da kapatıldı
-  - ✅ Service tarafı 2.7a'da kapatıldı (3 metod + AttorneyRepository'ye
-    AttorneysExistAsync + GetByIdsAsync)
-  - ✅ Category tarafı 2.8a'da kapatıldı (3 admin metod + 2 hiyerarşi
-    guard: GetDescendantIdsAsync, HasChildrenAsync)
-  - Attorney tarafı 2.9a'da kapatılacak
-  - Entity-spesifik unique kontrol metodu (varsa, örn. ServiceKey)
-
 ---
 
 ## Faz 3 → İçerik Yönetimi

@@ -15,6 +15,7 @@ public class AttorneyAdminDto
     public string? ProfileImageUrl { get; set; }
     public int DisplayOrder { get; set; }
     public bool IsActive { get; set; }
+    public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public List<AttorneyTranslationDto> Translations { get; set; } = new();
