@@ -65,11 +65,10 @@
 ### 2.6-2.9 Modülleri için ön kontrol
 
 - **5 repository'ye eksik admin metodlarının eklenmesi**
-  - `GetByIdWithTranslationsAsync`
-  - `GetAdminPagedAsync(keyword, languageCode, page, pageSize, includeDeleted, ct)`
-  - `GetByIdIncludingDeletedAsync`
+  - ✅ Tag tarafı 2.6a'da kapatıldı (3 metod: GetByIdWithTranslationsAsync,
+    GetAdminPagedAsync, GetByIdIncludingDeletedAsync)
+  - Service/Category/Attorney tarafları 2.7a/2.8a/2.9a'da kapatılacak
   - Entity-spesifik unique kontrol metodu (varsa, örn. ServiceKey)
-  - Tetik: 2.6 (Service modülü) başlarken Page repository pattern'i kopyalanır
 
 ---
 
