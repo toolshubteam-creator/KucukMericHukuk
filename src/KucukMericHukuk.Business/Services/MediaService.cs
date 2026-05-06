@@ -162,6 +162,7 @@ public class MediaService : IMediaService
         var mapped = paged.Items.Select(m =>
         {
             var dto = _mapper.Map<MediaFileListDto>(m);
+            dto.Url = _storage.GetPublicUrl(m.RelativePath);
             dto.ThumbnailUrl = _storage.GetPublicUrl(m.ThumbnailRelativePath);
             return dto;
         }).ToList();

@@ -22,34 +22,21 @@
     `[Authorize(Roles = "Admin")]`. Service katmanında AuthorId ataması
     yapılır. Editor/Author rol bazlı guard Faz 5'e ertelendi.
 
-- **Medya admin UI** (Faz 3.2'ye ertelendi)
-  - Altyapı (entity, repository, IFileStorageService, SkiaSharpProcessor,
-    MediaService + Validator, Mapster mapping, EF migration) Faz 3.1'de
-    tamamlandı (PROGRESS.md commit hash kaydı).
-  - Kalan: admin galeri sayfası (DataTables), upload modal, image picker
-    modal (Quill + form alanları için), MediaController + ViewModeller +
-    SweetAlert2 confirm akışları.
-  - HtmlSanitizer `<img>` whitelist'e eklenmesi 3.3'te (medya picker
-    Quill'e bağlanırken).
+- **Quill içine resim insert + HtmlSanitizer `<img>` whitelist** (Faz 3.3'e ertelendi)
+  - Galeri ve picker modal Faz 3.2'de tamamlandı (PROGRESS.md commit hash
+    kaydı). Service ve Attorney form'larında image picker entegre edildi.
+  - Kalan: Quill toolbar'a image button + MediaPicker entegrasyonu,
+    HtmlSanitizer whitelist'e `<img>` ekleme (`src` + `alt` attribute,
+    `data:` scheme dikkatle değerlendirilecek — XSS riski). Article
+    modülü 3.4'te bu altyapıyı kullanır.
   - Kütüphane kararı: SkiaSharp 3.x + SkiaSharp.NativeAssets.Linux (MIT
     lisans, Microsoft destekli). ImageSharp 3.x reddedildi (Six Labors
     Split License — ticari kurumsal site için belirsiz lisanslama,
     Faz 3.1 başlangıç kararı).
-  - **MVP kapsamı (Faz 3 başlangıç kararı):** flat yapı + otomatik
-    `wwwroot/uploads/{yyyy}/{MM}/` tarih klasörü, WebP dönüşümü,
-    thumbnail (300px), SHA256 dedup, admin galeri (DataTables),
-    image picker modal (Quill + form alanları için), tek alt-text alanı.
-  - **Kapsam dışı (Faz 5'e ertelendi):** manuel klasör oluşturma/taşıma,
-    responsive variant (1x/2x srcset), title/figcaption alanları.
 
 - **SEO meta alanları UI**
   - Entity'lerde alanlar var (Faz 1)
   - Admin form bileşeni Faz 3 (her modülde tekrar kullanılan partial)
-
-- **`<img>` tag'ı HtmlSanitizer whitelist'e**
-  - Şu an HtmlSanitizer whitelist'inde `<img>` yok (Faz 2.5c-i)
-  - Medya yöneticisi entegrasyonu sırasında (Faz 3): `src` + `alt` attribute,
-    scheme genişletmesi (`data:` dikkatle — XSS riski)
 
 ---
 
@@ -100,6 +87,19 @@
   - Faz 2.10c'de değerlendirildi, Faz 5 üretim öncesi tooling olarak
     ertelendi
   - Düşük öncelik (code review yeterli olabilir)
+
+- **Medya: Picker'da çoklu seçim**
+  - Faz 3.2 başlangıç kararıyla MVP'de tek seçim
+  - Ctrl/Shift ile çoklu seçim, Quill'e gallery insert için faydalı
+  - Form alanları için anlamsız (tek input), galeri sayfasında toplu
+    silme/restore aksiyonları için faydalı
+
+- **Medya: Paralel upload + progress bar**
+  - Faz 3.2'de client-side sıralı loop (basit, güvenli)
+  - 5+ dosya yüklenirken UX yavaş kalıyor — `Promise.all` + concurrency
+    limit (örn. 3) ile paralel
+  - Server-side throttling gerekebilir (rate limit, MediaService
+    isteğe bağlı kuyruk)
 
 - **Article: Editor/Author rol bazlı yetkilendirme**
   - Faz 3 başlangıç kararıyla ertelendi (3 başında: B seçeneği)

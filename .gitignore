@@ -433,3 +433,6 @@ FodyWeavers.xsd
 
 # ASP.NET local development settings (CLAUDE.md kuralı: bağlantı dizesi burada tutulur)
 **/appsettings.Development.json
+
+# Faz 3.1+ — kullanıcı yüklenen medya dosyaları (Local file storage)
+src/KucukMericHukuk.Web/wwwroot/uploads/

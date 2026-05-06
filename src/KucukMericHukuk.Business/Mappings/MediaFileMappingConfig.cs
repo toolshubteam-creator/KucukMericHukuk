@@ -15,6 +15,7 @@ public class MediaFileMappingConfig : IRegister
             .Map(d => d.ThumbnailUrl, s => s.ThumbnailRelativePath);
 
         config.NewConfig<MediaFile, MediaFileListDto>()
+            .Map(d => d.Url, s => s.RelativePath)
             .Map(d => d.ThumbnailUrl, s => s.ThumbnailRelativePath);
     }
 }

@@ -1,0 +1,91 @@
+@model KucukMericHukuk.Core.DTOs.Media.MediaFileDto
+@{
+    ViewData["Title"] = "Medya Detayı";
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">@Model.OriginalFileName</h2>
+        </div>
+        <div class="col-auto">
+            <a asp-action="Index" asp-controller="Medias" asp-area="Admin" class="btn btn-outline-secondary">
+                <i class="ti ti-arrow-left me-1"></i> Listeye Dön
+            </a>
+            <a asp-action="Edit" asp-controller="Medias" asp-area="Admin" asp-route-id="@Model.Id" class="btn btn-primary">
+                <i class="ti ti-edit me-1"></i> Düzenle
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string okMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@okMsg</div>
+}
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+
+<div class="row mt-3">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body text-center">
+                <img src="@Model.Url" alt="@(Model.AltText ?? Model.OriginalFileName)" class="media-detail-image" />
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="datagrid">
+                    <div class="datagrid-item">
+                        <div class="datagrid-title">Dosya Adı</div>
+                        <div class="datagrid-content">@Model.FileName</div>
+                    </div>
+                    <div class="datagrid-item">
+                        <div class="datagrid-title">Orijinal Ad</div>
+                        <div class="datagrid-content">@Model.OriginalFileName</div>
+                    </div>
+                    <div class="datagrid-item">
+                        <div class="datagrid-title">Boyutlar</div>
+                        <div class="datagrid-content">@Model.Width × @Model.Height</div>
+                    </div>
+                    <div class="datagrid-item">
+                        <div class="datagrid-title">Boyut</div>
+                        <div class="datagrid-content">@((Model.FileSizeBytes / 1024).ToString("N0")) KB</div>
+                    </div>
+                    <div class="datagrid-item">
+                        <div class="datagrid-title">Format</div>
+                        <div class="datagrid-content">@Model.ContentType</div>
+                    </div>
+                    <div class="datagrid-item">
+                        <div class="datagrid-title">Alt-text</div>
+                        <div class="datagrid-content">@(Model.AltText ?? "—")</div>
+                    </div>
+                    <div class="datagrid-item">
+                        <div class="datagrid-title">URL</div>
+                        <div class="datagrid-content"><code class="text-break">@Model.Url</code></div>
+                    </div>
+                    <div class="datagrid-item">
+                        <div class="datagrid-title">Yüklenme</div>
+                        <div class="datagrid-content">@Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <form asp-action="Delete" asp-controller="Medias" asp-area="Admin"
+                      asp-route-id="@Model.Id" method="post" class="d-inline"
+                      data-confirm="Bu dosyayı silmek istediğinizden emin misiniz?"
+                      data-confirm-title="Dosyayı Sil"
+                      data-confirm-button="Sil">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="ti ti-trash me-1"></i> Sil
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,54 @@
+@*
+    Ortak medya seçici modal. Quill editör ve form alanları için kullanılır.
+    Açma: MediaPicker.open(callback) — callback(item) seçim sonrası çağrılır.
+    Yükleme/galeri ayrı sekmelerde; modal her sayfada bir kez include edilir.
+*@
+<div class="modal modal-blur fade" id="mediaPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Medya Seç</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item"><button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#mp-gallery" role="tab">Galeri</button></li>
+                    <li class="nav-item"><button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#mp-upload" role="tab">Yeni Yükle</button></li>
+                </ul>
+                <div class="tab-content mt-3">
+                    <div class="tab-pane active" id="mp-gallery" role="tabpanel">
+                        <div class="row g-2 mb-3">
+                            <div class="col"><input type="search" id="mp-search" class="form-control" placeholder="Dosya adı veya alt-text..." /></div>
+                            <div class="col-auto"><button type="button" id="mp-search-btn" class="btn btn-outline-primary"><i class="ti ti-search"></i></button></div>
+                        </div>
+                        <div id="mp-grid" class="row row-cards"></div>
+                        <div id="mp-empty" class="empty" hidden>
+                            <p class="empty-title">Görsel yok</p>
+                            <p class="empty-subtitle text-secondary">"Yeni Yükle" sekmesinden ekleyebilirsiniz.</p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div id="mp-status" class="text-secondary small"></div>
+                            <div>
+                                <button type="button" id="mp-prev" class="btn btn-sm btn-outline-secondary" disabled>Önceki</button>
+                                <button type="button" id="mp-next" class="btn btn-sm btn-outline-secondary" disabled>Sonraki</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="mp-upload" role="tabpanel">
+                        <div id="mp-upload-zone" class="media-upload-zone" data-upload-url="@Url.Action("Upload", "Medias", new { area = "Admin" })">
+                            <div class="media-upload-zone-content">
+                                <i class="ti ti-cloud-upload media-upload-zone-icon"></i>
+                                <div class="media-upload-zone-title">Görsel sürükleyip bırakın</div>
+                                <div class="media-upload-zone-subtitle">veya <button type="button" class="btn btn-link p-0 align-baseline" id="mp-upload-pick">dosya seçin</button></div>
+                                <div class="text-secondary small mt-2">JPEG, PNG, WebP — maksimum 10 MB</div>
+                            </div>
+                            <input type="file" id="mp-upload-input" accept="image/jpeg,image/png,image/webp" hidden />
+                        </div>
+                        <div id="mp-upload-progress" class="mt-3" hidden></div>
+                    </div>
+                </div>
+            </div>
+            @Html.AntiForgeryToken()
+        </div>
+    </div>
+</div>
