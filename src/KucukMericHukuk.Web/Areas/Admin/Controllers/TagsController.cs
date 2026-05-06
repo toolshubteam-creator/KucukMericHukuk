@@ -182,9 +182,12 @@ public class TagsController : Controller
             if (result.FirstError?.Code == ErrorCodes.Tag.NotFound)
                 return NotFound();
 
-            _logger.LogError("Etiket silinemedi: id={Id}, errors={Errors}",
+            _logger.LogWarning("Etiket silinemedi: id={Id}, errors={Errors}",
                 id, string.Join("; ", result.Errors.Select(e => e.Message)));
-            TempData["Error"] = "Etiket silinirken bir sorun oluştu.";
+
+            TempData["Error"] = result.FirstError?.Message
+                ?? "Etiket silinirken bir sorun oluştu.";
+
             return RedirectToAction(nameof(Details), new { id });
         }
 
@@ -203,7 +206,12 @@ public class TagsController : Controller
             if (result.FirstError?.Code == ErrorCodes.Tag.NotFound)
                 return NotFound();
 
-            TempData["Error"] = "Etiket geri yüklenirken bir sorun oluştu.";
+            _logger.LogWarning("Etiket geri yüklenemedi: id={Id}, errors={Errors}",
+                id, string.Join("; ", result.Errors.Select(e => e.Message)));
+
+            TempData["Error"] = result.FirstError?.Message
+                ?? "Etiket geri yüklenirken bir sorun oluştu.";
+
             return RedirectToAction(nameof(Index), new { includeDeleted = true });
         }
 
@@ -222,7 +230,12 @@ public class TagsController : Controller
             if (result.FirstError?.Code == ErrorCodes.Tag.NotFound)
                 return NotFound();
 
-            TempData["Error"] = "Etiket kalıcı olarak silinirken bir sorun oluştu.";
+            _logger.LogWarning("Etiket kalıcı olarak silinemedi: id={Id}, errors={Errors}",
+                id, string.Join("; ", result.Errors.Select(e => e.Message)));
+
+            TempData["Error"] = result.FirstError?.Message
+                ?? "Etiket kalıcı olarak silinirken bir sorun oluştu.";
+
             return RedirectToAction(nameof(Index), new { includeDeleted = true });
         }
 
