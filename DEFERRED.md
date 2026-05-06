@@ -15,10 +15,22 @@
   - Quill editör + kategori/tag + kapak görseli
   - Article'a özel ErrorCodes slot'u 2.4a'da hazır
   - SluggedEntityType.Article 2.4b'de hazır
+  - **Status akışı (Faz 3 başlangıç kararı):** Published'da PublishedAt
+    otomatik atanır (manuel girilirse korunur). Transition serbest
+    (Draft↔Published↔Archived). Scheduled publishing YOK — Faz 5'e ertelendi.
+  - **Yetki modeli (Faz 3 başlangıç kararı):** Faz 3'te tüm Article CRUD
+    `[Authorize(Roles = "Admin")]`. Service katmanında AuthorId ataması
+    yapılır. Editor/Author rol bazlı guard Faz 5'e ertelendi.
 
 - **Medya yöneticisi** (Faz 3'e ertelendi)
   - File upload, galeri, WebP dönüşümü, klasör yapısı
   - ImageSharp/SkiaSharp paketi
+  - **MVP kapsamı (Faz 3 başlangıç kararı):** flat yapı + otomatik
+    `wwwroot/uploads/{yyyy}/{MM}/` tarih klasörü, WebP dönüşümü,
+    thumbnail (300px), SHA256 dedup, admin galeri (DataTables),
+    image picker modal (Quill + form alanları için), tek alt-text alanı.
+  - **Kapsam dışı (Faz 5'e ertelendi):** manuel klasör oluşturma/taşıma,
+    responsive variant (1x/2x srcset), title/figcaption alanları.
 
 - **SEO meta alanları UI**
   - Entity'lerde alanlar var (Faz 1)
@@ -78,6 +90,41 @@
   - Faz 2.10c'de değerlendirildi, Faz 5 üretim öncesi tooling olarak
     ertelendi
   - Düşük öncelik (code review yeterli olabilir)
+
+- **Article: Editor/Author rol bazlı yetkilendirme**
+  - Faz 3 başlangıç kararıyla ertelendi (3 başında: B seçeneği)
+  - Editor rolündeki kullanıcı sadece `Article.AuthorId == currentUserId`
+    olan kayıtları görür/düzenler/siler
+  - Implementation: IAuthorizationService + custom AuthorizationHandler
+    (`ArticleAuthorRequirement`) + service katmanında guard
+  - Integration test gerekir (3 senaryo: kendi makalesi, başkasının
+    makalesi, admin tüm makaleler)
+  - Faz 3'te tüm Article CRUD `[Authorize(Roles = "Admin")]` — service'te
+    AuthorId ataması yapılır, yetki guard'ı sonradan eklenir (breaking değil)
+
+- **Article: Scheduled publishing (zamanlanmış yayın)**
+  - Faz 3 başlangıç kararıyla ertelendi (Status akışı sadeleştirildi)
+  - Senaryo: `PublishedAt > Now && Status = Published` → frontend gizler,
+    zamanı geldiğinde görünür hale gelir
+  - Gerekli bileşenler: frontend filtresi (Faz 4 ile birlikte),
+    admin "Zamanlanmış" sekmesi, opsiyonel background service (cron)
+  - Faz 3'te yok — Status manuel, anlık: Draft / Published (PublishedAt=Now) / Archived
+
+- **Medya: Manuel klasör yönetimi**
+  - Faz 3 başlangıç kararıyla ertelendi (MVP kapsamı dışı)
+  - Kullanıcı tarafından klasör oluşturma, taşıma, yeniden adlandırma
+  - Implementation: `MediaFolder` entity + `MediaFile.FolderId` (nullable FK)
+  - Restore senaryosu karmaşık (klasör silinmiş + dosya restore edilirse?)
+  - İhtiyaç doğarsa Faz 5'te eklenir — mevcut dosyalar `FolderId = null`
+    kalır (root), breaking migration değil
+
+- **Medya: Responsive variant + SEO genişletmesi**
+  - Faz 3 başlangıç kararıyla ertelendi (MVP kapsamı dışı)
+  - 1x / 2x varyant üretimi (`srcset` desteği için)
+  - `title` ve `figcaption` alanları (alt-text MVP'de var)
+  - Faz 5 SEO turunda Schema.org ImageObject ile birlikte değerlendirilir
+  - Implementation: ImageSharp ile ek varyantlar, `MediaFile.Variants`
+    navigation property veya hesaplanan dosya yolu pattern'i
 
 ---
 
