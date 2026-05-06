@@ -74,6 +74,10 @@ builder.Services.AddBusiness();
 // Web katmanindaki Mapster IRegister'lari (PageFormMappingConfig vb.) GlobalSettings'e ekle
 builder.Services.AddWebMappings();
 
+// FormViewModel-level FluentValidation validator'ları (Page/Tag/Service/Category/
+// Attorney). Client-side data-val-* attribute üretimi için kayıt edilir.
+builder.Services.AddWebValidators();
+
 // FluentValidation client-side adapter (jQuery unobtrusive validation için
 // FluentValidation kurallarının HTML data-val-* attribute'larına yansıması).
 builder.Services.AddFluentValidationClientsideAdapters();
