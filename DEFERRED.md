@@ -22,18 +22,6 @@
     `[Authorize(Roles = "Admin")]`. Service katmanında AuthorId ataması
     yapılır. Editor/Author rol bazlı guard Faz 5'e ertelendi.
 
-- **Quill içine resim insert + HtmlSanitizer `<img>` whitelist** (Faz 3.3'e ertelendi)
-  - Galeri ve picker modal Faz 3.2'de tamamlandı (PROGRESS.md commit hash
-    kaydı). Service ve Attorney form'larında image picker entegre edildi.
-  - Kalan: Quill toolbar'a image button + MediaPicker entegrasyonu,
-    HtmlSanitizer whitelist'e `<img>` ekleme (`src` + `alt` attribute,
-    `data:` scheme dikkatle değerlendirilecek — XSS riski). Article
-    modülü 3.4'te bu altyapıyı kullanır.
-  - Kütüphane kararı: SkiaSharp 3.x + SkiaSharp.NativeAssets.Linux (MIT
-    lisans, Microsoft destekli). ImageSharp 3.x reddedildi (Six Labors
-    Split License — ticari kurumsal site için belirsiz lisanslama,
-    Faz 3.1 başlangıç kararı).
-
 - **SEO meta alanları UI**
   - Entity'lerde alanlar var (Faz 1)
   - Admin form bileşeni Faz 3 (her modülde tekrar kullanılan partial)
@@ -135,6 +123,20 @@
   - Faz 5 SEO turunda Schema.org ImageObject ile birlikte değerlendirilir
   - Implementation: ImageSharp ile ek varyantlar, `MediaFile.Variants`
     navigation property veya hesaplanan dosya yolu pattern'i
+
+- **Test ortamı için IFileStorageService mock/in-memory varyantı**
+  - Faz 3.2 raporunda gündeme geldi (madde DEFERRED'a 3.3'te yazıldı)
+  - Mevcut durum: Integration testler gerçek `wwwroot/uploads/` altına
+    dosya yazıyor (LocalFileStorageService gerçek WebRootPath kullanır)
+  - Geçici çözüm: `.gitignore`'da `src/KucukMericHukuk.Web/wwwroot/uploads/`
+    → repo'ya kaçmıyor
+  - Risk: Test izolasyonu zayıf, paralel test çakışması mümkün, cleanup yok,
+    her test koşusu disk biriktirir
+  - Çözüm seçenekleri:
+    - `InMemoryFileStorageService` implementasyonu, `WebApplicationFactory`'de
+      DI override (test fixture'ında)
+    - VEYA `TempPath` bazlı `LocalFileStorageService` variant + test sonrası
+      cleanup hook (`IAsyncLifetime`)
 
 ---
 
