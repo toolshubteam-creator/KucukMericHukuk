@@ -10,7 +10,7 @@
 | --- | --- | --- | --- |
 | 0 | Hazırlık (içerik, marka, kararlar) | 3-5 gün | 🔄 Devam ediyor |
 | 1 | Proje kurulumu & mimari | 1 hafta | ✅ Tamamlandı |
-| 2 | Yönetim paneli iskelet & temel modüller | 2 hafta | 🔄 Devam ediyor |
+| 2 | Yönetim paneli iskelet & temel modüller | 2 hafta | ✅ Tamamlandı |
 | 3 | İçerik yönetimi modülleri | 2 hafta | ⏳ Beklemede |
 | 4 | Frontend tasarım & geliştirme | 3 hafta | ⏳ Beklemede |
 | 5 | SEO, entegrasyon, güvenlik | 1 hafta | ⏳ Beklemede |
@@ -20,10 +20,11 @@
 
 ---
 
-## FAZ 2 — Yönetim Paneli & Temel Modüller — 🔄 DEVAM EDİYOR
+## FAZ 2 — Yönetim Paneli (Admin CMS) — ✅ TAMAMLANDI
 
 **Başlama Tarihi:** 05.05.2026
-**Hedef Bitiş:** Faz 2 toplam 2 hafta planlı
+**Tamamlanma Tarihi:** 06.05.2026
+**Tag:** `v0.2.0`
 
 ### Tamamlanan Adımlar
 
@@ -34,34 +35,118 @@
 | 2.3 | DbInitializer + 3 rol seed + ilk admin + Claims factory | `2255a87` |
 | 2.4a | Result<T> + Error + FluentValidation altyapısı | `c0cc332` |
 | 2.4b | Slug helper + SlugService + 6 repo SlugExistsAsync | `7fa445a` |
+| 2.5a | PageService + Validator + birim testler | `17bb4cb` |
+| 2.5b | PagesController + Index/Details (read-only) | `418568b` |
+| 2.5c-i | Page form akışı + Quill + HtmlSanitizer | `3f21faa` |
+| 2.5c-ii | Page destructive akışlar + SweetAlert2 | `1640f28` |
+| 2.5e | Tag IsActive eklenmesi + 4 config HasDefaultValue | `314d437` |
+| 2.6a | TagService + Validator + birim testler | `27f1936` |
+| 2.6b | Tag UI + ArticleCount projection | `a9a38ab` |
+| 2.7a | ServiceService + Validator + M:N attorney sync + birim testler | `ae34ba7` |
+| 2.7b | Service UI + Attorney checkbox list + Quill | `4fc18db` |
+| 2.7c | Service destructive akışlar | `cab0d62` |
+| 2.8a | CategoryService + Validator + hierarchy guards + birim testler | `0900b25` |
+| 2.8b | Category UI + parent dropdown indent + circular guard | `eb700e3` |
+| 2.8c | Category destructive akışlar + HasChildren error UI | `1b136ac` |
+| 2.9a | AttorneyService + UserId guard + M:N service sync + bio sanitize | `201e1dd` |
+| 2.9b | Attorney admin UI + user picker + foto preview | `3cd5488` |
+| 2.9b-fix | ServiceIds/AttorneyIds validation UI feedback | `3f33066` |
+| 2.9c | Attorney destructive akışlar | `dec1c7d` |
+| 2.10a | 5 modül _Form partial + IsUniqueConstraintViolation extension + Web DI | `9da8e9d` |
+| 2.10b | Page+Service controller hizalama + MVC implicit-required suppress | `7f553b8` |
+| 2.10b-tag-fix | TagsController LogWarning + FirstError.Message hizalama | `c2abe61` |
+| 2.10c | UI polish: client-side validation + sidebar active + Quill partial + Category restore guard | `47c9d40` |
+| 2.10c-fix | 5 modül FormViewModel validator (client-side validation aktif) | `67c2a3a` |
+| 2.11 | Integration testler (anonymous-auth-CRUD round-trip, SQLite in-memory) | `27f8f09` |
+
+### Yapılanlar
+
+**Altyapı (2.1–2.4)**
+
+- Admin Area + Tabler 1.4.0 + 401/403/404 sayfaları
+- Cookie auth + Login/Logout + AntiForgery + AppUserClaimsPrincipalFactory (FullName claim)
+- DbInitializer + 3 rol (Admin/Editor/Author) + admin user seed (configuration'dan, idempotent)
+- `Result<T>` pattern + `Error` + `ErrorCodes` + `BusinessException`/`NotFoundException`
+- FluentValidation manuel registration (`AddBusiness` scan, AutoValidation YOK)
+- `SlugHelper` (Türkçe transliteration) + `ISlugService` + 6 repository `SlugExistsAsync`
+
+**Modüller (2.5–2.9) — 5 modül full CRUD**
+
+- **Page** modülü: statik sayfa içerikleri + Quill editor + HtmlSanitizer
+- **Tag** modülü: makale etiketleri + ArticleCount projection
+- **Service** modülü: hizmet alanları + M:N Attorneys + Quill
+- **Category** modülü: hierarchy + parent dropdown indent + circular/self-parent guard
+- **Attorney** modülü: profil + UserId guard + M:N Services + foto preview + ProfileImage placeholder
+
+  Her modülde:
+  - Read (Index/Details) + Write (Create/Edit) + Destructive (Delete/Restore/HardDelete)
+  - Çoklu dil çevirileri (tr-TR mevcut, çoklu dil altyapı hazır)
+  - SweetAlert2 confirm dialogları
+  - Server-side ve client-side FluentValidation
+  - HtmlSanitizer ile XSS koruması (Quill alanları)
+
+**Cleanup ve Polish (2.10)**
+
+- 2.10a: 5 modül `_<X>Form` partial refactor (−318 net satır)
+- 2.10a: `IsUniqueConstraintViolation` extension method (5 service kopyası → ortak helper)
+- 2.10a: `Web/DependencyInjection.cs` (`AddWebMappings` + ileride `AddWebValidators`)
+- 2.10b: Page+Service controller hizalama (`FirstError.Message` + `LogWarning`)
+- 2.10b: MVC implicit-required suppress (FluentValidation tek mesaj kaynak)
+- 2.10b-tag-fix: TagsController da aynı pattern'e hizalandı (5 modül uniformity)
+- 2.10c: FluentValidation client-side adapter
+- 2.10c: Sidebar aktif state (`IsActiveController` HtmlHelper extension)
+- 2.10c: Quill `_QuillStyles` + `_QuillScripts` partial (CDN tek noktadan)
+- 2.10c: Category Restore parent IsDeleted guard + `Category.ParentDeleted` error code
+- 2.10c-fix: 5 modül FormViewModel validator (client-side validation aktif: `data-val-required`, `data-val-maxlength`, `data-val-regex` attribute'ları üretilir)
+
+**Integration Test (2.11)**
+
+- Yeni proje: `tests/KucukMericHukuk.IntegrationTests`
+- `WebApplicationFactory<Program>` + SQLite in-memory + admin user seed
+- 13 test: Anonymous access redirects (7), Login flow (3), Page CRUD round-trip (3)
+- Cookie `SecurePolicy.SameAsRequest` test override (production `Always` korundu)
+- Türkçe encoding tuzağı tespit edildi → CLAUDE.md'ye not eklendi
 
 ### İstatistikler
 
-- **Yeni commit (Faz 2):** 5 feature commit + 1 docs commit (DEFERRED.md, `c69907f`)
-- **Toplam test:** 51 PASSED, 0 failed (11 Faz 1 + 40 Faz 2)
+- **Toplam commit (Faz 2):** 29 (feature + fix + refactor + docs)
+- **Toplam test:** 180 PASSED, 0 failed (167 birim + 13 integration)
 - **Build durumu:** 0 error, 0 warning
-- **Yeni dosya:** ~50, **Modified:** ~20
+- **Yeni proje sayısı:** 1 (IntegrationTests)
+- **Yeni dosya:** ~120, **Modified:** ~80
+- **Net kod satırı:** Refactor sonrası ~9000+ satır C# + Razor
 
 ### Bilinen Sorunlar / Geçici Çözümler
 
-- Soft-deleted parent translation slug'ı `SlugExistsAsync` tarafından görülmez; silinen sayfa slug'ı yeniden kullanılabilir, restore'da unique index ihlali riski. DEFERRED.md "Belirsiz Zamanlama" bölümünde takip ediliyor.
+- **FluentValidation `When()` conditional kurallar HTML attribute üretmez**: Attorney `Email` gibi koşullu kurallar client-side data-val-* almaz; server-side fallback ile çalışır.
+- **`SetValidator` (RuleForEach Translations) `Translations[0]...` index-bazlı**: çoklu dil eklendiğinde tekrar değerlendirilmeli.
+- **FormViewModelValidator kuralları InputValidator'lardan kopya**: DRY ihlali kabul edildi (kural değişirse 2 yerde güncelle); Faz 5'te Mapster mapping'li alternatif değerlendirilebilir.
+- **`Cookie.SecurePolicy = Always` test ortamında HTTP cookie engelliyor**: test factory'de `SameAsRequest` PostConfigure override (production kodu DOKUNULMAZ).
+- **Soft-deleted parent translation slug'ı `SlugExistsAsync` tarafından görülmez** (Faz 1.3'ten beri DEFERRED'da takipte): silinmiş kayıt slug'ı yeniden kullanılabilir, restore'da unique index ihlali riski; production'a yakın bir noktada gözden geçirilecek.
 
-### Faz 2 Sonraki Adımlara Aktarılan Notlar
+### Bir Sonraki Faza Aktarılan Notlar
 
-- Quill 2.x + HtmlSanitizer entegrasyonu Adım 2.5c'de (Page Content)
-- FluentValidation client-side adapter Adım 2.10 cleanup'ta
-- Sidebar ViewComponent refactor Adım 2.10
-- HTTPS profil zorunlu kuralı CLAUDE.md'ye Adım 2.10'da
+- **Faz 3 başlangıcı**: Article modülü (Quill + Kategori + Tag + Kapak) — `SluggedEntityType.Article` 2.4b'de hazır, `ErrorCodes.Article` slot'u 2.4a'da hazır.
+- **Medya yöneticisi gerek**: Service.FeaturedImage + Attorney.ProfileImageUrl image picker dahil — şu an manuel URL.
+- **HtmlSanitizer whitelist'e `<img>` ekle** (Faz 3 medya entegrasyonu için).
+- **Faz 3'te Article SEO meta UI tasarımı** dikkate alınmalı.
 
-### Tamamlanmamış Adımlar (Sıradaki)
+### Faz 5'e Taşınan İşler (DEFERRED)
 
-- 2.5a: PageService + Validator + birim test (referans modül başlangıcı)
-- 2.5b: PageController + Index/Details view (read-only)
-- 2.5c: Page Create/Edit/Delete + dil sekme partial + Quill
-- 2.6-2.9: Service/Attorney/Category/Tag modülleri (Page pattern kopyası)
-- 2.10: Dashboard + ortak listing partial'ları + Faz 2 cleanup
-- 2.11: Integration testler (Login flow, Authorize, Page CRUD)
-- 2.12: PROGRESS.md final güncelleme + v0.2.0 tag
+- Translation full-replace stratejisi gözden geçirme (audit trail bozulmuyor mu)
+- Pre-commit hook `AddFluentValidationAutoValidation` çağrı kontrolü (husky/shell)
+- SlugHelper minimum uzunluk fallback (SEO koruma — bozuk encoding'li input)
+- Sidebar aktif state Area-aware genişletme (controller adı çakışması)
+- Email confirmation, AspNetCoreRateLimit, Global exception middleware
+- OWASP Top 10 audit, Sitemap.xml, robots.txt
+- Production seed credentials (env var), LocalDB → SQL Server, Lockout reset UI
+
+### Test Sonuçları
+
+- **Birim testler**: 167/167 PASSED (Business katmanı + Core common + Mapster mapping)
+- **Integration testler**: 13/13 PASSED (HTTP round-trip + auth + AntiForgery)
+- **PageSpeed**: Faz 6'da ölçülecek
+- **Tarayıcı görsel test**: Faz 6'da ekran görüntüleriyle dokümante edilecek
 
 ---
 

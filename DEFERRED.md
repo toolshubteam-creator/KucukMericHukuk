@@ -9,16 +9,6 @@
 
 ---
 
-## Faz 2 → İleri Adımlar
-
-### 2.10 — Faz 2 Cleanup
-
-- **HTTPS profil zorunlu kuralı CLAUDE.md'ye**
-  - Cookie SecurePolicy=Always nedeniyle dev'de HTTP profilinde login bozuk
-  - Faz 2.3 raporundan
-
----
-
 ## Faz 3 → İçerik Yönetimi
 
 - **Article modülü** (Faz 2 dışına alındı)

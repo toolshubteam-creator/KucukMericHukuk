@@ -367,22 +367,51 @@ Border radius: `4px` (küçük), `8px` (kart), `16px` (büyük blok).
 
 ## 10. Test Gereksinimleri
 
-- **Unit test:** Business katmanı servisleri için xUnit + Moq.
-- **Integration test:** API endpoint'leri için WebApplicationFactory.
+- **Unit test:** Business katmanı servisleri için xUnit + Moq (`tests/KucukMericHukuk.Tests`).
+- **Integration test:** HTTP endpoint'leri için `WebApplicationFactory<Program>` + SQLite in-memory (`tests/KucukMericHukuk.IntegrationTests`).
 - **Coverage hedefi:** Business katmanı en az %70.
 - Her PR'da test eklenmesi beklenir.
+
+### Integration Test HTML Assertion'ları
+
+Razor view'lar HTML çıktıyı encoded üretir. Türkçe karakterler HTML entity formuna çevrilir:
+
+| Karakter | HTML entity |
+| --- | --- |
+| `ı` | `&#x131;` |
+| `ş` | `&#x15F;` |
+| `ğ` | `&#x11F;` |
+| `ü` | `&#xFC;` |
+| `ö` | `&#xF6;` |
+| `ç` | `&#xE7;` |
+| `İ` | `&#x130;` |
+
+Bu nedenle integration test'lerde HTML body assertion'ları yazarken **mesajdan ASCII-only bir alt-string seç** ve onu kontrol et:
+
+- ❌ `html.Should().Contain("hatalı")`        — `ı` HTML-encoded olduğu için yakalanmaz
+- ✅ `html.Should().Contain("E-posta veya")`   — ASCII-only substring
+- ✅ `html.Should().Contain("zorunludur")`     — `z/o/r/u/n/l/u/d/u/r` ASCII
+
+### Geliştirme Komutu — HTTPS Profili
+
+`dotnet run` her zaman `https` profili ile çalıştırılır:
+
+```bash
+dotnet run --project src/KucukMericHukuk.Web --launch-profile https
+```
+
+Sebep: Cookie auth `SecurePolicy = Always` (Faz 2.2 güvenlik kararı). HTTP profili (default) auth cookie'yi engeller — login redirect döngüleri ve smoke test'lerde 302/401 hatalarına yol açar.
+
+Integration test'lerde `IntegrationTestFactory` `SecurePolicy.SameAsRequest`'e indirger — production kodu DOKUNULMAZ.
 
 ---
 
 ## 11. Faz Durumu
 
-**Mevcut Faz:** Faz 2 — Yönetim Paneli (Adım 2.4a tamamlandı, sıradaki: 2.4b — Slug helper + ISlugService)
+**Mevcut Faz:** Faz 3 — İçerik yönetimi modülleri (Article + Medya yöneticisi) sıraya alındı.
 
 - ✅ **Faz 1 — Proje Kurulumu & Mimari** tamamlandı (05.05.2026): 5 katmanlı solution, BaseEntity + Identity, 6 domain entity + translation, Generic Repository + UoW + 6 özel repository, 24 DTO + 6 Mapster mapping config, çok dilli altyapı, 11 test PASSED
-- ✅ **Faz 2.1 — Admin Area iskeleti** tamamlandı: Tabler.io v1.4.0 entegrasyonu, `_AdminLayout` + sidebar/topbar/footer, AdminController + ErrorController, brand admin.css
-- ✅ **Faz 2.2 — Authentication** tamamlandı: Cookie auth pipeline, AccountController login/logout (POST + AntiForgery), Login.cshtml, `[Authorize]`/`[AllowAnonymous]`, open-redirect koruması
-- ✅ **Faz 2.3 — Authorization** tamamlandı: `IDbInitializer` + 3 rol (Admin/Editor/Author) + ilk admin kullanıcı seed (configuration'dan, idempotent), `AppUserClaimsPrincipalFactory` (FullName claim), Topbar claim okuma
-- ✅ **Faz 2.4a — Service katmanı altyapısı** tamamlandı: `Result`/`Result<T>`/`Error`/`ErrorCodes` (Core/Common), `NotFoundException`/`BusinessException` (Core/Exceptions), FluentValidation DI scan (auto-MVC YOK), `ValidationResultExtensions` (Business/Common), `ModelStateExtensions` (Web/Extensions), 18 yeni unit test (toplam 29 PASSED)
+- ✅ **Faz 2 — Yönetim Paneli (Admin CMS)** tamamlandı (06.05.2026, tag `v0.2.0`): 5 modül full CRUD (Page/Tag/Service/Category/Attorney), cookie auth + 3 rol seed, FluentValidation server+client side, SweetAlert2 + Quill + Tabler 1.4.0, integration test altyapısı, **180/180 test PASSED** (167 birim + 13 integration), 29 commit
 - 🔄 **Faz 0 — Hazırlık** kısmen sürüyor (müşteri içerik beklentisi)
 
 Faz tamamlama detayları için `PROGRESS.md` dosyasına bakınız.
