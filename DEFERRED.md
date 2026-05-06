@@ -126,6 +126,20 @@
 
 - **robots.txt dinamik yönetim**
 
+- **SlugHelper minimum uzunluk fallback (SEO koruma)**
+  - Sorun: Bozuk encoding'li input (ör. yanlış UTF-8) SlugHelper'a girince
+    anlamsız kısa slug üretebilir (örn. "av-test-avukat-fd" — son "-fd"
+    bozuk byte'lardan)
+  - Browser'da müşteri kullanımında nadir, ama API/script entegrasyonu
+    veya kopya-yapıştır sırasında tetiklenebilir
+  - SEO açısından: anlamsız slug Google'da kötü URL kalitesi ve user
+    perception zayıf
+  - Çözüm önerisi: SlugHelper'a minimum uzunluk kuralı (örn. 3-5 karakter
+    altındaysa "untitled-{entity}-{id}" gibi fallback)
+  - Veya: bozuk Unicode tespiti (Slugify öncesi normalize başarısızsa
+    reject + Result.Failure)
+  - Faz 5 kapsamında, üretim öncesi audit'te değerlendirilir
+
 ---
 
 ## Faz 6 → Yayına Alma
