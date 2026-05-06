@@ -33,11 +33,6 @@
   - .git/hooks veya husky benzeri
   - Düşük öncelik (code review yeterli olabilir)
 
-- **`IsUniqueConstraintViolation` helper refactor (PageService)**
-  - Şu an `InnerException.Message` string kontrolü ("UNIQUE", "duplicate")
-  - 2.10'da `SqlException.Number` (2627/2601) kontrolüne çevrilecek
-  - Dosya: `Business/Services/PageService.cs`
-
 - **CategoryService.RestoreAsync parent IsDeleted kontrolü**
   - Şu an child Restore edilince parent soft-deleted ise orphan parent
     referansı kalır (FK doğru ama UI/UX kafa karıştırıcı, Faz 2.8a)
@@ -51,16 +46,6 @@
     merge daha "SQL-friendly" ama karmaşık
   - 2.10 cleanup'ta veya Service/Attorney/Article modüllerinde performans
     sorunu çıkarsa revize
-
-- **Create.cshtml + Edit.cshtml ortak `_PageForm` / `_TagForm` / `_ServiceForm` / `_CategoryForm` / `_AttorneyForm` partial refactor**
-  - Page (Faz 2.5c-i), Tag (Faz 2.6b), Service (Faz 2.7b), Category
-    (Faz 2.8b) ve Attorney (Faz 2.9b) için form body iki view'da kopya
-  - 2.10'da partial'a alın, sadece outer container + breadcrumb +
-    submit label farklı olur
-
-- **`Web/DependencyInjection.cs` oluşturulacak**
-  - Şu an `Program.cs`'te direkt `TypeAdapterConfig.GlobalSettings.Scan` çağrısı
-  - `AddWeb()` extension'ına taşı, Mapster scan + ileride filter conventions
 
 - **MVC implicit-required vs FluentValidation duplicate mesaj**
   - Non-nullable string property'lere ASP.NET Core implicit `[Required]`

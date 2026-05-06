@@ -1,0 +1,49 @@
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Categories.CategoryFormViewModel
+
+<div class="row mt-3">
+    <div class="col-12 col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Genel Bilgiler</h3>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="ParentCategoryId" class="form-label"></label>
+                    <select asp-for="ParentCategoryId" class="form-select">
+                        <option value="">— (Üst kategori yok)</option>
+                        @foreach (var p in Model.AvailableParents)
+                        {
+                            <option value="@p.Id">@Html.Raw(p.Name)</option>
+                        }
+                    </select>
+                    <span asp-validation-for="ParentCategoryId" class="invalid-feedback d-block"></span>
+                    <small class="form-hint">Boş bırakılırsa kök kategori olur. Düzenlemede kendisi ve alt kategorileri seçilemez.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DisplayOrder" class="form-label"></label>
+                    <input asp-for="DisplayOrder" class="form-control" type="number" min="0" />
+                    <span asp-validation-for="DisplayOrder" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-check form-switch">
+                        <input asp-for="IsActive" class="form-check-input" />
+                        <span class="form-check-label">Aktif</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Çeviriler</h3>
+            </div>
+            <div class="card-body">
+                <partial name="_CategoryLanguageTabs" model="Model" />
+            </div>
+        </div>
+    </div>
+</div>

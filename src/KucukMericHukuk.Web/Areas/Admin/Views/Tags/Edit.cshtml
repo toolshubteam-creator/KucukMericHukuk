@@ -24,28 +24,13 @@
     </div>
 </div>
 
-@*
-    Form body Create ile aynı — 2.10 cleanup'ta ortak _TagForm partial'ına refactor.
-*@
 <form asp-action="Edit" asp-controller="Tags" asp-area="Admin" asp-route-id="@Model.Id"
       method="post" autocomplete="off" novalidate>
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
     <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-    <div class="card mt-3">
-        <div class="card-body">
-            <div class="mb-4">
-                <label class="form-check form-switch">
-                    <input asp-for="IsActive" class="form-check-input" />
-                    <span class="form-check-label">Aktif</span>
-                </label>
-            </div>
-
-            <h4 class="mt-3">Çeviriler</h4>
-            <partial name="_TagLanguageTabs" model="Model" />
-        </div>
-    </div>
+    <partial name="_TagForm" model="Model" />
 
     <div class="card-footer mt-3 d-flex">
         <a asp-action="Details" asp-controller="Tags" asp-area="Admin"

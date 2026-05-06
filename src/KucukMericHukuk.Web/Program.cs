@@ -6,6 +6,7 @@ using KucukMericHukuk.DataAccess;
 using KucukMericHukuk.DataAccess.Context;
 using KucukMericHukuk.Infrastructure;
 using KucukMericHukuk.Infrastructure.Initialization;
+using KucukMericHukuk.Web;
 using KucukMericHukuk.Web.Areas.Admin.Identity;
 using KucukMericHukuk.Web.Localization;
 using Microsoft.AspNetCore.Identity;
@@ -70,7 +71,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddBusiness();
 
 // Web katmanindaki Mapster IRegister'lari (PageFormMappingConfig vb.) GlobalSettings'e ekle
-Mapster.TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
+builder.Services.AddWebMappings();
 
 // Localization
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");

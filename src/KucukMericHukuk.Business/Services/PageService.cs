@@ -145,7 +145,7 @@ public class PageService : IPageService
         {
             await _uow.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+        catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolation())
         {
             return Result.Failure<int>(new Error(
                 ErrorCodes.Common.Conflict,
@@ -215,7 +215,7 @@ public class PageService : IPageService
         {
             await _uow.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+        catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolation())
         {
             return Result.Failure(new Error(
                 ErrorCodes.Common.Conflict,
@@ -307,9 +307,4 @@ public class PageService : IPageService
         return errors.Count > 0 ? Result.Failure(errors) : Result.Success();
     }
 
-    private static bool IsUniqueConstraintViolation(DbUpdateException ex)
-    {
-        return ex.InnerException?.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) == true ||
-               ex.InnerException?.Message.Contains("duplicate", StringComparison.OrdinalIgnoreCase) == true;
-    }
 }
