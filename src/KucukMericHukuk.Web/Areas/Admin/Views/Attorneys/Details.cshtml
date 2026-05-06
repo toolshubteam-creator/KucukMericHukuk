@@ -29,20 +29,43 @@
                    asp-route-id="@Model.Id" class="btn btn-primary">
                     <i class="ti ti-edit me-1"></i> Düzenle
                 </a>
-                @* Sil — Faz 2.9c'de aktif edilecek *@
-                <button type="button" class="btn btn-outline-danger ms-1" disabled>
-                    <i class="ti ti-trash me-1"></i> Sil (Faz 2.9c)
-                </button>
+                <form asp-action="Delete" asp-controller="Attorneys" asp-area="Admin"
+                      asp-route-id="@Model.Id"
+                      method="post"
+                      class="d-inline ms-1"
+                      data-confirm="Bu avukat profilini silmek istediğinizden emin misiniz? Daha sonra geri yükleyebilirsiniz."
+                      data-confirm-title="Avukatı Sil"
+                      data-confirm-button="Sil">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="ti ti-trash me-1"></i> Sil
+                    </button>
+                </form>
             }
             else
             {
-                @* Restore + HardDelete — Faz 2.9c'de aktif edilecek *@
-                <button type="button" class="btn btn-outline-success" disabled>
-                    <i class="ti ti-restore me-1"></i> Geri Yükle (Faz 2.9c)
-                </button>
-                <button type="button" class="btn btn-danger ms-1" disabled>
-                    <i class="ti ti-x me-1"></i> Tamamen Sil (Faz 2.9c)
-                </button>
+                <form asp-action="Restore" asp-controller="Attorneys" asp-area="Admin"
+                      asp-route-id="@Model.Id"
+                      method="post"
+                      class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-success">
+                        <i class="ti ti-restore me-1"></i> Geri Yükle
+                    </button>
+                </form>
+                <form asp-action="HardDelete" asp-controller="Attorneys" asp-area="Admin"
+                      asp-route-id="@Model.Id"
+                      method="post"
+                      class="d-inline ms-1"
+                      data-confirm="Bu avukat profili ve tüm çevirileri KALICI olarak silinecek. Bu işlem GERİ ALINAMAZ. Devam edilsin mi?"
+                      data-confirm-title="Kalıcı Silme"
+                      data-confirm-button="Tamamen Sil"
+                      data-confirm-variant="danger">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="ti ti-x me-1"></i> Tamamen Sil
+                    </button>
+                </form>
             }
         </div>
     </div>

@@ -202,6 +202,78 @@ public class AttorneysController : Controller
         return RedirectToAction(nameof(Details), new { id });
     }
 
+    [HttpPost("delete/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id, CancellationToken ct)
+    {
+        var result = await _attorneyService.DeleteAsync(id, ct);
+
+        if (result.IsFailure)
+        {
+            if (result.FirstError?.Code == ErrorCodes.Attorney.NotFound)
+                return NotFound();
+
+            _logger.LogWarning("Avukat silinemedi: id={Id}, errors={Errors}",
+                id, string.Join("; ", result.Errors.Select(e => e.Message)));
+
+            TempData["Error"] = result.FirstError?.Message
+                ?? "Avukat silinirken bir sorun oluştu.";
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        TempData["Success"] = "Avukat silindi.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost("restore/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Restore(int id, CancellationToken ct)
+    {
+        var result = await _attorneyService.RestoreAsync(id, ct);
+
+        if (result.IsFailure)
+        {
+            if (result.FirstError?.Code == ErrorCodes.Attorney.NotFound)
+                return NotFound();
+
+            _logger.LogWarning("Avukat geri yüklenemedi: id={Id}, errors={Errors}",
+                id, string.Join("; ", result.Errors.Select(e => e.Message)));
+
+            TempData["Error"] = result.FirstError?.Message
+                ?? "Avukat geri yüklenirken bir sorun oluştu.";
+
+            return RedirectToAction(nameof(Index), new { includeDeleted = true });
+        }
+
+        TempData["Success"] = "Avukat geri yüklendi.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost("hard-delete/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> HardDelete(int id, CancellationToken ct)
+    {
+        var result = await _attorneyService.HardDeleteAsync(id, ct);
+
+        if (result.IsFailure)
+        {
+            if (result.FirstError?.Code == ErrorCodes.Attorney.NotFound)
+                return NotFound();
+
+            _logger.LogWarning("Avukat kalıcı olarak silinemedi: id={Id}, errors={Errors}",
+                id, string.Join("; ", result.Errors.Select(e => e.Message)));
+
+            TempData["Error"] = result.FirstError?.Message
+                ?? "Avukat kalıcı olarak silinirken bir sorun oluştu.";
+
+            return RedirectToAction(nameof(Index), new { includeDeleted = true });
+        }
+
+        TempData["Success"] = "Avukat kalıcı olarak silindi.";
+        return RedirectToAction(nameof(Index));
+    }
+
     private async Task LoadAvailableUsersAsync(
         AttorneyFormViewModel vm, CancellationToken ct)
     {

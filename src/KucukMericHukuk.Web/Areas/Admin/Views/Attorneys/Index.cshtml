@@ -180,20 +180,43 @@
                                        class="btn btn-sm btn-outline-primary" title="Düzenle">
                                         <i class="ti ti-edit"></i>
                                     </a>
-                                    @* Sil — Faz 2.9c'de aktif edilecek *@
-                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Sil (Faz 2.9c)" disabled>
-                                        <i class="ti ti-trash"></i>
-                                    </button>
+                                    <form asp-action="Delete" asp-controller="Attorneys" asp-area="Admin"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="d-inline"
+                                          data-confirm="Bu avukat profilini silmek istediğinizden emin misiniz? Daha sonra geri yükleyebilirsiniz."
+                                          data-confirm-title="Avukatı Sil"
+                                          data-confirm-button="Sil">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </form>
                                 }
                                 else
                                 {
-                                    @* Restore + HardDelete — Faz 2.9c'de aktif edilecek *@
-                                    <button type="button" class="btn btn-sm btn-outline-success" title="Geri Yükle (Faz 2.9c)" disabled>
-                                        <i class="ti ti-restore"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Tamamen Sil (Faz 2.9c)" disabled>
-                                        <i class="ti ti-x"></i>
-                                    </button>
+                                    <form asp-action="Restore" asp-controller="Attorneys" asp-area="Admin"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Geri Yükle">
+                                            <i class="ti ti-restore"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-action="HardDelete" asp-controller="Attorneys" asp-area="Admin"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="d-inline"
+                                          data-confirm="Bu avukat profili ve tüm çevirileri KALICI olarak silinecek. Bu işlem GERİ ALINAMAZ. Devam edilsin mi?"
+                                          data-confirm-title="Kalıcı Silme"
+                                          data-confirm-button="Tamamen Sil"
+                                          data-confirm-variant="danger">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Tamamen Sil">
+                                            <i class="ti ti-x"></i>
+                                        </button>
+                                    </form>
                                 }
                             </td>
                         </tr>
