@@ -47,27 +47,6 @@
   - 2.10 cleanup'ta veya Service/Attorney/Article modüllerinde performans
     sorunu çıkarsa revize
 
-- **MVC implicit-required vs FluentValidation duplicate mesaj**
-  - Non-nullable string property'lere ASP.NET Core implicit `[Required]`
-    uyguluyor → "The X field is required." mesajı. FluentValidation aynı kuralı
-    daha açıklayıcı Türkçe mesajla veriyor — 2 mesaj birden gözüküyor (Faz 2.5c-i)
-  - Çözüm: ya `MvcOptions.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true`
-    ya da DTO property'lerini nullable yap. 2.10'da karar verilir.
-
-- **Page+Service controller'ları `FirstError.Message` kullanımına geç**
-  - Şu an `PagesController` ve `ServicesController` Delete/Restore/HardDelete'te
-    sabit mesaj ("silinirken bir sorun oluştu") `TempData["Error"]`'a yazıyor;
-    service'in user-friendly mesajı (örn. HasChildren) ignore ediliyor
-  - Category 2.8c'de iyileştirme yapıldı: `result.FirstError?.Message`
-    kullanılıyor (mesajlar service'in Result.Failure'ından sızıyor)
-  - 2.10'da Page+Service controller'larını da bu pattern'e hizala
-
-- **Controller log seviyesi: expected business outcome'lar `LogWarning` olsun**
-  - Şu an Page+Service Delete/Restore/HardDelete'te `LogError` kullanılıyor
-  - Category 2.8c'de `LogWarning` kullanıldı (HasChildren expected outcome,
-    Page/Service için de Translation full-replace race vb. expected outcomes)
-  - 2.10'da Page+Service controller'larını da `LogWarning`'e hizala
-
 ---
 
 ## Faz 3 → İçerik Yönetimi

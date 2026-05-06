@@ -104,7 +104,13 @@ builder.Services.Configure<RouteOptions>(options =>
 });
 
 // MVC + Localization
-builder.Services.AddControllersWithViews()
+builder.Services.AddControllersWithViews(options =>
+    {
+        // FluentValidation NotEmpty kuralları zaten Türkçe mesaj sağlıyor;
+        // MVC'nin non-nullable string'lere implicit [Required] eklemesi
+        // duplicate "The X field is required." mesajı üretiyor — kapatıldı.
+        options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+    })
     .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
     .AddDataAnnotationsLocalization();
 

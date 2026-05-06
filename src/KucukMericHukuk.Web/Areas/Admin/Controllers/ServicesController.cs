@@ -194,9 +194,12 @@ public class ServicesController : Controller
             if (result.FirstError?.Code == ErrorCodes.Service.NotFound)
                 return NotFound();
 
-            _logger.LogError("Hizmet silinemedi: id={Id}, errors={Errors}",
+            _logger.LogWarning("Hizmet silinemedi: id={Id}, errors={Errors}",
                 id, string.Join("; ", result.Errors.Select(e => e.Message)));
-            TempData["Error"] = "Hizmet silinirken bir sorun oluştu.";
+
+            TempData["Error"] = result.FirstError?.Message
+                ?? "Hizmet silinirken bir sorun oluştu.";
+
             return RedirectToAction(nameof(Details), new { id });
         }
 
@@ -215,9 +218,12 @@ public class ServicesController : Controller
             if (result.FirstError?.Code == ErrorCodes.Service.NotFound)
                 return NotFound();
 
-            _logger.LogError("Hizmet geri yüklenemedi: id={Id}, errors={Errors}",
+            _logger.LogWarning("Hizmet geri yüklenemedi: id={Id}, errors={Errors}",
                 id, string.Join("; ", result.Errors.Select(e => e.Message)));
-            TempData["Error"] = "Hizmet geri yüklenirken bir sorun oluştu.";
+
+            TempData["Error"] = result.FirstError?.Message
+                ?? "Hizmet geri yüklenirken bir sorun oluştu.";
+
             return RedirectToAction(nameof(Index), new { includeDeleted = true });
         }
 
@@ -236,9 +242,12 @@ public class ServicesController : Controller
             if (result.FirstError?.Code == ErrorCodes.Service.NotFound)
                 return NotFound();
 
-            _logger.LogError("Hizmet kalıcı olarak silinemedi: id={Id}, errors={Errors}",
+            _logger.LogWarning("Hizmet kalıcı olarak silinemedi: id={Id}, errors={Errors}",
                 id, string.Join("; ", result.Errors.Select(e => e.Message)));
-            TempData["Error"] = "Hizmet kalıcı olarak silinirken bir sorun oluştu.";
+
+            TempData["Error"] = result.FirstError?.Message
+                ?? "Hizmet kalıcı olarak silinirken bir sorun oluştu.";
+
             return RedirectToAction(nameof(Index), new { includeDeleted = true });
         }
 

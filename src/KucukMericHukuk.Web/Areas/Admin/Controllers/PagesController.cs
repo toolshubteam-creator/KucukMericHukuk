@@ -188,9 +188,12 @@ public class PagesController : Controller
             if (result.FirstError?.Code == ErrorCodes.Page.NotFound)
                 return NotFound();
 
-            _logger.LogError("Sayfa silinemedi: id={Id}, errors={Errors}",
+            _logger.LogWarning("Sayfa silinemedi: id={Id}, errors={Errors}",
                 id, string.Join("; ", result.Errors.Select(e => e.Message)));
-            TempData["Error"] = "Sayfa silinirken bir sorun oluştu.";
+
+            TempData["Error"] = result.FirstError?.Message
+                ?? "Sayfa silinirken bir sorun oluştu.";
+
             return RedirectToAction(nameof(Details), new { id });
         }
 
@@ -209,9 +212,12 @@ public class PagesController : Controller
             if (result.FirstError?.Code == ErrorCodes.Page.NotFound)
                 return NotFound();
 
-            _logger.LogError("Sayfa geri yüklenemedi: id={Id}, errors={Errors}",
+            _logger.LogWarning("Sayfa geri yüklenemedi: id={Id}, errors={Errors}",
                 id, string.Join("; ", result.Errors.Select(e => e.Message)));
-            TempData["Error"] = "Sayfa geri yüklenirken bir sorun oluştu.";
+
+            TempData["Error"] = result.FirstError?.Message
+                ?? "Sayfa geri yüklenirken bir sorun oluştu.";
+
             return RedirectToAction(nameof(Index), new { includeDeleted = true });
         }
 
@@ -230,9 +236,12 @@ public class PagesController : Controller
             if (result.FirstError?.Code == ErrorCodes.Page.NotFound)
                 return NotFound();
 
-            _logger.LogError("Sayfa kalıcı olarak silinemedi: id={Id}, errors={Errors}",
+            _logger.LogWarning("Sayfa kalıcı olarak silinemedi: id={Id}, errors={Errors}",
                 id, string.Join("; ", result.Errors.Select(e => e.Message)));
-            TempData["Error"] = "Sayfa kalıcı olarak silinirken bir sorun oluştu.";
+
+            TempData["Error"] = result.FirstError?.Message
+                ?? "Sayfa kalıcı olarak silinirken bir sorun oluştu.";
+
             return RedirectToAction(nameof(Index), new { includeDeleted = true });
         }
 
