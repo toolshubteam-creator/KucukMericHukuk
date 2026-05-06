@@ -1,4 +1,5 @@
 using KucukMericHukuk.Core.Interfaces.Services;
+using KucukMericHukuk.Infrastructure.FileStorage;
 using KucukMericHukuk.Infrastructure.Initialization;
 using KucukMericHukuk.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +18,10 @@ public static class DependencyInjection
 
         // HtmlSanitizer thread-safe (paket dokümantasyonu) — Singleton
         services.AddSingleton<IHtmlSanitizerService, HtmlSanitizerService>();
+
+        // Medya: dosya saklama + görsel işleme
+        services.AddScoped<IFileStorageService, LocalFileStorageService>();
+        services.AddScoped<IImageProcessor, SkiaSharpProcessor>();
 
         return services;
     }

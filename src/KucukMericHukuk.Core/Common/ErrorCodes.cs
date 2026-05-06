@@ -55,4 +55,13 @@ public static class ErrorCodes
         public const string NotFound = "Tag.NotFound";
         public const string SlugExists = "Tag.SlugExists";
     }
+
+    public static class Media
+    {
+        public const string NotFound = "Media.NotFound";
+        public const string FileTooLarge = "Media.FileTooLarge";
+        public const string UnsupportedMediaType = "Media.UnsupportedMediaType";
+        public const string ProcessingFailed = "Media.ProcessingFailed";
+        public const string StorageFailed = "Media.StorageFailed";
+    }
 }

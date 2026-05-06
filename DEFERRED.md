@@ -22,9 +22,19 @@
     `[Authorize(Roles = "Admin")]`. Service katmanında AuthorId ataması
     yapılır. Editor/Author rol bazlı guard Faz 5'e ertelendi.
 
-- **Medya yöneticisi** (Faz 3'e ertelendi)
-  - File upload, galeri, WebP dönüşümü, klasör yapısı
-  - ImageSharp/SkiaSharp paketi
+- **Medya admin UI** (Faz 3.2'ye ertelendi)
+  - Altyapı (entity, repository, IFileStorageService, SkiaSharpProcessor,
+    MediaService + Validator, Mapster mapping, EF migration) Faz 3.1'de
+    tamamlandı (PROGRESS.md commit hash kaydı).
+  - Kalan: admin galeri sayfası (DataTables), upload modal, image picker
+    modal (Quill + form alanları için), MediaController + ViewModeller +
+    SweetAlert2 confirm akışları.
+  - HtmlSanitizer `<img>` whitelist'e eklenmesi 3.3'te (medya picker
+    Quill'e bağlanırken).
+  - Kütüphane kararı: SkiaSharp 3.x + SkiaSharp.NativeAssets.Linux (MIT
+    lisans, Microsoft destekli). ImageSharp 3.x reddedildi (Six Labors
+    Split License — ticari kurumsal site için belirsiz lisanslama,
+    Faz 3.1 başlangıç kararı).
   - **MVP kapsamı (Faz 3 başlangıç kararı):** flat yapı + otomatik
     `wwwroot/uploads/{yyyy}/{MM}/` tarih klasörü, WebP dönüşümü,
     thumbnail (300px), SHA256 dedup, admin galeri (DataTables),
