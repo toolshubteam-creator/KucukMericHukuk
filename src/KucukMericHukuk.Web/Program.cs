@@ -1,4 +1,5 @@
 using System.Globalization;
+using FluentValidation.AspNetCore;
 using KucukMericHukuk.Business;
 using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.Entities.Identity;
@@ -72,6 +73,10 @@ builder.Services.AddBusiness();
 
 // Web katmanindaki Mapster IRegister'lari (PageFormMappingConfig vb.) GlobalSettings'e ekle
 builder.Services.AddWebMappings();
+
+// FluentValidation client-side adapter (jQuery unobtrusive validation için
+// FluentValidation kurallarının HTML data-val-* attribute'larına yansıması).
+builder.Services.AddFluentValidationClientsideAdapters();
 
 // Localization
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");

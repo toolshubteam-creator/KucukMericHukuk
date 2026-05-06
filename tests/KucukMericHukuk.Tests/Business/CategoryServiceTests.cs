@@ -348,6 +348,32 @@ public class CategoryServiceTests : IDisposable
         cat.IsDeleted.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task RestoreAsync_ParentDeleted_ShouldFail()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        // Setup: parent + child, ikisi de soft-deleted
+        var parent = await sut.CreateAsync(BuildValidInput(name: "P", slug: "p"));
+        var child = await sut.CreateAsync(BuildValidInput(name: "C", slug: "c", parentCategoryId: parent.Value));
+
+        // Önce child'ı sil (HasChildren guard nedeniyle parent direkt silinemez)
+        await sut.DeleteAsync(child.Value);
+        await sut.DeleteAsync(parent.Value);
+
+        // Act: child'ı restore dene — parent hâlâ deleted
+        var result = await sut.RestoreAsync(child.Value);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.FirstError!.Code.Should().Be(ErrorCodes.Category.ParentDeleted);
+
+        await using var verify = _factory.CreateContext();
+        var dbChild = verify.Set<Category>().IgnoreQueryFilters().First(c => c.Id == child.Value);
+        dbChild.IsDeleted.Should().BeTrue();
+    }
+
     // -------------------- HARD DELETE --------------------
 
     [Fact]

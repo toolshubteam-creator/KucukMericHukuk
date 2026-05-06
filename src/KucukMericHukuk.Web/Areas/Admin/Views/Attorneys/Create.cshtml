@@ -4,8 +4,7 @@
 }
 
 @section Styles {
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/quill@@2.0.3/dist/quill.snow.css" />
+    <partial name="_QuillStyles" />
     <link rel="stylesheet" href="~/css/admin/components/attorney-form.css" asp-append-version="true" />
 }
 
@@ -40,6 +39,5 @@
 </form>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/quill@@2.0.3/dist/quill.js"></script>
-    <script src="~/js/admin/quill-init.js" asp-append-version="true"></script>
+    <partial name="_QuillScripts" />
 }

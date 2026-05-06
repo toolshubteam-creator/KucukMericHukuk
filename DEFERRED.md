@@ -13,39 +13,9 @@
 
 ### 2.10 — Faz 2 Cleanup
 
-- **FluentValidation client-side adapter**
-  - Şu an: server-side validation only
-  - Hedef: `AddFluentValidationClientsideAdapters` ekle, mevcut validator'lar
-    jQuery unobtrusive'e otomatik yansır
-  - Trade-off: ekstra paket vs ekstra round-trip
-  - Faz 2.4a kararı
-
 - **HTTPS profil zorunlu kuralı CLAUDE.md'ye**
   - Cookie SecurePolicy=Always nedeniyle dev'de HTTP profilinde login bozuk
   - Faz 2.3 raporundan
-
-- **Sidebar ViewComponent refactor**
-  - Şu an statik partial (Faz 2.1)
-  - Aktif menü vurgulaması + role-based filter ihtiyacı doğdukça
-
-- **Pre-commit hook: AddFluentValidationAutoValidation çağrı kontrolü**
-  - 2.4a kararı bypass edilmesin
-  - .git/hooks veya husky benzeri
-  - Düşük öncelik (code review yeterli olabilir)
-
-- **CategoryService.RestoreAsync parent IsDeleted kontrolü**
-  - Şu an child Restore edilince parent soft-deleted ise orphan parent
-    referansı kalır (FK doğru ama UI/UX kafa karıştırıcı, Faz 2.8a)
-  - Çözüm: Restore'da parent.IsDeleted=true ise warning + Restore engellensin
-    VEYA cascade restore. 2.10'da değerlendir.
-
-- **PageService Translation full-replace stratejisi gözden geçirilsin**
-  - Şu an `UpdateAsync`'te `page.Translations.Clear()` + `Add(...)`
-  - Alternatif: id-bazlı merge (var olanı update, yenisini insert, kayıpları sil)
-  - Trade-off: full-replace EF tracking açısından basit, az satır;
-    merge daha "SQL-friendly" ama karmaşık
-  - 2.10 cleanup'ta veya Service/Attorney/Article modüllerinde performans
-    sorunu çıkarsa revize
 
 ---
 
@@ -103,6 +73,21 @@
   - Veya: bozuk Unicode tespiti (Slugify öncesi normalize başarısızsa
     reject + Result.Failure)
   - Faz 5 kapsamında, üretim öncesi audit'te değerlendirilir
+
+- **Translation full-replace stratejisi gözden geçirme**
+  - Şu an Update'te `Translations.Clear() + Add(...)` pattern, audit
+    trail bozar (Translation Id'leri yenilenir, CreatedAt güncellenir)
+  - Faz 2.10c'de değerlendirildi, Faz 5 audit aşamasına ertelendi
+  - Çözüm: Diff-based update (LanguageCode bazlı find/update/delete/add)
+  - 5 service etkilenir, kapsamlı test gerekir
+
+- **Pre-commit hook: AddFluentValidationAutoValidation çağrı kontrolü**
+  - 2.4a kararı bypass edilmesin
+  - Husky/shell script ile commit öncesi DTO'larda FluentValidator
+    kuralı eksik mi check
+  - Faz 2.10c'de değerlendirildi, Faz 5 üretim öncesi tooling olarak
+    ertelendi
+  - Düşük öncelik (code review yeterli olabilir)
 
 ---
 

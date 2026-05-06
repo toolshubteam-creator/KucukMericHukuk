@@ -5,8 +5,7 @@
 }
 
 @section Styles {
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/quill@@2.0.3/dist/quill.snow.css" />
+    <partial name="_QuillStyles" />
 }
 
 <div class="page-header">
@@ -46,6 +45,5 @@
 </form>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/quill@@2.0.3/dist/quill.js"></script>
-    <script src="~/js/admin/quill-init.js" asp-append-version="true"></script>
+    <partial name="_QuillScripts" />
 }

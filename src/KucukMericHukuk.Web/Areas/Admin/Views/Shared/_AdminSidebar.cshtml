@@ -1,5 +1,6 @@
 @*
-    Statik sidebar. Faz 2 ileri adımlarında ViewComponent'e refactor edilecek (active state + role-based filter).
+    Sidebar. Aktif state controller-bazlı (Helpers/SidebarHelpers.IsActiveController).
+    Role-based filter ihtiyacı doğdukça ViewComponent'e refactor edilebilir.
 *@
 <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark">
     <div class="container-fluid">
@@ -22,7 +23,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-action="Index" asp-controller="Pages" asp-area="Admin">
+                    <a class="nav-link @Html.IsActiveController("Pages")" asp-action="Index" asp-controller="Pages" asp-area="Admin">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
                             <i class="ti ti-file-text"></i>
                         </span>
@@ -30,7 +31,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-action="Index" asp-controller="Services" asp-area="Admin">
+                    <a class="nav-link @Html.IsActiveController("Services")" asp-action="Index" asp-controller="Services" asp-area="Admin">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
                             <i class="ti ti-briefcase"></i>
                         </span>
@@ -38,7 +39,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-action="Index" asp-controller="Attorneys" asp-area="Admin">
+                    <a class="nav-link @Html.IsActiveController("Attorneys")" asp-action="Index" asp-controller="Attorneys" asp-area="Admin">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
                             <i class="ti ti-users"></i>
                         </span>
@@ -54,7 +55,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-action="Index" asp-controller="Categories" asp-area="Admin">
+                    <a class="nav-link @Html.IsActiveController("Categories")" asp-action="Index" asp-controller="Categories" asp-area="Admin">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
                             <i class="ti ti-category"></i>
                         </span>
@@ -62,7 +63,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-action="Index" asp-controller="Tags" asp-area="Admin">
+                    <a class="nav-link @Html.IsActiveController("Tags")" asp-action="Index" asp-controller="Tags" asp-area="Admin">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
                             <i class="ti ti-tag"></i>
                         </span>

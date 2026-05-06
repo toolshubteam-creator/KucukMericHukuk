@@ -47,6 +47,7 @@ public static class ErrorCodes
         public const string CircularParent = "Category.CircularParent";
         public const string HasChildren = "Category.HasChildren";
         public const string ParentNotFound = "Category.ParentNotFound";
+        public const string ParentDeleted = "Category.ParentDeleted";
     }
 
     public static class Tag

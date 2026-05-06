@@ -248,8 +248,21 @@ public class CategoryService : ICategoryService
 
         if (!category.IsDeleted) return Result.Success();
 
-        // NOT: Parent IsDeleted ise orphan parent referansı kalır.
-        // 2.10'da değerlendirilecek (DEFERRED).
+        // Parent IsDeleted guard: child Restore edilince soft-deleted parent
+        // referansı orphan kalır (Faz 2.8a'da çıkan UX sorunu). Önce parent'ı
+        // restore etmek gerekir.
+        if (category.ParentCategoryId.HasValue)
+        {
+            var parent = await _uow.Categories.GetByIdIncludingDeletedAsync(
+                category.ParentCategoryId.Value, ct);
+
+            if (parent != null && parent.IsDeleted)
+            {
+                return Result.Failure(new Error(
+                    ErrorCodes.Category.ParentDeleted,
+                    "Bu kategorinin üst kategorisi silinmiş durumda. Önce üst kategoriyi geri yükleyin."));
+            }
+        }
 
         _uow.Categories.Restore(category);
         await _uow.SaveChangesAsync(ct);
