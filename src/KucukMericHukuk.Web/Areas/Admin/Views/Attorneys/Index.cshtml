@@ -1,0 +1,216 @@
+@using KucukMericHukuk.Web.Areas.Admin.ViewModels.Shared
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Attorneys.AttorneyListViewModel
+@{
+    ViewData["Title"] = "Avukatlarımız";
+
+    var paginationVm = new PaginationViewModel
+    {
+        PageNumber = Model.PageNumber,
+        TotalPages = Model.TotalPages,
+        HasPrevious = Model.HasPrevious,
+        HasNext = Model.HasNext,
+        GetPageUrl = pageNum => Url.Action("Index", "Attorneys", new
+        {
+            area = "Admin",
+            keyword = Model.Query.Keyword,
+            serviceId = Model.Query.ServiceId,
+            page = pageNum,
+            pageSize = Model.Query.PageSize,
+            languageCode = Model.Query.LanguageCode,
+            includeDeleted = Model.Query.IncludeDeleted
+        }) ?? "#"
+    };
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin/components/attorney-form.css" asp-append-version="true" />
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">Avukatlarımız</h2>
+            <div class="text-secondary">Toplam @Model.TotalCount kayıt</div>
+        </div>
+        <div class="col-auto">
+            <a asp-action="Create" asp-controller="Attorneys" asp-area="Admin" class="btn btn-primary">
+                <i class="ti ti-plus me-1"></i> Yeni Avukat
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string okMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@okMsg</div>
+}
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+
+<div class="card mt-3">
+    <div class="card-body border-bottom">
+        <form asp-action="Index" asp-controller="Attorneys" asp-area="Admin" method="get">
+            <div class="row g-2">
+                <div class="col-md">
+                    <input type="search" name="keyword" value="@Model.Query.Keyword"
+                           class="form-control" placeholder="Ad veya soyada göre ara..." />
+                </div>
+                <div class="col-md-3">
+                    <select name="serviceId" class="form-select">
+                        <option value="">Tüm hizmetler</option>
+                        @foreach (var s in Model.AvailableServices)
+                        {
+                            <option value="@s.Id" selected="@(Model.Query.ServiceId == s.Id)">@s.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <label class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox"
+                               name="includeDeleted" value="true"
+                               @(Model.Query.IncludeDeleted ? "checked" : "") />
+                        <span class="form-check-label">Silinmişleri göster</span>
+                    </label>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="ti ti-search me-1"></i> Ara
+                    </button>
+                    <a asp-action="Index" asp-controller="Attorneys" asp-area="Admin"
+                       class="btn btn-outline-secondary">Temizle</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">Avukat bulunamadı</p>
+            <p class="empty-subtitle text-secondary">
+                @if (!string.IsNullOrWhiteSpace(Model.Query.Keyword))
+                {
+                    <text>"@Model.Query.Keyword" araması için sonuç yok.</text>
+                }
+                else
+                {
+                    <text>Henüz hiç avukat eklenmemiş.</text>
+                }
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th class="w-1">Foto</th>
+                        <th>Ad Soyad</th>
+                        <th>Ünvan</th>
+                        <th>Slug</th>
+                        <th>Hizmet</th>
+                        <th>Sıra</th>
+                        <th>Durum</th>
+                        <th class="w-1">Eylemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        var firstTr = item.Translations?.FirstOrDefault(t => t.LanguageCode == Model.Query.LanguageCode)
+                                   ?? item.Translations?.FirstOrDefault();
+                        var fullName = firstTr?.FullName ?? "(adsız)";
+                        var title = firstTr?.Title ?? "—";
+                        var slug = firstTr?.Slug ?? "—";
+                        var serviceCount = item.Services?.Count ?? 0;
+
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(item.ProfileImageUrl))
+                                {
+                                    <img src="@item.ProfileImageUrl" alt="@fullName" class="rounded attorney-list-photo" />
+                                }
+                                else
+                                {
+                                    <span class="avatar avatar-sm">
+                                        <i class="ti ti-user"></i>
+                                    </span>
+                                }
+                            </td>
+                            <td>@fullName</td>
+                            <td>@title</td>
+                            <td><code>@slug</code></td>
+                            <td>
+                                @if (serviceCount > 0)
+                                {
+                                    <span class="badge bg-blue-lt">@serviceCount</span>
+                                }
+                                else
+                                {
+                                    <span class="text-secondary">0</span>
+                                }
+                            </td>
+                            <td>@item.DisplayOrder</td>
+                            <td>
+                                @if (item.IsDeleted)
+                                {
+                                    <span class="badge bg-danger-lt">Silinmiş</span>
+                                }
+                                else if (item.IsActive)
+                                {
+                                    <span class="badge bg-success-lt">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-lt">Pasif</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-controller="Attorneys" asp-area="Admin"
+                                   asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary"
+                                   title="Detay"><i class="ti ti-eye"></i></a>
+
+                                @if (!item.IsDeleted)
+                                {
+                                    <a asp-action="Edit" asp-controller="Attorneys" asp-area="Admin"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-outline-primary" title="Düzenle">
+                                        <i class="ti ti-edit"></i>
+                                    </a>
+                                    @* Sil — Faz 2.9c'de aktif edilecek *@
+                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Sil (Faz 2.9c)" disabled>
+                                        <i class="ti ti-trash"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    @* Restore + HardDelete — Faz 2.9c'de aktif edilecek *@
+                                    <button type="button" class="btn btn-sm btn-outline-success" title="Geri Yükle (Faz 2.9c)" disabled>
+                                        <i class="ti ti-restore"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Tamamen Sil (Faz 2.9c)" disabled>
+                                        <i class="ti ti-x"></i>
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                <strong>@((Model.PageNumber - 1) * Model.PageSize + 1)</strong> -
+                <strong>@Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)</strong>
+                arası, toplam <strong>@Model.TotalCount</strong> kayıt
+            </p>
+            <div class="ms-auto">
+                <partial name="_Pagination" model="paginationVm" />
+            </div>
+        </div>
+    }
+</div>

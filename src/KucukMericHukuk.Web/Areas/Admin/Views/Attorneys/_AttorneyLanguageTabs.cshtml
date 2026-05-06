@@ -1,0 +1,105 @@
+@using KucukMericHukuk.Core.Constants
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Attorneys.AttorneyFormViewModel
+@{
+    var supportedLanguages = LanguageCodes.Supported;
+}
+
+<ul class="nav nav-tabs mb-3" role="tablist">
+    @{
+        var firstTab = true;
+        foreach (var lang in supportedLanguages)
+        {
+            var tabId = $"attlang-{lang.Replace("-", "_")}";
+            <li class="nav-item" role="presentation">
+                <a class="nav-link @(firstTab ? "active" : "")"
+                   data-bs-toggle="tab" href="#@tabId" role="tab">@lang</a>
+            </li>
+            firstTab = false;
+        }
+    }
+</ul>
+
+<div class="tab-content">
+    @{
+        var firstPane = true;
+        for (var i = 0; i < Model.Translations.Count; i++)
+        {
+            var t = Model.Translations[i];
+            var tabId = $"attlang-{t.LanguageCode.Replace("-", "_")}";
+
+            <div class="tab-pane fade @(firstPane ? "show active" : "")" id="@tabId" role="tabpanel">
+                <input type="hidden" asp-for="Translations[i].LanguageCode" />
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].FullName" class="form-label required"></label>
+                    <input asp-for="Translations[i].FullName" class="form-control" maxlength="150" />
+                    <span asp-validation-for="Translations[i].FullName" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].Title" class="form-label"></label>
+                    <input asp-for="Translations[i].Title" class="form-control" maxlength="100"
+                           placeholder="Av., Hukuk Müşaviri, vb." />
+                    <span asp-validation-for="Translations[i].Title" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].Slug" class="form-label"></label>
+                    <input asp-for="Translations[i].Slug" class="form-control"
+                           placeholder="boş bırakılırsa addan otomatik üretilir" maxlength="200" />
+                    <span asp-validation-for="Translations[i].Slug" class="invalid-feedback d-block"></span>
+                    <small class="form-hint">Yalnızca küçük harf, rakam ve tire.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].ShortBio" class="form-label"></label>
+                    <textarea asp-for="Translations[i].ShortBio" class="form-control"
+                              rows="2" maxlength="500"></textarea>
+                    <span asp-validation-for="Translations[i].ShortBio" class="invalid-feedback d-block"></span>
+                    <small class="form-hint">Liste/kart önizlemelerinde gösterilir.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].FullBio" class="form-label"></label>
+                    <textarea asp-for="Translations[i].FullBio"
+                              class="form-control"
+                              data-quill-target="true"
+                              rows="10"></textarea>
+                    <span asp-validation-for="Translations[i].FullBio" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].Education" class="form-label"></label>
+                    <textarea asp-for="Translations[i].Education" class="form-control"
+                              rows="6" maxlength="2000"></textarea>
+                    <span asp-validation-for="Translations[i].Education" class="invalid-feedback d-block"></span>
+                    <small class="form-hint">Üniversite, sertifika, kurslar... Her birini yeni satıra yazabilirsiniz.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].Publications" class="form-label"></label>
+                    <textarea asp-for="Translations[i].Publications" class="form-control"
+                              rows="6" maxlength="2000"></textarea>
+                    <span asp-validation-for="Translations[i].Publications" class="invalid-feedback d-block"></span>
+                    <small class="form-hint">Kitap, makale, tebliğ... Her birini yeni satıra yazabilirsiniz.</small>
+                </div>
+
+                <h4 class="mt-4">SEO</h4>
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].MetaTitle" class="form-label"></label>
+                    <input asp-for="Translations[i].MetaTitle" class="form-control" maxlength="200" />
+                    <span asp-validation-for="Translations[i].MetaTitle" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].MetaDescription" class="form-label"></label>
+                    <textarea asp-for="Translations[i].MetaDescription" class="form-control"
+                              maxlength="500" rows="3"></textarea>
+                    <span asp-validation-for="Translations[i].MetaDescription" class="invalid-feedback d-block"></span>
+                </div>
+            </div>
+            firstPane = false;
+        }
+    }
+</div>

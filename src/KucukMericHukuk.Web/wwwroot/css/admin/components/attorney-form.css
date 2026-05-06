@@ -1,0 +1,22 @@
+/* Attorney module — preview/list-thumb sınırlamaları + Details placeholder.
+   Inline CSS yasağı (CLAUDE.md) gereği ayrı dosyada. */
+
+.attorney-photo-preview {
+    max-width: 200px;
+    max-height: 200px;
+    object-fit: cover;
+}
+
+.attorney-list-photo {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+}
+
+.attorney-photo-placeholder {
+    font-size: 3rem;
+}
+
+.attorney-multiline {
+    white-space: pre-line;
+}
