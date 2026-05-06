@@ -1,0 +1,24 @@
+/* ============================================================
+   Quill 2.x editor — admin form'ları için min-height ve genişlik.
+   Quill snow-theme default min-height ~1em (çok dar). Override.
+   ============================================================ */
+
+.quill-editor-container {
+    width: 100%;
+}
+
+.ql-container.ql-snow {
+    min-height: 300px;
+}
+
+.ql-editor {
+    min-height: 300px;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Quill içinde insert edilen <img> taşmasını engelle (Faz 3.3 picker entegrasyonu) */
+.ql-editor img {
+    max-width: 100%;
+    height: auto;
+}
