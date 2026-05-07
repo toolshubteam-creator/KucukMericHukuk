@@ -17,6 +17,7 @@ public class ArticleAdminDto
     public bool IsFeatured { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public bool IsDeleted { get; set; }
     public List<ArticleTranslationDto> Translations { get; set; } = new();
     public List<LookupDto> Tags { get; set; } = new();
 }

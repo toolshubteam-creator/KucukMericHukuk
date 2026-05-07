@@ -1,0 +1,51 @@
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Articles.ArticleFormViewModel
+@{
+    ViewData["Title"] = "Yeni Makale";
+}
+
+@section Styles {
+    <partial name="_QuillStyles" />
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/choices.js@@11.1.0/public/assets/styles/choices.min.css" />
+}
+
+<div class="page-header">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <nav aria-label="breadcrumbs">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-action="Index" asp-controller="Articles" asp-area="Admin">Makaleler</a>
+                    </li>
+                    <li class="breadcrumb-item active">Yeni Makale</li>
+                </ol>
+            </nav>
+            <h2 class="page-title">Yeni Makale</h2>
+        </div>
+    </div>
+</div>
+
+<form asp-action="Create" asp-controller="Articles" asp-area="Admin"
+      method="post" autocomplete="off" novalidate>
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+    <partial name="_ArticleForm" model="Model" />
+
+    <div class="card-footer mt-3 d-flex">
+        <a asp-action="Index" asp-controller="Articles" asp-area="Admin" class="btn btn-link">Vazgeç</a>
+        <button type="submit" class="btn btn-primary ms-auto">
+            <i class="ti ti-plus me-1"></i> Oluştur
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/choices.js@@11.1.0/public/assets/scripts/choices.min.js"></script>
+    <partial name="_QuillScripts" />
+    <partial name="_MediaPickerModal" />
+    <script src="~/js/admin/media-picker.js" asp-append-version="true"></script>
+    <script src="~/js/admin/media-picker-binder.js" asp-append-version="true"></script>
+    <script src="~/js/admin/choices-init.js" asp-append-version="true"></script>
+    <script src="~/js/admin/slug-from-title.js" asp-append-version="true"></script>
+}

@@ -11,17 +11,6 @@
 
 ## Faz 3 → İçerik Yönetimi
 
-- **Article modülü** (Faz 2 dışına alındı)
-  - Quill editör + kategori/tag + kapak görseli
-  - Article'a özel ErrorCodes slot'u 2.4a'da hazır
-  - SluggedEntityType.Article 2.4b'de hazır
-  - **Status akışı (Faz 3 başlangıç kararı):** Published'da PublishedAt
-    otomatik atanır (manuel girilirse korunur). Transition serbest
-    (Draft↔Published↔Archived). Scheduled publishing YOK — Faz 5'e ertelendi.
-  - **Yetki modeli (Faz 3 başlangıç kararı):** Faz 3'te tüm Article CRUD
-    `[Authorize(Roles = "Admin")]`. Service katmanında AuthorId ataması
-    yapılır. Editor/Author rol bazlı guard Faz 5'e ertelendi.
-
 - **SEO meta alanları UI**
   - Entity'lerde alanlar var (Faz 1)
   - Admin form bileşeni Faz 3 (her modülde tekrar kullanılan partial)

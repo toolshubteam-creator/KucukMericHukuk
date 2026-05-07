@@ -29,6 +29,7 @@ public static class DependencyInjection
         // Service'ler
         services.AddScoped<ISlugService, SlugService>();
         services.AddScoped<IPageService, PageService>();
+        services.AddScoped<IArticleService, ArticleService>();
         services.AddScoped<ITagService, TagService>();
         services.AddScoped<IServiceService, ServiceService>();
         services.AddScoped<ICategoryService, CategoryService>();

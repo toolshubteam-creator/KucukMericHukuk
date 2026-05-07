@@ -23,6 +23,8 @@ public static class ErrorCodes
         public const string NotFound = "Article.NotFound";
         public const string SlugExists = "Article.SlugExists";
         public const string InvalidStatus = "Article.InvalidStatus";
+        public const string CategoryNotFound = "Article.CategoryNotFound";
+        public const string TranslationRequired = "Article.TranslationRequired";
     }
 
     public static class Service

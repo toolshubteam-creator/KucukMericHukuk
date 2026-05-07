@@ -1,0 +1,237 @@
+@using KucukMericHukuk.Core.Enums
+@using KucukMericHukuk.Web.Areas.Admin.ViewModels.Shared
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Articles.ArticleListViewModel
+@{
+    ViewData["Title"] = "Makaleler";
+
+    var paginationVm = new PaginationViewModel
+    {
+        PageNumber = Model.PageNumber,
+        TotalPages = Model.TotalPages,
+        HasPrevious = Model.HasPrevious,
+        HasNext = Model.HasNext,
+        GetPageUrl = pageNum => Url.Action("Index", "Articles", new
+        {
+            area = "Admin",
+            keyword = Model.Query.Keyword,
+            status = Model.Query.Status,
+            categoryId = Model.Query.CategoryId,
+            page = pageNum,
+            pageSize = Model.Query.PageSize,
+            includeDeleted = Model.Query.IncludeDeleted
+        }) ?? "#"
+    };
+
+    string StatusBadge(ArticleStatus s, bool isDeleted)
+    {
+        if (isDeleted) return "<span class=\"badge bg-danger-lt\">Silinmiş</span>";
+        return s switch
+        {
+            ArticleStatus.Published => "<span class=\"badge bg-success-lt\">Yayında</span>",
+            ArticleStatus.Archived => "<span class=\"badge bg-dark-lt\">Arşivlendi</span>",
+            _ => "<span class=\"badge bg-secondary-lt\">Taslak</span>",
+        };
+    }
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">Makaleler</h2>
+            <div class="text-secondary">Toplam @Model.TotalCount kayıt</div>
+        </div>
+        <div class="col-auto">
+            <a asp-action="Create" asp-controller="Articles" asp-area="Admin" class="btn btn-primary">
+                <i class="ti ti-plus me-1"></i> Yeni Makale
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string successMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@successMsg</div>
+}
+@if (TempData["Error"] is string errorMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errorMsg</div>
+}
+
+<div class="card mt-3">
+    <div class="card-body border-bottom">
+        <form asp-action="Index" asp-controller="Articles" asp-area="Admin" method="get">
+            <div class="row g-2">
+                <div class="col-md">
+                    <input type="search" name="keyword" value="@Model.Query.Keyword"
+                           class="form-control" placeholder="Başlık veya özette ara..." />
+                </div>
+                <div class="col-md-auto">
+                    <select name="status" class="form-select">
+                        <option value="">Tüm durumlar</option>
+                        <option value="@((int)ArticleStatus.Draft)" selected="@(Model.Query.Status == ArticleStatus.Draft)">Taslak</option>
+                        <option value="@((int)ArticleStatus.Published)" selected="@(Model.Query.Status == ArticleStatus.Published)">Yayında</option>
+                        <option value="@((int)ArticleStatus.Archived)" selected="@(Model.Query.Status == ArticleStatus.Archived)">Arşivlendi</option>
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <select name="categoryId" class="form-select">
+                        <option value="">Tüm kategoriler</option>
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <option value="@cat.Id" selected="@(Model.Query.CategoryId == cat.Id)">@cat.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <label class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox"
+                               name="includeDeleted" value="true"
+                               @(Model.Query.IncludeDeleted ? "checked" : "") />
+                        <span class="form-check-label">Silinmişleri göster</span>
+                    </label>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="ti ti-search me-1"></i> Ara
+                    </button>
+                    <a asp-action="Index" asp-controller="Articles" asp-area="Admin"
+                       class="btn btn-outline-secondary">Temizle</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">Makale bulunamadı</p>
+            <p class="empty-subtitle text-secondary">
+                @if (!string.IsNullOrWhiteSpace(Model.Query.Keyword))
+                {
+                    <text>"@Model.Query.Keyword" araması için sonuç yok.</text>
+                }
+                else
+                {
+                    <text>Henüz hiç makale eklenmemiş.</text>
+                }
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th class="w-1"></th>
+                        <th>Başlık</th>
+                        <th>Kategori</th>
+                        <th>Yazar</th>
+                        <th>Durum</th>
+                        <th>Yayın Tarihi</th>
+                        <th class="w-1">Eylemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        var firstTranslation = item.Translations?.FirstOrDefault();
+                        var title = firstTranslation?.Title ?? "(başlıksız)";
+
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(item.FeaturedImageUrl))
+                                {
+                                    <img src="@item.FeaturedImageUrl" alt="" class="rounded"
+                                         style="width:48px;height:48px;object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <span class="avatar avatar-rounded bg-secondary-lt">
+                                        <i class="ti ti-photo-off"></i>
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <strong>@title</strong>
+                                @if (item.IsFeatured)
+                                {
+                                    <span class="badge bg-yellow-lt ms-1" title="Öne çıkan">★</span>
+                                }
+                            </td>
+                            <td>@(item.CategoryName ?? "—")</td>
+                            <td>@(item.AuthorName ?? "—")</td>
+                            <td>@Html.Raw(StatusBadge(item.Status, item.IsDeleted))</td>
+                            <td>
+                                @(item.PublishedAt.HasValue
+                                    ? item.PublishedAt.Value.ToString("dd.MM.yyyy HH:mm")
+                                    : "—")
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-controller="Articles" asp-area="Admin"
+                                   asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary"
+                                   title="Detay">
+                                    <i class="ti ti-eye"></i>
+                                </a>
+                                @if (!item.IsDeleted)
+                                {
+                                    <a asp-action="Edit" asp-controller="Articles" asp-area="Admin"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-outline-primary" title="Düzenle">
+                                        <i class="ti ti-edit"></i>
+                                    </a>
+                                    <form asp-action="Delete" asp-controller="Articles" asp-area="Admin"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="d-inline"
+                                          data-confirm="Bu makaleyi silmek istediğinizden emin misiniz? Daha sonra geri yükleyebilirsiniz."
+                                          data-confirm-title="Makaleyi Sil"
+                                          data-confirm-button="Sil">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Restore" asp-controller="Articles" asp-area="Admin"
+                                          asp-route-id="@item.Id"
+                                          method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Geri Yükle">
+                                            <i class="ti ti-restore"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-action="HardDelete" asp-controller="Articles" asp-area="Admin"
+                                          asp-route-id="@item.Id"
+                                          method="post" class="d-inline"
+                                          data-confirm="Bu makale ve tüm çevirileri KALICI olarak silinecek. Bu işlem GERİ ALINAMAZ. Devam edilsin mi?"
+                                          data-confirm-title="Kalıcı Silme"
+                                          data-confirm-button="Tamamen Sil"
+                                          data-confirm-variant="danger">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Tamamen Sil">
+                                            <i class="ti ti-x"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                <strong>@((Model.PageNumber - 1) * Model.PageSize + 1)</strong> -
+                <strong>@Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)</strong>
+                arası, toplam <strong>@Model.TotalCount</strong> kayıt
+            </p>
+            <div class="ms-auto">
+                <partial name="_Pagination" model="paginationVm" />
+            </div>
+        </div>
+    }
+</div>
