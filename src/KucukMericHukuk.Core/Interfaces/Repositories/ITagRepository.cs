@@ -19,4 +19,5 @@ public interface ITagRepository : IGenericRepository<Tag>
         bool includeDeleted,
         CancellationToken ct = default);
     Task<Tag?> GetByIdIncludingDeletedAsync(int id, CancellationToken ct = default);
+    Task<List<Tag>> GetByIdsAsync(IEnumerable<int> ids, CancellationToken ct = default);
 }

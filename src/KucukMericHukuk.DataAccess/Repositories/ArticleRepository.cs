@@ -97,4 +97,60 @@ public class ArticleRepository : GenericRepository<Article>, IArticleRepository
 
         return query.AnyAsync(ct);
     }
+
+    public async Task<PagedResult<Article>> GetAdminPagedAsync(
+        string? keyword,
+        string languageCode,
+        ArticleStatus? status,
+        int? categoryId,
+        int page,
+        int pageSize,
+        bool includeDeleted,
+        CancellationToken ct = default)
+    {
+        var query = includeDeleted
+            ? _dbSet.IgnoreQueryFilters()
+            : _dbSet.AsQueryable();
+
+        query = query
+            .Include(a => a.Translations.Where(t => t.LanguageCode == languageCode))
+            .Include(a => a.Author)
+            .Include(a => a.Category).ThenInclude(c => c!.Translations.Where(t => t.LanguageCode == languageCode))
+            .AsSplitQuery();
+
+        if (status.HasValue)
+            query = query.Where(a => a.Status == status.Value);
+
+        if (categoryId.HasValue)
+            query = query.Where(a => a.CategoryId == categoryId.Value);
+
+        if (!string.IsNullOrWhiteSpace(keyword))
+        {
+            query = query.Where(a => a.Translations.Any(t =>
+                t.LanguageCode == languageCode &&
+                (t.Title.Contains(keyword) || (t.Excerpt != null && t.Excerpt.Contains(keyword)))));
+        }
+
+        query = query
+            .OrderByDescending(a => a.CreatedAt)
+            .ThenByDescending(a => a.Id);
+
+        return await query.AsNoTracking().ToPagedListAsync(page, pageSize, ct);
+    }
+
+    public Task<Article?> GetByIdForAdminAsync(int id, CancellationToken ct = default)
+        => _dbSet
+            .Include(a => a.Translations)
+            .Include(a => a.Author)
+            .Include(a => a.Category).ThenInclude(c => c!.Translations)
+            .Include(a => a.Tags).ThenInclude(t => t.Translations)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(a => a.Id == id, ct);
+
+    public Task<Article?> GetByIdIncludingDeletedAsync(int id, CancellationToken ct = default)
+        => _dbSet.IgnoreQueryFilters()
+            .Include(a => a.Translations)
+            .Include(a => a.Tags)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(a => a.Id == id, ct);
 }

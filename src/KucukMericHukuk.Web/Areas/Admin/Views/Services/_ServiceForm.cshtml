@@ -29,9 +29,25 @@
 
                 <div class="mb-3">
                     <label asp-for="FeaturedImage" class="form-label"></label>
-                    <input asp-for="FeaturedImage" class="form-control" maxlength="500" />
+                    <div class="input-group">
+                        <input asp-for="FeaturedImage" id="ServiceFeaturedImage" class="form-control" maxlength="500" />
+                        <button type="button" class="btn btn-outline-secondary"
+                                data-media-picker-target="#ServiceFeaturedImage"
+                                data-media-preview="#ServiceFeaturedImagePreview">
+                            <i class="ti ti-photo me-1"></i> Galeriden Seç
+                        </button>
+                    </div>
                     <span asp-validation-for="FeaturedImage" class="invalid-feedback d-block"></span>
-                    <small class="form-hint">Görsel URL (Faz 3'te medya yöneticisi eklenecek).</small>
+                    <div class="mt-2">
+                        @if (!string.IsNullOrWhiteSpace(Model.FeaturedImage))
+                        {
+                            <img id="ServiceFeaturedImagePreview" src="@Model.FeaturedImage" alt="Önizleme" class="rounded service-featured-preview" />
+                        }
+                        else
+                        {
+                            <img id="ServiceFeaturedImagePreview" src="" alt="" class="rounded service-featured-preview" hidden />
+                        }
+                    </div>
                 </div>
             </div>
         </div>

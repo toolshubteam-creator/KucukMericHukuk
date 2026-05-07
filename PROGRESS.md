@@ -11,12 +11,131 @@
 | 0 | Hazırlık (içerik, marka, kararlar) | 3-5 gün | 🔄 Devam ediyor |
 | 1 | Proje kurulumu & mimari | 1 hafta | ✅ Tamamlandı |
 | 2 | Yönetim paneli iskelet & temel modüller | 2 hafta | ✅ Tamamlandı |
-| 3 | İçerik yönetimi modülleri | 2 hafta | ⏳ Beklemede |
+| 3 | İçerik yönetimi modülleri | 2 hafta | ✅ Tamamlandı |
 | 4 | Frontend tasarım & geliştirme | 3 hafta | ⏳ Beklemede |
 | 5 | SEO, entegrasyon, güvenlik | 1 hafta | ⏳ Beklemede |
 | 6 | Test, düzeltme, yayına alma | 1 hafta | ⏳ Beklemede |
 
 **Toplam:** 10 hafta (+2 hafta tampon önerisi)
+
+---
+
+## FAZ 3 — İçerik Yönetimi: Medya + Article — ✅ TAMAMLANDI
+
+**Başlama Tarihi:** 06.05.2026
+**Tamamlanma Tarihi:** 07.05.2026
+
+### Tamamlanan Adımlar
+
+| Adım | Açıklama | Commit |
+| --- | --- | --- |
+| 3.0 | Faz 3 başlangıç kararları (sıra, kapsam, status, yetki) DEFERRED'a işlendi | `ae3d8a7` |
+| 3.1 | Medya altyapısı: entity + repo + LocalFileStorage + SkiaSharpProcessor + birim testler | `d53b61e` |
+| 3.2 | Medya admin UI: galeri sayfası + drag&drop upload + picker modal + Service/Attorney form entegrasyonu | `47d0c53` |
+| 3.3 | Quill image picker + HtmlSanitizer `<img>` whitelist + Pages picker entegrasyonu | `0aec536` |
+| 3.3.1 | Bootstrap JS CDN (Tabler 1.4 `window.bootstrap` expose etmiyor — modal/tab global gerek) | `f886fd3` |
+| 3.3.2 | Quill editör min-height (300px) + medias.css link doğrulaması | `9e7a286` |
+| 3.4 | Article modülü: ArticleService + Validator + Controller + UI + Choices.js + Tom Select swap | `1ebbae6` |
+
+### Yapılanlar
+
+**Medya altyapısı (3.1)**
+
+- `MediaFile` entity (BaseEntity türevi, soft-delete + Sha256 unique dedup)
+- `IMediaFileRepository` (GetByHashAsync, GetAdminPagedAsync, GetByIdIncludingDeletedAsync)
+- `IFileStorageService` → `LocalFileStorageService` (wwwroot/uploads/{yyyy}/{MM}/ otomatik klasör)
+- `IImageProcessor` → `SkiaSharpProcessor` (WebP encode, 2000px max, 300px thumbnail, Mitchell-Netravali resampling)
+- `IMediaService` (Upload/GetById/GetPaged/Update/Delete/Restore/HardDelete)
+- SHA256 dedup + race-condition (DbUpdateException unique constraint catch)
+- Migration `AddMediaFile`, MSSQL'e uygulandı
+- 6 birim test (MediaService) + 4 birim test (SkiaSharpProcessor)
+
+**Medya admin UI ve Quill entegrasyonu (3.2 + 3.3 + hot-fix'ler)**
+
+- `MediasController` (8 action: Index, Details, Edit alt-text, Delete, Restore, HardDelete, Upload AJAX, PickerList JSON)
+- Galeri sayfası: kart bazlı grid + arama + IncludeDeleted toggle + drag&drop upload zone (çoklu dosya sıralı)
+- `_MediaPickerModal.cshtml` partial (Quill ve form alanları için ortak modal, sekmeler: Galeri + Yeni Yükle)
+- `media-picker.js` + `media-picker-binder.js` + `media-gallery.js` (vanilla JS, AntiForgery FormData token)
+- `MediaPicker.open(callback)` API — Quill'den ve form butonundan ortak çağrı
+- Service ve Attorney form'larında "Galeriden Seç" butonu + preview (manuel URL korundu)
+- Pages form'unda Quill image insert için _MediaPickerModal eklendi
+- HtmlSanitizer `<img>` whitelist: src + alt + width + height + class (style hariç)
+- HtmlSanitizer `AllowedSchemes`'ten `http` kaldırıldı (HTTPS-only, mixed-content engellemesi)
+- Quill toolbar 'image' button + `imageHandlerFor` override → MediaPicker → cursor pos insert
+- Bootstrap 5.3.3 CDN eklendi (Tabler 1.4.0 `window.bootstrap` expose etmiyor → modal/tab global gerek)
+- `quill-editor.css`: `.ql-editor min-height: 300px` + insert edilen img max-width
+- 4 integration test (Medias)
+
+**Article modülü (3.4)**
+
+- `ArticleService` (Create/Update/Delete/Restore/HardDelete/GetById/GetPaged)
+- `ArticleInputValidator` (en az bir dilde Title+Content, Title varsa Content zorunlu)
+- Status flow: Draft↔Published↔Archived; Published'a transition'da `PublishedAt = UtcNow` (manuel girilirse korunur), Draft/Archived'a geçişte `PublishedAt`'a dokunulmaz
+- ReadingTime hesaplama (Türkçe için 200 wpm, HTML strip + word count, min 1 dakika)
+- Excerpt fallback (boş bırakılırsa Content'ten ilk 160 karakter, HTML strip + ellipsis)
+- Slug otomatik üretim (boş bırakılırsa Title'dan; manuel girilirse `EnsureUniqueAsync`)
+- AuthorId service tarafında set (controller current user'ı `User.GetUserIdOrNull()` ile alır)
+- Tag M:N: `ITagRepository.GetByIdsAsync` ile bulk fetch, update'te clear+re-attach
+- Category 1:N nullable, validator var-olduğunu kontrol eder
+- HtmlSanitizer her translation Content'i için zorunlu çağrı (XSS)
+- `ArticlesController` (7 action) + ViewModels (List, Form, TranslationForm)
+- `_ArticleForm` + `_ArticleLanguageTabs` partial'ları
+- Choices.js 11.1.0 (MIT) tag multi-select — Tom Select 2.4.3 Apache 2.0 reddedildi, swap delta uygulandı
+- `slug-from-title.js` (Türkçe transliteration, kullanıcı manuel girince stop)
+- Mapster `ArticleListDto/AdminDto/DetailDto` mapping (Faz 1'den hazırdı; `ArticleAdminDto`'ya `IsDeleted` eklendi UI badge için)
+- 12 birim test + 6 integration test
+
+**DEFERRED hareket özeti**
+
+- Kapatılanlar: Article modülü altyapısı, Medya yöneticisi, `<img>` HtmlSanitizer whitelist, Quill image insert, Service/Attorney image picker entegrasyonu
+- Yeni eklenenler (Faz 5'e):
+  - Article: Editor/Author rol bazlı yetkilendirme (3.0 kararı, B seçeneği)
+  - Article: Scheduled publishing (3.0 kararı)
+  - Medya: Manuel klasör yönetimi (MVP kapsamı dışı)
+  - Medya: Responsive variant + SEO genişletmesi (1x/2x srcset, title/figcaption)
+  - Medya: Picker'da çoklu seçim (3.2'de tek seçim MVP)
+  - Medya: Paralel upload + progress bar (3.2'de sıralı loop)
+  - Test ortamı için IFileStorageService mock/in-memory varyantı (3.2 raporundan, .gitignore geçici çözüm)
+
+### İstatistikler
+
+- **Toplam commit (Faz 3):** 7 (1 docs + 4 feat + 2 fix) + 1 kapanış docs
+- **Toplam test (Faz 3 sonu):** 226 PASSED, 0 failed (203 birim + 23 integration)
+- **Faz 3'te eklenen test sayısı:** 46 (önceki 180 → 226)
+- **Build durumu:** 0 error, 0 warning
+- **Yeni dosya:** ~70 (entity/repo/service/controller/view/JS/CSS/test)
+- **Modified:** ~25
+- **Yeni NuGet paketleri:** SkiaSharp 3.119.2 (MIT), SkiaSharp.NativeAssets.Linux 3.119.2 (MIT), Microsoft.AspNetCore.Hosting.Abstractions
+- **Yeni JS bağımlılıkları (CDN):** Bootstrap 5.3.3 (MIT), Choices.js 11.1.0 (MIT), Tom Select 2.4.3 reddedildi (Apache 2.0)
+
+### Bilinen Sorunlar / Geçici Çözümler
+
+- **Test artifact'ı `wwwroot/uploads/`'a yazıyor**: Integration testler gerçek `LocalFileStorageService` kullanıyor; `.gitignore` ile repo'ya kaçmıyor. DEFERRED'da Faz 5'e taşındı (mock/in-memory varyantı).
+- **`<img src="http://...">` strip davranışı**: HTTPS-only kararıyla http URL'leri sanitize'da `src`'ı uçuruyor, `<img>` tag'i kalıyor (boş kırık image). Pratikte tetiklenmiyor (picker hep `/uploads/...` veriyor). Not olarak bilinmesi yeterli, fix gerekmiyor.
+- **Choices.js placeholder Türkçeleştirildi** ama bazı edge case mesajları (örn. limit aşıldı) hâlâ İngilizce — Faz 5 lokalizasyon turunda ele alınır.
+- **Quill toolbar `link` butonu** native prompt kullanıyor (Türkçe değil); Faz 5 UI polish turunda custom modal'a geçilebilir.
+
+### Bir Sonraki Faza Aktarılan Notlar
+
+- **Faz 4 = Frontend (Tasarım & Geliştirme)**: tamamen yeni bağlam — admin işi bitti, public site sıfırdan
+- **Tasarım token'ları zaten admin için kuruldu** (`admin.css` :root değişkenleri); frontend için ayrı palet ve tipografi (Playfair Display + Inter, lacivert+amber+kırık beyaz)
+- **Quill içeriğinin frontend render'ı**: HtmlSanitizer çıktısı zaten güvenli — `@Html.Raw(article.Content)` direkt kullanılabilir; `<img>` için CSS responsive (`max-width: 100%`)
+- **Image lazy loading**: tüm `<img>`'lerde `loading="lazy"` eklenmeli (Article content + featured + galeri)
+- **WebP fallback**: Tarayıcı uyumluluğu artık geniş, fallback gerekmiyor
+- **SEO partial'lar**: Frontend layout'ta `_MetaTags`, `_OpenGraph`, `_StructuredData` (JSON-LD) partial'ları kurulacak — Faz 5'te doldurulacak ama Faz 4'te iskelet
+- **Choices.js admin'de kullanıldı**; frontend'de tag filtre listeleri için aynı kütüphane kullanılabilir (CDN tek nokta)
+- **Article ViewCount**: Faz 4'te frontend article detail action içinde `IncrementViewCountAsync` çağrılır (zaten repository'de hazır)
+
+### Faz 5'e Taşınan İşler (DEFERRED)
+
+Bkz. DEFERRED.md — Faz 3 kapanışında 7 yeni madde eklendi.
+
+### Test Sonuçları
+
+- **Birim testler (Faz 3 sonu):** 203/203 PASSED
+- **Integration testler (Faz 3 sonu):** 23/23 PASSED
+- **Manuel browser testi:** 15/15 ✓ (Article CRUD + status flow + Choices.js tag picker + image picker + Quill image insert + Edit/Delete/Restore cycle)
+- **PageSpeed:** Faz 6'da ölçülecek
 
 ---
 

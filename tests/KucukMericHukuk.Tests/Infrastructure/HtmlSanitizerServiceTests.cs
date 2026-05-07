@@ -74,4 +74,56 @@ public class HtmlSanitizerServiceTests
         var result = _sut.Sanitize("<a href=\"ftp://x\">X</a>");
         result.Should().NotContain("ftp://");
     }
+
+    [Fact]
+    public void Sanitize_ImgTag_WithHttpsSrc_ShouldKeep()
+    {
+        var input = "<p>Önce</p><img src=\"https://example.com/foto.webp\" alt=\"foto\" width=\"600\" height=\"400\" class=\"img-fluid\" /><p>Sonra</p>";
+        var result = _sut.Sanitize(input);
+        result.Should().Contain("<img");
+        result.Should().Contain("src=\"https://example.com/foto.webp\"");
+        result.Should().Contain("alt=\"foto\"");
+        result.Should().Contain("width=\"600\"");
+        result.Should().Contain("height=\"400\"");
+        result.Should().Contain("class=\"img-fluid\"");
+    }
+
+    [Fact]
+    public void Sanitize_ImgTag_WithHttpSrc_ShouldStripSrc()
+    {
+        // http reddedildiği için src URL DOM'a yansımamalı (Ganss.Xss: scheme reject → strip).
+        var input = "<img src=\"http://insecure.example.com/x.jpg\" alt=\"x\" />";
+        var result = _sut.Sanitize(input);
+        result.Should().NotContain("http://insecure.example.com");
+    }
+
+    [Fact]
+    public void Sanitize_ImgTag_WithJavascriptSrc_ShouldStrip()
+    {
+        var input = "<img src=\"javascript:alert(1)\" alt=\"xss\" />";
+        var result = _sut.Sanitize(input);
+        result.Should().NotContain("javascript:");
+        result.Should().NotContain("alert");
+    }
+
+    [Fact]
+    public void Sanitize_ImgTag_WithStyleAttribute_ShouldStripStyle()
+    {
+        // style izin verilmedi (Faz 3.3 kararı) — strip edilmeli, ama img + diğer attribute'lar kalır.
+        var input = "<img src=\"https://example.com/x.webp\" alt=\"x\" style=\"position:absolute; top:0\" />";
+        var result = _sut.Sanitize(input);
+        result.Should().Contain("<img");
+        result.Should().Contain("https://example.com/x.webp");
+        result.Should().NotContain("style");
+        result.Should().NotContain("position");
+    }
+
+    [Fact]
+    public void Sanitize_ImgTag_WithOnerrorAttribute_ShouldStrip()
+    {
+        var input = "<img src=\"https://example.com/x.webp\" onerror=\"alert(1)\" />";
+        var result = _sut.Sanitize(input);
+        result.Should().NotContain("onerror");
+        result.Should().NotContain("alert");
+    }
 }

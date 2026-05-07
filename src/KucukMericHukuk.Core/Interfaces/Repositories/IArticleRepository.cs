@@ -1,5 +1,6 @@
 using KucukMericHukuk.Core.DTOs.Common;
 using KucukMericHukuk.Core.Entities;
+using KucukMericHukuk.Core.Enums;
 
 namespace KucukMericHukuk.Core.Interfaces.Repositories;
 
@@ -15,4 +16,18 @@ public interface IArticleRepository : IGenericRepository<Article>
     Task<IReadOnlyList<Article>> GetRecentAsync(string languageCode, int count, CancellationToken ct = default);
     Task IncrementViewCountAsync(int articleId, CancellationToken ct = default);
     Task<bool> SlugExistsAsync(string slug, string languageCode, int? excludeId = null, CancellationToken ct = default);
+
+    Task<PagedResult<Article>> GetAdminPagedAsync(
+        string? keyword,
+        string languageCode,
+        ArticleStatus? status,
+        int? categoryId,
+        int page,
+        int pageSize,
+        bool includeDeleted,
+        CancellationToken ct = default);
+
+    Task<Article?> GetByIdForAdminAsync(int id, CancellationToken ct = default);
+
+    Task<Article?> GetByIdIncludingDeletedAsync(int id, CancellationToken ct = default);
 }

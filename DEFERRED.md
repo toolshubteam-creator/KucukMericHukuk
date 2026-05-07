@@ -11,23 +11,9 @@
 
 ## Faz 3 → İçerik Yönetimi
 
-- **Article modülü** (Faz 2 dışına alındı)
-  - Quill editör + kategori/tag + kapak görseli
-  - Article'a özel ErrorCodes slot'u 2.4a'da hazır
-  - SluggedEntityType.Article 2.4b'de hazır
-
-- **Medya yöneticisi** (Faz 3'e ertelendi)
-  - File upload, galeri, WebP dönüşümü, klasör yapısı
-  - ImageSharp/SkiaSharp paketi
-
 - **SEO meta alanları UI**
   - Entity'lerde alanlar var (Faz 1)
   - Admin form bileşeni Faz 3 (her modülde tekrar kullanılan partial)
-
-- **`<img>` tag'ı HtmlSanitizer whitelist'e**
-  - Şu an HtmlSanitizer whitelist'inde `<img>` yok (Faz 2.5c-i)
-  - Medya yöneticisi entegrasyonu sırasında (Faz 3): `src` + `alt` attribute,
-    scheme genişletmesi (`data:` dikkatle — XSS riski)
 
 ---
 
@@ -78,6 +64,68 @@
   - Faz 2.10c'de değerlendirildi, Faz 5 üretim öncesi tooling olarak
     ertelendi
   - Düşük öncelik (code review yeterli olabilir)
+
+- **Medya: Picker'da çoklu seçim**
+  - Faz 3.2 başlangıç kararıyla MVP'de tek seçim
+  - Ctrl/Shift ile çoklu seçim, Quill'e gallery insert için faydalı
+  - Form alanları için anlamsız (tek input), galeri sayfasında toplu
+    silme/restore aksiyonları için faydalı
+
+- **Medya: Paralel upload + progress bar**
+  - Faz 3.2'de client-side sıralı loop (basit, güvenli)
+  - 5+ dosya yüklenirken UX yavaş kalıyor — `Promise.all` + concurrency
+    limit (örn. 3) ile paralel
+  - Server-side throttling gerekebilir (rate limit, MediaService
+    isteğe bağlı kuyruk)
+
+- **Article: Editor/Author rol bazlı yetkilendirme**
+  - Faz 3 başlangıç kararıyla ertelendi (3 başında: B seçeneği)
+  - Editor rolündeki kullanıcı sadece `Article.AuthorId == currentUserId`
+    olan kayıtları görür/düzenler/siler
+  - Implementation: IAuthorizationService + custom AuthorizationHandler
+    (`ArticleAuthorRequirement`) + service katmanında guard
+  - Integration test gerekir (3 senaryo: kendi makalesi, başkasının
+    makalesi, admin tüm makaleler)
+  - Faz 3'te tüm Article CRUD `[Authorize(Roles = "Admin")]` — service'te
+    AuthorId ataması yapılır, yetki guard'ı sonradan eklenir (breaking değil)
+
+- **Article: Scheduled publishing (zamanlanmış yayın)**
+  - Faz 3 başlangıç kararıyla ertelendi (Status akışı sadeleştirildi)
+  - Senaryo: `PublishedAt > Now && Status = Published` → frontend gizler,
+    zamanı geldiğinde görünür hale gelir
+  - Gerekli bileşenler: frontend filtresi (Faz 4 ile birlikte),
+    admin "Zamanlanmış" sekmesi, opsiyonel background service (cron)
+  - Faz 3'te yok — Status manuel, anlık: Draft / Published (PublishedAt=Now) / Archived
+
+- **Medya: Manuel klasör yönetimi**
+  - Faz 3 başlangıç kararıyla ertelendi (MVP kapsamı dışı)
+  - Kullanıcı tarafından klasör oluşturma, taşıma, yeniden adlandırma
+  - Implementation: `MediaFolder` entity + `MediaFile.FolderId` (nullable FK)
+  - Restore senaryosu karmaşık (klasör silinmiş + dosya restore edilirse?)
+  - İhtiyaç doğarsa Faz 5'te eklenir — mevcut dosyalar `FolderId = null`
+    kalır (root), breaking migration değil
+
+- **Medya: Responsive variant + SEO genişletmesi**
+  - Faz 3 başlangıç kararıyla ertelendi (MVP kapsamı dışı)
+  - 1x / 2x varyant üretimi (`srcset` desteği için)
+  - `title` ve `figcaption` alanları (alt-text MVP'de var)
+  - Faz 5 SEO turunda Schema.org ImageObject ile birlikte değerlendirilir
+  - Implementation: ImageSharp ile ek varyantlar, `MediaFile.Variants`
+    navigation property veya hesaplanan dosya yolu pattern'i
+
+- **Test ortamı için IFileStorageService mock/in-memory varyantı**
+  - Faz 3.2 raporunda gündeme geldi (madde DEFERRED'a 3.3'te yazıldı)
+  - Mevcut durum: Integration testler gerçek `wwwroot/uploads/` altına
+    dosya yazıyor (LocalFileStorageService gerçek WebRootPath kullanır)
+  - Geçici çözüm: `.gitignore`'da `src/KucukMericHukuk.Web/wwwroot/uploads/`
+    → repo'ya kaçmıyor
+  - Risk: Test izolasyonu zayıf, paralel test çakışması mümkün, cleanup yok,
+    her test koşusu disk biriktirir
+  - Çözüm seçenekleri:
+    - `InMemoryFileStorageService` implementasyonu, `WebApplicationFactory`'de
+      DI override (test fixture'ında)
+    - VEYA `TempPath` bazlı `LocalFileStorageService` variant + test sonrası
+      cleanup hook (`IAsyncLifetime`)
 
 ---
 

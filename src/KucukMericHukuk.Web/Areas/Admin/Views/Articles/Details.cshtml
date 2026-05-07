@@ -1,0 +1,214 @@
+@using KucukMericHukuk.Core.Enums
+@model KucukMericHukuk.Core.DTOs.Article.ArticleAdminDto
+@{
+    var firstTranslation = Model.Translations.FirstOrDefault();
+    var title = firstTranslation?.Title ?? "(başlıksız)";
+    ViewData["Title"] = $"Makale: {title}";
+
+    string StatusBadge() => Model.Status switch
+    {
+        ArticleStatus.Published => "<span class=\"badge bg-success-lt\">Yayında</span>",
+        ArticleStatus.Archived => "<span class=\"badge bg-dark-lt\">Arşivlendi</span>",
+        _ => "<span class=\"badge bg-secondary-lt\">Taslak</span>",
+    };
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin/components/page-details.css" asp-append-version="true" />
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <nav aria-label="breadcrumbs">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-action="Index" asp-controller="Articles" asp-area="Admin">Makaleler</a>
+                    </li>
+                    <li class="breadcrumb-item active">@title</li>
+                </ol>
+            </nav>
+            <h2 class="page-title">@title</h2>
+        </div>
+        <div class="col-auto">
+            @if (!Model.IsDeleted)
+            {
+                <a asp-action="Edit" asp-controller="Articles" asp-area="Admin"
+                   asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="ti ti-edit me-1"></i> Düzenle
+                </a>
+                <form asp-action="Delete" asp-controller="Articles" asp-area="Admin"
+                      asp-route-id="@Model.Id" method="post" class="d-inline ms-1"
+                      data-confirm="Bu makaleyi silmek istediğinizden emin misiniz?"
+                      data-confirm-title="Makaleyi Sil"
+                      data-confirm-button="Sil">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="ti ti-trash me-1"></i> Sil
+                    </button>
+                </form>
+            }
+            else
+            {
+                <form asp-action="Restore" asp-controller="Articles" asp-area="Admin"
+                      asp-route-id="@Model.Id" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-success">
+                        <i class="ti ti-restore me-1"></i> Geri Yükle
+                    </button>
+                </form>
+                <form asp-action="HardDelete" asp-controller="Articles" asp-area="Admin"
+                      asp-route-id="@Model.Id" method="post" class="d-inline ms-1"
+                      data-confirm="Bu makale ve tüm çevirileri KALICI olarak silinecek. Devam edilsin mi?"
+                      data-confirm-title="Kalıcı Silme"
+                      data-confirm-button="Tamamen Sil"
+                      data-confirm-variant="danger">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="ti ti-x me-1"></i> Tamamen Sil
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string successMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@successMsg</div>
+}
+@if (TempData["Error"] is string errorMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errorMsg</div>
+}
+
+<div class="row mt-3">
+    <div class="col-12 col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Genel Bilgiler</h3>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.FeaturedImageUrl))
+            {
+                <img src="@Model.FeaturedImageUrl" alt="" class="img-fluid" />
+            }
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-5">Durum</dt>
+                    <dd class="col-7">@Html.Raw(StatusBadge())</dd>
+
+                    <dt class="col-5">Yayın Tarihi</dt>
+                    <dd class="col-7">
+                        @(Model.PublishedAt.HasValue
+                            ? Model.PublishedAt.Value.ToString("dd.MM.yyyy HH:mm")
+                            : "—")
+                    </dd>
+
+                    <dt class="col-5">Yazar</dt>
+                    <dd class="col-7">@(Model.AuthorName ?? "—")</dd>
+
+                    <dt class="col-5">Kategori</dt>
+                    <dd class="col-7">@(Model.CategoryName ?? "—")</dd>
+
+                    <dt class="col-5">Görüntülenme</dt>
+                    <dd class="col-7">@Model.ViewCount</dd>
+
+                    <dt class="col-5">Öne Çıkan</dt>
+                    <dd class="col-7">@(Model.IsFeatured ? "Evet" : "Hayır")</dd>
+
+                    <dt class="col-5">Etiketler</dt>
+                    <dd class="col-7">
+                        @if (Model.Tags.Count == 0)
+                        {
+                            <span class="text-secondary">—</span>
+                        }
+                        else
+                        {
+                            foreach (var tag in Model.Tags)
+                            {
+                                <span class="badge bg-blue-lt me-1">@tag.Name</span>
+                            }
+                        }
+                    </dd>
+
+                    <dt class="col-5">Oluşturulma</dt>
+                    <dd class="col-7">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+
+                    @if (Model.UpdatedAt.HasValue)
+                    {
+                        <dt class="col-5">Güncellenme</dt>
+                        <dd class="col-7">@Model.UpdatedAt.Value.ToString("dd.MM.yyyy HH:mm")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Çeviriler (@(Model.Translations?.Count ?? 0))</h3>
+            </div>
+            <div class="card-body">
+                @if (Model.Translations is null || Model.Translations.Count == 0)
+                {
+                    <p class="text-secondary mb-0">Henüz çeviri eklenmemiş.</p>
+                }
+                else
+                {
+                    <div class="accordion" id="articleTranslationsAccordion">
+                        @{ var idx = 0; }
+                        @foreach (var t in Model.Translations)
+                        {
+                            var collapseId = $"art-trans-{idx}";
+                            <div class="accordion-item">
+                                <h4 class="accordion-header">
+                                    <button class="accordion-button @(idx > 0 ? "collapsed" : "")"
+                                            type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#@collapseId"
+                                            aria-expanded="@(idx == 0 ? "true" : "false")">
+                                        <span class="badge bg-blue-lt me-2">@t.LanguageCode</span>
+                                        @t.Title
+                                    </button>
+                                </h4>
+                                <div id="@collapseId"
+                                     class="accordion-collapse collapse @(idx == 0 ? "show" : "")"
+                                     data-bs-parent="#articleTranslationsAccordion">
+                                    <div class="accordion-body">
+                                        <dl class="row">
+                                            <dt class="col-3">Slug</dt>
+                                            <dd class="col-9"><code>@t.Slug</code></dd>
+
+                                            <dt class="col-3">Kısa Açıklama</dt>
+                                            <dd class="col-9">@(string.IsNullOrWhiteSpace(t.Excerpt) ? "—" : t.Excerpt)</dd>
+
+                                            <dt class="col-3">Okuma Süresi</dt>
+                                            <dd class="col-9">@t.ReadingTimeMinutes dk</dd>
+
+                                            <dt class="col-3">Meta Başlık</dt>
+                                            <dd class="col-9">@(string.IsNullOrWhiteSpace(t.MetaTitle) ? "—" : t.MetaTitle)</dd>
+
+                                            <dt class="col-3">Meta Açıklama</dt>
+                                            <dd class="col-9">@(string.IsNullOrWhiteSpace(t.MetaDescription) ? "—" : t.MetaDescription)</dd>
+
+                                            <dt class="col-3">İçerik</dt>
+                                            <dd class="col-9">
+                                                @* Servis tarafında HtmlSanitizer'dan geçti — Html.Raw güvenli. *@
+                                                <div class="border rounded p-2 bg-light">
+                                                    <div class="page-content-preview">
+                                                        @Html.Raw(t.Content)
+                                                    </div>
+                                                </div>
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                            idx++;
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

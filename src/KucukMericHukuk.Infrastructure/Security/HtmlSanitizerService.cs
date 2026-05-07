@@ -19,7 +19,8 @@ public class HtmlSanitizerService : IHtmlSanitizerService
             "p", "br", "strong", "em", "u", "s",
             "a", "ul", "ol", "li",
             "h2", "h3", "h4",
-            "blockquote", "code", "pre"
+            "blockquote", "code", "pre",
+            "img"
         })
         {
             _sanitizer.AllowedTags.Add(tag);
@@ -29,8 +30,16 @@ public class HtmlSanitizerService : IHtmlSanitizerService
         _sanitizer.AllowedAttributes.Add("target");
         _sanitizer.AllowedAttributes.Add("rel");
 
+        // <img> attribute whitelist (Faz 3.3): src, alt, width, height, class.
+        // style YASAK (XSS yüzeyi genişlemesin); on* zaten Ganss.Xss tarafından strip edilir.
+        _sanitizer.AllowedAttributes.Add("src");
+        _sanitizer.AllowedAttributes.Add("alt");
+        _sanitizer.AllowedAttributes.Add("width");
+        _sanitizer.AllowedAttributes.Add("height");
+        _sanitizer.AllowedAttributes.Add("class");
+
+        // HTTPS-only (Faz 3.3 kararı): http kaldırıldı, mixed-content engellenir.
         _sanitizer.AllowedSchemes.Clear();
-        _sanitizer.AllowedSchemes.Add("http");
         _sanitizer.AllowedSchemes.Add("https");
         _sanitizer.AllowedSchemes.Add("mailto");
         _sanitizer.AllowedSchemes.Add("tel");

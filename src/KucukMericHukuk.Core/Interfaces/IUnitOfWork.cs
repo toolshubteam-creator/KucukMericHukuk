@@ -10,6 +10,7 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
     ICategoryRepository Categories { get; }
     ITagRepository Tags { get; }
     IArticleRepository Articles { get; }
+    IMediaFileRepository MediaFiles { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 

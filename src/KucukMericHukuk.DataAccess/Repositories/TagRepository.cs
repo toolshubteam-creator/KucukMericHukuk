@@ -84,4 +84,7 @@ public class TagRepository : GenericRepository<Tag>, ITagRepository
     public Task<Tag?> GetByIdIncludingDeletedAsync(int id, CancellationToken ct = default)
         => _dbSet.IgnoreQueryFilters()
             .FirstOrDefaultAsync(t => t.Id == id, ct);
+
+    public async Task<List<Tag>> GetByIdsAsync(IEnumerable<int> ids, CancellationToken ct = default)
+        => await _dbSet.Where(t => ids.Contains(t.Id)).ToListAsync(ct);
 }

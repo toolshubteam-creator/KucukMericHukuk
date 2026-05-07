@@ -35,16 +35,25 @@
 
                 <div class="mb-3">
                     <label asp-for="ProfileImageUrl" class="form-label"></label>
-                    <input asp-for="ProfileImageUrl" class="form-control" maxlength="500" />
+                    <div class="input-group">
+                        <input asp-for="ProfileImageUrl" id="AttorneyProfileImageUrl" class="form-control" maxlength="500" />
+                        <button type="button" class="btn btn-outline-secondary"
+                                data-media-picker-target="#AttorneyProfileImageUrl"
+                                data-media-preview="#AttorneyProfileImagePreview">
+                            <i class="ti ti-photo me-1"></i> Galeriden Seç
+                        </button>
+                    </div>
                     <span asp-validation-for="ProfileImageUrl" class="invalid-feedback d-block"></span>
-                    <small class="form-hint">Görsel URL (Faz 3'te medya yöneticisi eklenecek).</small>
-
-                    @if (!string.IsNullOrWhiteSpace(Model.ProfileImageUrl))
-                    {
-                        <div class="mt-2">
-                            <img src="@Model.ProfileImageUrl" alt="Profil önizleme" class="rounded attorney-photo-preview" />
-                        </div>
-                    }
+                    <div class="mt-2">
+                        @if (!string.IsNullOrWhiteSpace(Model.ProfileImageUrl))
+                        {
+                            <img id="AttorneyProfileImagePreview" src="@Model.ProfileImageUrl" alt="Profil önizleme" class="rounded attorney-photo-preview" />
+                        }
+                        else
+                        {
+                            <img id="AttorneyProfileImagePreview" src="" alt="" class="rounded attorney-photo-preview" hidden />
+                        }
+                    </div>
                 </div>
             </div>
         </div>

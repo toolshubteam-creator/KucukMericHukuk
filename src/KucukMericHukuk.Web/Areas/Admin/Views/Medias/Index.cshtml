@@ -1,0 +1,140 @@
+@using KucukMericHukuk.Web.Areas.Admin.ViewModels.Shared
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Medias.MediaListViewModel
+@{
+    ViewData["Title"] = "Medya";
+
+    var paginationVm = new PaginationViewModel
+    {
+        PageNumber = Model.PageNumber,
+        TotalPages = Model.TotalPages,
+        HasPrevious = Model.HasPrevious,
+        HasNext = Model.HasNext,
+        GetPageUrl = pageNum => Url.Action("Index", "Medias", new
+        {
+            area = "Admin",
+            keyword = Model.Query.Keyword,
+            page = pageNum,
+            pageSize = Model.Query.PageSize,
+            includeDeleted = Model.Query.IncludeDeleted
+        }) ?? "#"
+    };
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">Medya</h2>
+            <div class="text-secondary">Toplam @Model.TotalCount dosya</div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string okMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@okMsg</div>
+}
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+
+<div class="card mt-3">
+    <div class="card-body">
+        <div id="media-upload-zone" class="media-upload-zone" data-upload-url="@Url.Action("Upload", "Medias", new { area = "Admin" })">
+            <div class="media-upload-zone-content">
+                <i class="ti ti-cloud-upload media-upload-zone-icon"></i>
+                <div class="media-upload-zone-title">Görsel yüklemek için sürükleyip bırakın</div>
+                <div class="media-upload-zone-subtitle">veya <button type="button" class="btn btn-link p-0 align-baseline" id="media-upload-pick">dosya seçin</button></div>
+                <div class="text-secondary small mt-2">JPEG, PNG, WebP — maksimum 10 MB</div>
+            </div>
+            <input type="file" id="media-upload-input" multiple accept="image/jpeg,image/png,image/webp" hidden />
+            @Html.AntiForgeryToken()
+        </div>
+        <div id="media-upload-progress" class="mt-3" hidden></div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body border-bottom">
+        <form asp-action="Index" asp-controller="Medias" asp-area="Admin" method="get">
+            <div class="row g-2">
+                <div class="col-md">
+                    <input type="search" name="keyword" value="@Model.Query.Keyword"
+                           class="form-control" placeholder="Dosya adı veya alt-text..." />
+                </div>
+                <div class="col-md-auto">
+                    <label class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox"
+                               name="includeDeleted" value="true"
+                               @(Model.Query.IncludeDeleted ? "checked" : "") />
+                        <span class="form-check-label">Silinmişleri göster</span>
+                    </label>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="ti ti-search me-1"></i> Ara
+                    </button>
+                    <a asp-action="Index" asp-controller="Medias" asp-area="Admin"
+                       class="btn btn-outline-secondary">Temizle</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">Medya bulunamadı</p>
+            <p class="empty-subtitle text-secondary">
+                @if (!string.IsNullOrWhiteSpace(Model.Query.Keyword))
+                {
+                    <text>"@Model.Query.Keyword" araması için sonuç yok.</text>
+                }
+                else
+                {
+                    <text>Yukarıdaki alana sürükle-bırak yaparak ilk görseli yükleyebilirsiniz.</text>
+                }
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="card-body">
+            <div class="row row-cards media-grid">
+                @foreach (var item in Model.Items)
+                {
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="card card-sm media-card @(item.IsDeleted ? "media-card-deleted" : "")">
+                            <a asp-action="Details" asp-controller="Medias" asp-area="Admin" asp-route-id="@item.Id">
+                                <img src="@item.ThumbnailUrl" alt="@(item.AltText ?? item.OriginalFileName)" class="card-img-top media-card-thumb" loading="lazy" />
+                            </a>
+                            <div class="card-body p-2">
+                                <div class="text-truncate" title="@item.OriginalFileName">@item.OriginalFileName</div>
+                                <div class="text-secondary small">@item.Width × @item.Height — @((item.FileSizeBytes / 1024).ToString("N0")) KB</div>
+                                @if (item.IsDeleted)
+                                {
+                                    <span class="badge bg-danger-lt mt-1">Silinmiş</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                <strong>@((Model.PageNumber - 1) * Model.PageSize + 1)</strong> -
+                <strong>@Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)</strong>
+                arası, toplam <strong>@Model.TotalCount</strong> kayıt
+            </p>
+            <div class="ms-auto">
+                <partial name="_Pagination" model="paginationVm" />
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/admin/media-gallery.js" asp-append-version="true"></script>
+}

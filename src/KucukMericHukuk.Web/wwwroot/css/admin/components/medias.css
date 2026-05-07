@@ -1,0 +1,65 @@
+/* Medya yöneticisi — galeri grid, upload zone, picker modal kartları. */
+
+.media-upload-zone {
+    position: relative;
+    border: 2px dashed var(--tblr-border-color, #dadcde);
+    border-radius: 8px;
+    padding: 2rem 1rem;
+    text-align: center;
+    transition: border-color .15s, background-color .15s;
+    cursor: default;
+}
+.media-upload-zone-hover {
+    border-color: var(--tblr-primary, #0054a6);
+    background-color: rgba(0, 84, 166, 0.04);
+}
+.media-upload-zone-icon {
+    font-size: 2.5rem;
+    color: var(--tblr-secondary, #6c757d);
+}
+.media-upload-zone-title {
+    font-weight: 500;
+    margin-top: .5rem;
+}
+.media-upload-zone-subtitle {
+    color: var(--tblr-secondary, #6c757d);
+    margin-top: .25rem;
+}
+
+.media-grid .media-card-thumb {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    background-color: #f8f9fa;
+}
+.media-card-deleted {
+    opacity: .55;
+}
+
+.media-detail-image {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+}
+
+.mp-card {
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+}
+.mp-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.12);
+}
+.mp-card-thumb {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    background-color: #f8f9fa;
+}
+
+/* Service form featured image preview (Faz 3.2) */
+.service-featured-preview {
+    max-width: 320px;
+    max-height: 180px;
+    object-fit: cover;
+    border: 1px solid var(--tblr-border-color, #dadcde);
+}

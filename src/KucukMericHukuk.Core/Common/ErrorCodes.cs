@@ -23,6 +23,8 @@ public static class ErrorCodes
         public const string NotFound = "Article.NotFound";
         public const string SlugExists = "Article.SlugExists";
         public const string InvalidStatus = "Article.InvalidStatus";
+        public const string CategoryNotFound = "Article.CategoryNotFound";
+        public const string TranslationRequired = "Article.TranslationRequired";
     }
 
     public static class Service
@@ -54,5 +56,14 @@ public static class ErrorCodes
     {
         public const string NotFound = "Tag.NotFound";
         public const string SlugExists = "Tag.SlugExists";
+    }
+
+    public static class Media
+    {
+        public const string NotFound = "Media.NotFound";
+        public const string FileTooLarge = "Media.FileTooLarge";
+        public const string UnsupportedMediaType = "Media.UnsupportedMediaType";
+        public const string ProcessingFailed = "Media.ProcessingFailed";
+        public const string StorageFailed = "Media.StorageFailed";
     }
 }
