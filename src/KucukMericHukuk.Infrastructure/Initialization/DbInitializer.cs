@@ -312,6 +312,80 @@ public class DbInitializer : IDbInitializer
             _logger.LogInformation("Demo seed: 3 makale eklendi (kategorili: 1 Ceza + 2 Aile).");
         }
 
+        var pageSeeds = new[]
+        {
+            new
+            {
+                Key = "about", DisplayOrder = 1,
+                Title = "Hakkımızda", Slug = "hakkimizda",
+                Content = "<h2>Küçükmeriç Hukuk Bürosu</h2><p>Sakarya Serdivan'da hizmet veren büromuz, müvekkillerimize geniş hukuki alanlarda uzmanlık ve titiz takip sağlamaktadır.</p><p>Misyonumuz, etik ve şeffaf çalışma ilkeleri çerçevesinde adil hukuki çözümler üretmektir.</p>",
+                MetaTitle = "Hakkımızda — Küçükmeriç Hukuk Bürosu",
+                MetaDescription = "Sakarya Serdivan'da hizmet veren Küçükmeriç Hukuk Bürosu hakkında bilgi."
+            },
+            new
+            {
+                Key = "privacy", DisplayOrder = 2,
+                Title = "Gizlilik Politikası (KVKK)", Slug = "gizlilik",
+                Content = "<h2>Kişisel Verilerin Korunması</h2><p>6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında, kişisel verilerinizin işlenmesi ve korunması ile ilgili politikalarımız bu sayfada açıklanmaktadır.</p><p><em>Bu içerik müşteri tarafından detaylandırılacaktır.</em></p>",
+                MetaTitle = "Gizlilik Politikası — KVKK",
+                MetaDescription = "Kişisel verilerin korunması kanunu kapsamında gizlilik politikamız."
+            },
+            new
+            {
+                Key = "cookie", DisplayOrder = 3,
+                Title = "Çerez Politikası", Slug = "cerez-politikasi",
+                Content = "<h2>Çerez Kullanımı</h2><p>Web sitemiz kullanıcı deneyimini iyileştirmek için çerezler kullanmaktadır. Bu çerezlerin türleri ve kullanım amaçları hakkında detaylı bilgi bu sayfada yer alır.</p><p><em>Bu içerik müşteri tarafından detaylandırılacaktır.</em></p>",
+                MetaTitle = "Çerez Politikası",
+                MetaDescription = "Web sitemizdeki çerez kullanımı hakkında bilgi."
+            },
+            new
+            {
+                Key = "terms", DisplayOrder = 4,
+                Title = "Kullanım Koşulları", Slug = "kullanim-kosullari",
+                Content = "<h2>Site Kullanım Koşulları</h2><p>Bu web sitesini ziyaret eden ve kullanan ziyaretçilerimizin uyması beklenen koşullar bu sayfada açıklanmaktadır.</p><p><em>Bu içerik müşteri tarafından detaylandırılacaktır.</em></p>",
+                MetaTitle = "Kullanım Koşulları",
+                MetaDescription = "Site kullanım koşulları."
+            }
+        };
+
+        var addedPageCount = 0;
+        foreach (var seed in pageSeeds)
+        {
+            // Idempotent: PageKey'e göre kontrol (dil-bağımsız teknik ID).
+            var exists = await _db.Set<Page>().AnyAsync(p => p.PageKey == seed.Key, ct);
+            if (exists) continue;
+
+            var page = new Page
+            {
+                PageKey = seed.Key,
+                IsActive = true,
+                DisplayOrder = seed.DisplayOrder,
+                Translations = new List<PageTranslation>
+                {
+                    new()
+                    {
+                        LanguageCode = "tr-TR",
+                        Title = seed.Title,
+                        Slug = seed.Slug,
+                        Content = seed.Content,
+                        MetaTitle = seed.MetaTitle,
+                        MetaDescription = seed.MetaDescription
+                    }
+                }
+            };
+            _db.Set<Page>().Add(page);
+            addedPageCount++;
+        }
+        if (addedPageCount > 0)
+        {
+            await _db.SaveChangesAsync(ct);
+            _logger.LogInformation("Demo seed: {Count} sayfa eklendi (eksik PageKey'ler).", addedPageCount);
+        }
+        else
+        {
+            _logger.LogInformation("Demo seed: tüm PageKey'ler zaten mevcut, sayfa eklenmedi.");
+        }
+
         var attorneys = await _db.Set<Attorney>().Include(a => a.Services).ToListAsync(ct);
         var allServices = await _db.Set<Service>().ToListAsync(ct);
         var anyChange = false;

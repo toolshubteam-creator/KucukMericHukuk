@@ -17,6 +17,7 @@
 @import url('components/pagination.css');
 @import url('components/service-detail.css');
 @import url('components/attorney-detail.css');
+@import url('components/page-detail.css');
 
 /* --- Design tokens (admin.css ile birebir aynı renk seti, ayrı dosya) --- */
 :root {

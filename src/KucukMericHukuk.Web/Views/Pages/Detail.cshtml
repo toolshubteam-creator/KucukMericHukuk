@@ -1,0 +1,23 @@
+@model KucukMericHukuk.Web.ViewModels.Page.PageDetailViewModel
+@using KucukMericHukuk.Web.Helpers
+@{
+    ViewData["Title"] = !string.IsNullOrEmpty(Model.Page.MetaTitle) ? Model.Page.MetaTitle : Model.Page.Title;
+}
+
+<article class="page-detail">
+    <header class="page-detail__header section-public">
+        <div class="container container-narrow">
+            <h1 class="page-detail__title">@Model.Page.Title</h1>
+        </div>
+    </header>
+
+    <div class="page-detail__content section-public">
+        <div class="container container-narrow">
+            <div class="article-content">
+                @Html.LazyImageHtml(Model.Page.Content)
+            </div>
+        </div>
+    </div>
+</article>
+
+<partial name="_CtaSection" />
