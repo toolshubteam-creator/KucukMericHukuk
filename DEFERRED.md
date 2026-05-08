@@ -32,6 +32,25 @@
 
 - **OWASP Top 10 audit**
 
+- **Token DRY refactor — admin + public ortak `tokens.css`**
+  - Faz 4.1'de admin.css :root token'ları ve site.css :root token'ları aynı renk değerleriyle iki dosyada duplicate yazıldı
+  - Refactor: ortak `wwwroot/css/tokens.css` her iki layout'ta `<link>` ile yüklenir
+  - Trade-off: tutarlılık vs çift dosya değiştirme riski; şimdilik bilinçli duplicate
+  - Tetik: Faz 5/6 cleanup turunda
+
+- **Google Fonts self-host (Playfair Display + Inter)**
+  - Faz 4.1'de Google Fonts CDN ile yüklendi (preconnect + display=swap)
+  - Self-host avantaj: 1 daha az DNS, GDPR safer, indirme garantili boyut
+  - Implementation: woff2 dosyalarını `wwwroot/fonts/` altına indir, @font-face ile bağla
+  - Tetik: Faz 5/6 PageSpeed optimizasyon turunda
+
+- **CDN SRI integrity hash — admin + public Bootstrap, Tabler, Choices.js, Quill, SweetAlert2**
+  - Faz 4.1 başında durma noktası: admin layout'unda Bootstrap JS SRI'siz yükleniyor (Faz 3.3.1 kararı), public'te de aynı politikayla devam edildi (5.3.3 CDN, hash yok)
+  - Diğer CDN'ler (Tabler 1.4.0, Choices.js 11.1.0, Quill 2.0.3, SweetAlert2) de SRI'siz yükleniyor
+  - OWASP A06: Vulnerable Components — supply chain saldırısına karşı koruma
+  - Implementation: tüm CDN <link>/<script> tag'lerine integrity="sha384-..." crossorigin="anonymous" ekle, hash'leri jsdelivr/CDN sağlayıcılarının SRI generator'ından üret
+  - Tetik: Faz 5 OWASP Top 10 audit turunda — admin + public birlikte
+
 - **Sitemap.xml otomatik üretici** (Infrastructure)
 
 - **robots.txt dinamik yönetim**

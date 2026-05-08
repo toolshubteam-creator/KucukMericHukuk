@@ -1,0 +1,17 @@
+@* Faz 4.1: minimal placeholder header. Faz 4.2'de full nav + mobile hamburger gelecek. *@
+@{
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+<header class="site-header">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between">
+            <a class="site-header__brand" asp-controller="Home" asp-action="Index" asp-route-culture="@culture">
+                Küçükmeriç Hukuk
+            </a>
+            <nav class="site-header__nav d-none d-md-flex">
+                <a asp-controller="Home" asp-action="Index" asp-route-culture="@culture">Ana Sayfa</a>
+                <a asp-controller="Home" asp-action="Privacy" asp-route-culture="@culture">Gizlilik</a>
+            </nav>
+        </div>
+    </div>
+</header>
