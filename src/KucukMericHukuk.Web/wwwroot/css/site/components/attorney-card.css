@@ -1,0 +1,38 @@
+.attorney-card {
+    text-align: center;
+    background: var(--color-bg-alt);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    transition: transform 0.25s ease;
+}
+
+.attorney-card:hover { transform: translateY(-4px); }
+
+.attorney-card__photo {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto var(--space-2);
+    border: 3px solid var(--color-accent);
+}
+
+.attorney-card__photo--placeholder {
+    background-color: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent);
+}
+
+.attorney-card__name {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--color-primary);
+    margin-bottom: 4px;
+}
+
+.attorney-card__title {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+}

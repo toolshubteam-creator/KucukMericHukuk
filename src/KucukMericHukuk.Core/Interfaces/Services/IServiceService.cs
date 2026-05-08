@@ -9,6 +9,9 @@ public interface IServiceService
     Task<Result<ServiceDetailDto>> GetBySlugAsync(
         string slug, string languageCode, CancellationToken ct = default);
 
+    Task<IReadOnlyList<ServiceListDto>> GetActiveOrderedAsync(
+        string languageCode, int? take = null, CancellationToken ct = default);
+
     Task<Result<ServiceAdminDto>> GetByIdAsync(
         int id, CancellationToken ct = default);
 

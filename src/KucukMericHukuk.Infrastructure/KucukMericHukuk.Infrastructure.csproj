@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\KucukMericHukuk.Core\KucukMericHukuk.Core.csproj" />
+    <ProjectReference Include="..\KucukMericHukuk.DataAccess\KucukMericHukuk.DataAccess.csproj" />
   </ItemGroup>
 
   <ItemGroup>

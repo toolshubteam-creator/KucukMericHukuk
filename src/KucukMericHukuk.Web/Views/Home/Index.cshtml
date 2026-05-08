@@ -1,14 +1,71 @@
+@model KucukMericHukuk.Web.ViewModels.Home.HomeIndexViewModel
 @{
-    ViewData["Title"] = "Küçükmeriç Hukuk Bürosu — Ana Sayfa";
+    ViewData["Title"] = "Küçükmeriç Hukuk Bürosu";
 }
 
-<section class="section">
-    <div class="container container-narrow text-center">
-        <h1 class="mb-3">Faz 4.1 — Layout iskeleti hazır</h1>
-        <p class="lead mb-4">
-            Public layout, design token ve tipografi entegrasyonu çalışıyor.
-            Hero, hizmetler, avukatlar ve makaleler Faz 4.2 ile gelecek.
-        </p>
-        <a href="#" class="btn-accent">Randevu Al (placeholder)</a>
-    </div>
-</section>
+<partial name="_HeroSection" />
+
+@if (Model.FeaturedServices.Any())
+{
+    <section class="section-public" data-fade-up>
+        <div class="container">
+            <div class="section-public__header">
+                <p class="section-public__eyebrow">Hizmet Alanlarımız</p>
+                <h2 class="section-public__title">Uzmanlık alanlarımız</h2>
+                <p class="section-public__lead">Geniş yelpazede hukuki danışmanlık ve dava takibi hizmeti sunuyoruz.</p>
+            </div>
+            <div class="row g-4">
+                @foreach (var service in Model.FeaturedServices)
+                {
+                    <div class="col-md-4">
+                        <partial name="_ServiceCard" model="service" />
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<partial name="_PrinciplesSection" />
+
+@if (Model.FeaturedAttorneys.Any())
+{
+    <section class="section-public" data-fade-up>
+        <div class="container">
+            <div class="section-public__header">
+                <p class="section-public__eyebrow">Ekibimiz</p>
+                <h2 class="section-public__title">Avukatlarımız</h2>
+            </div>
+            <div class="row g-4 justify-content-center">
+                @foreach (var attorney in Model.FeaturedAttorneys)
+                {
+                    <div class="col-md-4">
+                        <partial name="_AttorneyCard" model="attorney" />
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+@if (Model.RecentArticles.Any())
+{
+    <section class="section-public section-public--alt" data-fade-up>
+        <div class="container">
+            <div class="section-public__header">
+                <p class="section-public__eyebrow">Yayınlar</p>
+                <h2 class="section-public__title">Son makaleler</h2>
+            </div>
+            <div class="row g-4">
+                @foreach (var article in Model.RecentArticles)
+                {
+                    <div class="col-md-4">
+                        <partial name="_ArticleCard" model="article" />
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<partial name="_CtaSection" />

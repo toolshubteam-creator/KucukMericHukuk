@@ -35,7 +35,8 @@
 
 | Adım | Açıklama | Commit |
 | --- | --- | --- |
-| 4.1 | Public layout iskeleti + design token + tipografi (Playfair+Inter) + Bootstrap CDN + _PublicLayout/_SiteHeader/_SiteFooter/_BareLayout partial seti | _pending_ |
+| 4.1 | Public layout iskeleti + design token + tipografi (Playfair+Inter) + Bootstrap CDN + _PublicLayout/_SiteHeader/_SiteFooter/_BareLayout partial seti | `65dcfbf` |
+| 4.2 | Ana Sayfa: hero + hizmetler + ilkeler + avukatlar + makaleler + cta · 6 partial · 7 component CSS · Lucide ikonlar · scroll fade-up · 3 service public method (`GetActiveOrderedAsync` × 2 + `GetFeaturedOrRecentAsync`) · DbInitializer demo seed (flag-driven) · 2 stub controller (Services/Articles Detail) | _pending_ |
 
 ---
 

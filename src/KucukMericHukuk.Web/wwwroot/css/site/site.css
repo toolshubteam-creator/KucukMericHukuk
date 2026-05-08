@@ -5,6 +5,14 @@
    Bootstrap 5.3.3 üzerine override.
    ============================================================ */
 
+@import url('components/hero.css');
+@import url('components/section.css');
+@import url('components/service-card.css');
+@import url('components/attorney-card.css');
+@import url('components/article-card.css');
+@import url('components/principles.css');
+@import url('components/cta-section.css');
+
 /* --- Design tokens (admin.css ile birebir aynı renk seti, ayrı dosya) --- */
 :root {
     --color-primary: #0F2A23;

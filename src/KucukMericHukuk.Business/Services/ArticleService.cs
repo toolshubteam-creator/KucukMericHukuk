@@ -39,6 +39,24 @@ public class ArticleService : IArticleService
         _sanitizer = sanitizer;
     }
 
+    public async Task<IReadOnlyList<ArticleListDto>> GetFeaturedOrRecentAsync(
+        string languageCode, int count, CancellationToken ct = default)
+    {
+        var featured = await _uow.Articles.GetFeaturedAsync(languageCode, count, ct);
+        if (featured.Count >= count)
+        {
+            return _mapper.Map<List<ArticleListDto>>(featured.Take(count).ToList());
+        }
+
+        var remaining = count - featured.Count;
+        var recent = await _uow.Articles.GetRecentAsync(languageCode, count + featured.Count, ct);
+        var featuredIds = featured.Select(a => a.Id).ToHashSet();
+        var fillIn = recent.Where(a => !featuredIds.Contains(a.Id)).Take(remaining);
+
+        var combined = featured.Concat(fillIn).ToList();
+        return _mapper.Map<List<ArticleListDto>>(combined);
+    }
+
     public async Task<Result<ArticleAdminDto>> GetByIdAsync(int id, CancellationToken ct = default)
     {
         var article = await _uow.Articles.GetByIdForAdminAsync(id, ct);

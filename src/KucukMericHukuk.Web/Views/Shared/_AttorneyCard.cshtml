@@ -1,0 +1,16 @@
+@model KucukMericHukuk.Core.DTOs.Attorney.AttorneyListDto
+@{
+    var hasPhoto = !string.IsNullOrEmpty(Model.ProfileImageUrl);
+}
+<div class="attorney-card">
+    @if (hasPhoto)
+    {
+        <img src="@Model.ProfileImageUrl" alt="@Model.FullName" class="attorney-card__photo" loading="lazy" />
+    }
+    else
+    {
+        <div class="attorney-card__photo attorney-card__photo--placeholder"><i data-lucide="user" width="40" height="40"></i></div>
+    }
+    <h3 class="attorney-card__name">@Model.FullName</h3>
+    <p class="attorney-card__title">@Model.Title</p>
+</div>
