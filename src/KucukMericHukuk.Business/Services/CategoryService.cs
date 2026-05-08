@@ -31,6 +31,13 @@ public class CategoryService : ICategoryService
         _validator = validator;
     }
 
+    public async Task<IReadOnlyList<CategoryListDto>> GetActiveOrderedAsync(
+        string languageCode, CancellationToken ct = default)
+    {
+        var entities = await _uow.Categories.GetActiveOrderedAsync(languageCode, ct);
+        return _mapper.Map<List<CategoryListDto>>(entities);
+    }
+
     public async Task<Result<CategoryListDto>> GetBySlugAsync(
         string slug, string languageCode, CancellationToken ct = default)
     {
