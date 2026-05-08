@@ -17,6 +17,21 @@
 
 ---
 
+## Faz 4 → Frontend (sonraki adımlar)
+
+- **Hero/header marka vurgusu — yeşil zemin alternatifleri değerlendirme**
+  - Faz 4.2 sonrası gündem: kullanıcı hero/header'da yeşil arka plan istiyor mu sorusunu sordu
+  - Mevcut karar: krem hero korundu (beyaz alan hakimiyeti spec'i, prestij dengesi)
+  - Faz 4.9 son cila adımında 4 alternatif değerlendirilecek:
+    - A) Header altına ince altın çizgi (minimal vurgu)
+    - B) Hero'da decorative açık-yeşil filigran (%5 opacity arka plan)
+    - C) Hero alt-banner: küçük yeşil şerit + slogan
+    - D) Hero üstü altın eyebrow: "Küçükmeriç Hukuk Bürosu · Sakarya"
+  - Diğer 16 sayfa render olduktan sonra hero karakteri netleşince ekran görüntüleri üzerinden tek seferde karar verilecek
+  - Tetik: Faz 4.9 (404 + cookie consent + son cila adımı)
+
+---
+
 ## Faz 5 → Güvenlik & SEO
 
 - **Email confirmation** (Identity)
@@ -43,6 +58,11 @@
   - Self-host avantaj: 1 daha az DNS, GDPR safer, indirme garantili boyut
   - Implementation: woff2 dosyalarını `wwwroot/fonts/` altına indir, @font-face ile bağla
   - Tetik: Faz 5/6 PageSpeed optimizasyon turunda
+
+- **Lucide Icons CDN: SRI hash + sürüm pin**
+  - Faz 4.2'de `unpkg.com/lucide@latest` CDN'inden SRI'siz yüklendi
+  - Mevcut SRI deferral maddesine paralel: Faz 5 OWASP turunda SRI eklenecek
+  - `@latest` yerine sabit sürüm pinleme (ör: `lucide@0.x.x`) aynı turun parçası
 
 - **CDN SRI integrity hash — admin + public Bootstrap, Tabler, Choices.js, Quill, SweetAlert2**
   - Faz 4.1 başında durma noktası: admin layout'unda Bootstrap JS SRI'siz yükleniyor (Faz 3.3.1 kararı), public'te de aynı politikayla devam edildi (5.3.3 CDN, hash yok)

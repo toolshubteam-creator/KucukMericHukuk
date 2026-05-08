@@ -1,0 +1,21 @@
+.cta-section {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+    color: var(--color-bg-alt);
+    padding: var(--space-6) 0;
+    text-align: center;
+}
+
+.cta-section__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    color: var(--color-bg-alt);
+    margin-bottom: var(--space-2);
+}
+
+.cta-section__subtitle {
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: var(--space-3);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}

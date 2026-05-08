@@ -46,6 +46,14 @@ public class AttorneyService : IAttorneyService
         return Result.Success(_mapper.Map<AttorneyDetailDto>(attorney));
     }
 
+    public async Task<IReadOnlyList<AttorneyListDto>> GetActiveOrderedAsync(
+        string languageCode, int? take = null, CancellationToken ct = default)
+    {
+        var entities = await _uow.Attorneys.GetActiveOrderedAsync(languageCode, ct);
+        var source = take.HasValue ? entities.Take(take.Value) : entities;
+        return _mapper.Map<List<AttorneyListDto>>(source.ToList());
+    }
+
     public async Task<Result<AttorneyAdminDto>> GetByIdAsync(
         int id, CancellationToken ct = default)
     {

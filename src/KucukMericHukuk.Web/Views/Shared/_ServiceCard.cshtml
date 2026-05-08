@@ -1,0 +1,13 @@
+@model KucukMericHukuk.Core.DTOs.Service.ServiceListDto
+@{
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+    var iconName = string.IsNullOrEmpty(Model.Icon) ? "scale" : Model.Icon;
+}
+<div class="service-card">
+    <div class="service-card__icon"><i data-lucide="@iconName" width="32" height="32"></i></div>
+    <h3 class="service-card__title">@Model.Name</h3>
+    <p class="service-card__desc">@Model.ShortDescription</p>
+    <a class="service-card__link" asp-controller="Services" asp-action="Detail" asp-route-culture="@culture" asp-route-slug="@Model.Slug">
+        Detaylı Bilgi →
+    </a>
+</div>

@@ -47,6 +47,14 @@ public class ServiceService : IServiceService
         return Result.Success(_mapper.Map<ServiceDetailDto>(svc));
     }
 
+    public async Task<IReadOnlyList<ServiceListDto>> GetActiveOrderedAsync(
+        string languageCode, int? take = null, CancellationToken ct = default)
+    {
+        var entities = await _uow.Services.GetActiveOrderedAsync(languageCode, ct);
+        var source = take.HasValue ? entities.Take(take.Value) : entities;
+        return _mapper.Map<List<ServiceListDto>>(source.ToList());
+    }
+
     public async Task<Result<ServiceAdminDto>> GetByIdAsync(
         int id, CancellationToken ct = default)
     {

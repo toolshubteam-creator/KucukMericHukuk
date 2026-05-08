@@ -6,6 +6,9 @@ namespace KucukMericHukuk.Core.Interfaces.Services;
 
 public interface IArticleService
 {
+    Task<IReadOnlyList<ArticleListDto>> GetFeaturedOrRecentAsync(
+        string languageCode, int count, CancellationToken ct = default);
+
     Task<Result<ArticleAdminDto>> GetByIdAsync(int id, CancellationToken ct = default);
     Task<Result<PagedResult<ArticleAdminDto>>> GetPagedAsync(ArticleQueryDto query, CancellationToken ct = default);
     Task<Result<int>> CreateAsync(ArticleInputDto input, CancellationToken ct = default);

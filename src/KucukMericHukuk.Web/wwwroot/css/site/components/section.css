@@ -1,0 +1,36 @@
+.section-public {
+    padding: var(--space-6) 0;
+}
+
+.section-public--alt {
+    background-color: var(--color-bg-alt);
+}
+
+.section-public__header {
+    text-align: center;
+    margin-bottom: var(--space-5);
+}
+
+.section-public__eyebrow {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent-dark);
+    margin-bottom: var(--space-1);
+}
+
+.section-public__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    color: var(--color-primary);
+    margin-bottom: var(--space-2);
+}
+
+.section-public__lead {
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+    max-width: 700px;
+    margin: 0 auto;
+}

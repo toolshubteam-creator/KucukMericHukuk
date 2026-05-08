@@ -6,5 +6,36 @@
 (function () {
     "use strict";
 
-    // Faz 4.2+ ile dolacak: mobile menu, lazy load, scroll observer, accordion
+    // Lucide icons — data-lucide attribute'larını SVG'ye dönüştür
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+    }
+
+    // Scroll-triggered fade-up — prefers-reduced-motion respect
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced || !("IntersectionObserver" in window)) {
+        return;
+    }
+
+    const items = document.querySelectorAll("[data-fade-up]");
+    items.forEach((el) => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(20px)";
+        el.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+    });
+
+    const obs = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = "1";
+                    entry.target.style.transform = "translateY(0)";
+                    obs.unobserve(entry.target);
+                }
+            });
+        },
+        { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+    );
+
+    items.forEach((el) => obs.observe(el));
 })();

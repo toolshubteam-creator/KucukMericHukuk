@@ -9,6 +9,9 @@ public interface IAttorneyService
     Task<Result<AttorneyDetailDto>> GetBySlugAsync(
         string slug, string languageCode, CancellationToken ct = default);
 
+    Task<IReadOnlyList<AttorneyListDto>> GetActiveOrderedAsync(
+        string languageCode, int? take = null, CancellationToken ct = default);
+
     Task<Result<AttorneyAdminDto>> GetByIdAsync(
         int id, CancellationToken ct = default);
 
