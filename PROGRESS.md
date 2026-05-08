@@ -12,11 +12,30 @@
 | 1 | Proje kurulumu & mimari | 1 hafta | ✅ Tamamlandı |
 | 2 | Yönetim paneli iskelet & temel modüller | 2 hafta | ✅ Tamamlandı |
 | 3 | İçerik yönetimi modülleri | 2 hafta | ✅ Tamamlandı |
-| 4 | Frontend tasarım & geliştirme | 3 hafta | ⏳ Beklemede |
+| 4 | Frontend tasarım & geliştirme | 3 hafta | 🔄 Devam ediyor |
 | 5 | SEO, entegrasyon, güvenlik | 1 hafta | ⏳ Beklemede |
 | 6 | Test, düzeltme, yayına alma | 1 hafta | ⏳ Beklemede |
 
 **Toplam:** 10 hafta (+2 hafta tampon önerisi)
+
+---
+
+## FAZ 4 — Frontend (Tasarım & Geliştirme) — 🔄 BAŞLADI
+
+**Başlama Tarihi:** 08.05.2026
+
+### Hedef
+
+- 17 public sayfa (Ana, Hakkımızda, Avukatlarımız +detay, Hizmetler +detay, Makaleler +detay, SSS, Galeri, Referanslar, İletişim, Randevu Al, KVKK/Çerez/Kullanım, 404)
+- Tasarım yönü: Yeşil (#0F2A23) + Altın (#C9A961) + Krem (#FAF7F2), Playfair Display + Inter, 8px ölçü, mobile-first
+- Frontend kapsamı: ContactMessage entity + minimal Faq entity (kararlaştırıldı, faz başı strateji notu)
+- DEFERRED'a kaydırılan: Testimonial entity, Appointment entity (Faz 4.5/Faz 5)
+
+### Tamamlanan Adımlar
+
+| Adım | Açıklama | Commit |
+| --- | --- | --- |
+| 4.1 | Public layout iskeleti + design token + tipografi (Playfair+Inter) + Bootstrap CDN + _PublicLayout/_SiteHeader/_SiteFooter/_BareLayout partial seti | _pending_ |
 
 ---
 

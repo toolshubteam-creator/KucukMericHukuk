@@ -18,7 +18,6 @@ public class HomeController : Controller
     public IActionResult Index()
     {
         ViewData["Title"] = _localizer["HomeTitle"];
-        ViewData["Welcome"] = _localizer["WelcomeMessage"];
         return View();
     }
 
