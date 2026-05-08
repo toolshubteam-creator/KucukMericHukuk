@@ -15,6 +15,7 @@
 @import url('components/article-list.css');
 @import url('components/article-detail.css');
 @import url('components/pagination.css');
+@import url('components/service-detail.css');
 
 /* --- Design tokens (admin.css ile birebir aynı renk seti, ayrı dosya) --- */
 :root {

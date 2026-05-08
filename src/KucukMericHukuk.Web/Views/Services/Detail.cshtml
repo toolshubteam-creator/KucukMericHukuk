@@ -1,12 +1,85 @@
+@model KucukMericHukuk.Web.ViewModels.Service.ServiceDetailViewModel
+@using KucukMericHukuk.Web.Helpers
 @{
-    ViewData["Title"] = "Hizmet Detayı (Yakında)";
+    ViewData["Title"] = !string.IsNullOrEmpty(Model.Service.MetaTitle)
+        ? Model.Service.MetaTitle
+        : Model.Service.Name;
+    var iconName = string.IsNullOrEmpty(Model.Service.Icon) ? "scale" : Model.Service.Icon;
 }
 
-<section class="section">
-    <div class="container container-narrow text-center">
-        <h1 class="mb-3">Hizmet Detayı</h1>
-        <p class="text-muted">Slug: @ViewData["Slug"]</p>
-        <p class="lead">Bu sayfa Faz 4.4'te tamamlanacak. Lütfen sonra tekrar ziyaret edin.</p>
-        <a class="btn-accent" asp-controller="Home" asp-action="Index">Ana Sayfaya Dön</a>
-    </div>
-</section>
+<article class="service-detail">
+    <header class="service-detail__header section-public">
+        <div class="container container-narrow">
+            <div class="service-detail__icon">
+                <i data-lucide="@iconName" width="48" height="48"></i>
+            </div>
+            <h1 class="service-detail__title">@Model.Service.Name</h1>
+            @if (!string.IsNullOrEmpty(Model.Service.ShortDescription))
+            {
+                <p class="service-detail__lead">@Model.Service.ShortDescription</p>
+            }
+        </div>
+    </header>
+
+    @if (!string.IsNullOrEmpty(Model.Service.FeaturedImage))
+    {
+        <div class="service-detail__featured-image-wrap">
+            <div class="container container-narrow">
+                <img src="@Model.Service.FeaturedImage" alt="@Model.Service.Name" class="service-detail__featured-image" loading="lazy" />
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Service.FullDescription))
+    {
+        <div class="service-detail__content section-public">
+            <div class="container container-narrow">
+                <div class="article-content">
+                    @Html.LazyImageHtml(Model.Service.FullDescription)
+                </div>
+            </div>
+        </div>
+    }
+</article>
+
+@if (Model.Service.Attorneys.Any())
+{
+    <section class="section-public section-public--alt">
+        <div class="container">
+            <div class="section-public__header">
+                <p class="section-public__eyebrow">Bu Alandaki Avukatlarımız</p>
+                <h2 class="section-public__title">Uzman ekibimiz</h2>
+            </div>
+            <div class="row g-4 justify-content-center">
+                @foreach (var attorney in Model.Service.Attorneys)
+                {
+                    <div class="col-md-4">
+                        <partial name="_AttorneyCard" model="attorney" />
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+@if (Model.OtherServices.Any())
+{
+    <section class="section-public">
+        <div class="container">
+            <div class="section-public__header">
+                <p class="section-public__eyebrow">Diğer Hizmetler</p>
+                <h2 class="section-public__title">İlgilenebileceğiniz alanlar</h2>
+            </div>
+            <div class="row g-4">
+                @foreach (var other in Model.OtherServices)
+                {
+                    <div class="col-md-4">
+                        <partial name="_ServiceCard" model="other" />
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<partial name="_CtaSection" />

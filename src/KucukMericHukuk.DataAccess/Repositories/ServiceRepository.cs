@@ -22,6 +22,9 @@ public class ServiceRepository : GenericRepository<Service>, IServiceRepository
     public Task<Service?> GetBySlugAsync(string languageCode, string slug, CancellationToken ct = default)
         => Query().AsNoTracking()
             .Include(s => s.Translations.Where(t => t.LanguageCode == languageCode))
+            .Include(s => s.Attorneys.Where(a => a.IsActive).OrderBy(a => a.DisplayOrder))
+                .ThenInclude(a => a.Translations.Where(t => t.LanguageCode == languageCode))
+            .AsSplitQuery()
             .FirstOrDefaultAsync(s => s.Translations.Any(t => t.LanguageCode == languageCode && t.Slug == slug), ct);
 
     public Task<Service?> GetByIdWithTranslationsAsync(int id, CancellationToken ct = default)

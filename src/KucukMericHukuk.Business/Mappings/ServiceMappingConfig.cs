@@ -24,7 +24,8 @@ public class ServiceMappingConfig : IRegister
             .Map(dest => dest.FullDescription, src => src.Translations.Select(t => t.FullDescription).FirstOrDefault())
             .Map(dest => dest.MetaTitle, src => src.Translations.Select(t => t.MetaTitle).FirstOrDefault())
             .Map(dest => dest.MetaDescription, src => src.Translations.Select(t => t.MetaDescription).FirstOrDefault())
-            .Map(dest => dest.LanguageCode, src => src.Translations.Select(t => t.LanguageCode).FirstOrDefault() ?? string.Empty);
+            .Map(dest => dest.LanguageCode, src => src.Translations.Select(t => t.LanguageCode).FirstOrDefault() ?? string.Empty)
+            .Map(dest => dest.Attorneys, src => src.Attorneys);
 
         // Read: Entity → Admin
         config.NewConfig<Service, ServiceAdminDto>()

@@ -37,7 +37,8 @@
 | --- | --- | --- |
 | 4.1 | Public layout iskeleti + design token + tipografi (Playfair+Inter) + Bootstrap CDN + _PublicLayout/_SiteHeader/_SiteFooter/_BareLayout partial seti | `65dcfbf` |
 | 4.2 | Ana Sayfa: hero + hizmetler + ilkeler + avukatlar + makaleler + cta · 6 partial · 7 component CSS · Lucide ikonlar · scroll fade-up · 3 service public method (`GetActiveOrderedAsync` × 2 + `GetFeaturedOrRecentAsync`) · DbInitializer demo seed (flag-driven) · 2 stub controller (Services/Articles Detail) | `ee17731` |
-| 4.3 | Article public liste + detay: 4 service method (`GetBySlugAsync` + `GetPublishedPagedAsync` + `GetByCategoryAsync` + `GetRelatedAsync`), `ICategoryService.GetActiveOrderedAsync`, slug-based attribute routing, sidebar kategori filtresi, Bootstrap pagination + eliding, `IHtmlHelper.LazyImageHtml`, related articles fallback, Article seed kategori bağı (1 Ceza + 2 Aile), 5 birim test | _pending_ |
+| 4.3 | Article public liste + detay: 4 service method (`GetBySlugAsync` + `GetPublishedPagedAsync` + `GetByCategoryAsync` + `GetRelatedAsync`), `ICategoryService.GetActiveOrderedAsync`, slug-based attribute routing, sidebar kategori filtresi, Bootstrap pagination + eliding, `IHtmlHelper.LazyImageHtml`, related articles fallback, Article seed kategori bağı (1 Ceza + 2 Aile), 5 birim test | `6d20869` |
+| 4.4 | Service public liste + detay: ServiceDetailDto.Attorneys + repo Attorneys/Translations include + AsSplitQuery, 2 view (Index 3-kolon grid + Detail hero+content+attorneys+others+cta), service-detail.css, header nav (Hizmetler + Makaleler) | _pending_ |
 
 ---
 
