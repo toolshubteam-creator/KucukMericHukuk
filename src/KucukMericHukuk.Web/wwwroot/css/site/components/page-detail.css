@@ -1,0 +1,13 @@
+.page-detail__header {
+    text-align: center;
+    padding-top: var(--space-5);
+    padding-bottom: var(--space-3);
+}
+
+.page-detail__title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: var(--color-primary);
+    margin-bottom: var(--space-2);
+    letter-spacing: -0.02em;
+}
