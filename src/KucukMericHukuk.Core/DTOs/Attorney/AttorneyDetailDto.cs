@@ -21,5 +21,6 @@ public class AttorneyDetailDto
     public string? MetaTitle { get; set; }
     public string? MetaDescription { get; set; }
     public string LanguageCode { get; set; } = string.Empty;
+    public int? UserId { get; set; }
     public List<ServiceListDto> Services { get; set; } = new();
 }

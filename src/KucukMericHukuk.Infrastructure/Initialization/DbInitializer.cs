@@ -312,6 +312,26 @@ public class DbInitializer : IDbInitializer
             _logger.LogInformation("Demo seed: 3 makale eklendi (kategorili: 1 Ceza + 2 Aile).");
         }
 
+        var attorneys = await _db.Set<Attorney>().Include(a => a.Services).ToListAsync(ct);
+        var allServices = await _db.Set<Service>().ToListAsync(ct);
+        var anyChange = false;
+        foreach (var att in attorneys)
+        {
+            foreach (var svc in allServices)
+            {
+                if (att.Services.All(s => s.Id != svc.Id))
+                {
+                    att.Services.Add(svc);
+                    anyChange = true;
+                }
+            }
+        }
+        if (anyChange)
+        {
+            await _db.SaveChangesAsync(ct);
+            _logger.LogInformation("Demo seed: Attorney-Service M:N bağları eklendi.");
+        }
+
         _logger.LogInformation("Demo content seed tamamlandı.");
     }
 }

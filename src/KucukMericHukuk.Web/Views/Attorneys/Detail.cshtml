@@ -1,0 +1,144 @@
+@model KucukMericHukuk.Web.ViewModels.Attorney.AttorneyDetailViewModel
+@using KucukMericHukuk.Web.Helpers
+@{
+    ViewData["Title"] = !string.IsNullOrEmpty(Model.Attorney.MetaTitle)
+        ? Model.Attorney.MetaTitle
+        : Model.Attorney.FullName;
+    var hasPhoto = !string.IsNullOrEmpty(Model.Attorney.ProfileImageUrl);
+}
+
+<article class="attorney-detail">
+    <header class="attorney-detail__header section-public">
+        <div class="container container-narrow attorney-detail__header-inner">
+            @if (hasPhoto)
+            {
+                <img src="@Model.Attorney.ProfileImageUrl" alt="@Model.Attorney.FullName" class="attorney-detail__photo" />
+            }
+            else
+            {
+                <div class="attorney-detail__photo attorney-detail__photo--placeholder">
+                    <i data-lucide="user" width="80" height="80"></i>
+                </div>
+            }
+
+            <h1 class="attorney-detail__name">@Model.Attorney.FullName</h1>
+            @if (!string.IsNullOrEmpty(Model.Attorney.Title))
+            {
+                <p class="attorney-detail__title">@Model.Attorney.Title</p>
+            }
+
+            <div class="attorney-detail__contact">
+                @if (!string.IsNullOrEmpty(Model.Attorney.Email))
+                {
+                    <a href="mailto:@Model.Attorney.Email" class="attorney-detail__contact-link" title="E-posta">
+                        <i data-lucide="mail" width="20" height="20"></i>
+                    </a>
+                }
+                @if (!string.IsNullOrEmpty(Model.Attorney.PhoneNumber))
+                {
+                    <a href="tel:@Model.Attorney.PhoneNumber" class="attorney-detail__contact-link" title="Telefon">
+                        <i data-lucide="phone" width="20" height="20"></i>
+                    </a>
+                }
+                @if (!string.IsNullOrEmpty(Model.Attorney.LinkedInUrl))
+                {
+                    <a href="@Model.Attorney.LinkedInUrl" target="_blank" rel="noopener noreferrer" class="attorney-detail__contact-link" title="LinkedIn">
+                        <i data-lucide="linkedin" width="20" height="20"></i>
+                    </a>
+                }
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Attorney.BarName))
+            {
+                <p class="attorney-detail__bar">
+                    @Model.Attorney.BarName
+                    @if (!string.IsNullOrEmpty(Model.Attorney.BarRegistrationNumber))
+                    {
+                        <span> · Sicil No: @Model.Attorney.BarRegistrationNumber</span>
+                    }
+                </p>
+            }
+        </div>
+    </header>
+
+    @if (!string.IsNullOrEmpty(Model.Attorney.ShortBio))
+    {
+        <div class="attorney-detail__short-bio section-public">
+            <div class="container container-narrow">
+                <p class="attorney-detail__lead">@Model.Attorney.ShortBio</p>
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Attorney.FullBio))
+    {
+        <div class="attorney-detail__content section-public">
+            <div class="container container-narrow">
+                <div class="article-content">
+                    @Html.LazyImageHtml(Model.Attorney.FullBio)
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Attorney.Education))
+    {
+        <div class="attorney-detail__section section-public section-public--alt">
+            <div class="container container-narrow">
+                <h2 class="attorney-detail__section-title">Eğitim</h2>
+                <div class="attorney-detail__multiline">@Model.Attorney.Education</div>
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Attorney.Publications))
+    {
+        <div class="attorney-detail__section section-public">
+            <div class="container container-narrow">
+                <h2 class="attorney-detail__section-title">Yayınlar</h2>
+                <div class="attorney-detail__multiline">@Model.Attorney.Publications</div>
+            </div>
+        </div>
+    }
+</article>
+
+@if (Model.Attorney.Services.Any())
+{
+    <section class="section-public section-public--alt">
+        <div class="container">
+            <div class="section-public__header">
+                <p class="section-public__eyebrow">Uzmanlık Alanları</p>
+                <h2 class="section-public__title">Çalıştığı hukuk dalları</h2>
+            </div>
+            <div class="row g-4">
+                @foreach (var service in Model.Attorney.Services)
+                {
+                    <div class="col-md-4">
+                        <partial name="_ServiceCard" model="service" />
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+@if (Model.AuthorArticles.Any())
+{
+    <section class="section-public">
+        <div class="container">
+            <div class="section-public__header">
+                <p class="section-public__eyebrow">Yayınlar</p>
+                <h2 class="section-public__title">@Model.Attorney.FullName tarafından yazılan makaleler</h2>
+            </div>
+            <div class="row g-4">
+                @foreach (var article in Model.AuthorArticles)
+                {
+                    <div class="col-md-4">
+                        <partial name="_ArticleCard" model="article" />
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<partial name="_CtaSection" />

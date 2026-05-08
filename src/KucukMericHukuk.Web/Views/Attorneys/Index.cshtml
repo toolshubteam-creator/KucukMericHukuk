@@ -1,0 +1,41 @@
+@model KucukMericHukuk.Web.ViewModels.Attorney.AttorneyListViewModel
+@{
+    ViewData["Title"] = "Avukatlarımız";
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+
+<section class="section-public">
+    <div class="container">
+        <div class="section-public__header">
+            <p class="section-public__eyebrow">Ekibimiz</p>
+            <h1 class="section-public__title">Avukatlarımız</h1>
+            <p class="section-public__lead">
+                Hukukun farklı alanlarında uzmanlaşmış, deneyimli avukatlarımız.
+                Detaylı profil için kart üzerine tıklayabilirsiniz.
+            </p>
+        </div>
+
+        @if (Model.Attorneys.Any())
+        {
+            <div class="row g-4 justify-content-center">
+                @foreach (var attorney in Model.Attorneys)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <a class="text-decoration-none d-block"
+                           asp-controller="Attorneys" asp-action="Detail"
+                           asp-route-culture="@culture"
+                           asp-route-slug="@attorney.Slug">
+                            <partial name="_AttorneyCard" model="attorney" />
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted text-center">Şu anda yayında avukat profili bulunmamaktadır.</p>
+        }
+    </div>
+</section>
+
+<partial name="_CtaSection" />

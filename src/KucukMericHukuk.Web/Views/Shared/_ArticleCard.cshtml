@@ -4,12 +4,12 @@
     var publishedDate = Model.PublishedAt?.ToString("dd MMM yyyy") ?? "";
 }
 <a class="article-card d-block text-decoration-none" asp-controller="Articles" asp-action="Detail" asp-route-culture="@culture" asp-route-slug="@Model.Slug">
-    <div class="article-card__image-wrap">
-        @if (!string.IsNullOrEmpty(Model.FeaturedImageUrl))
-        {
+    @if (!string.IsNullOrEmpty(Model.FeaturedImageUrl))
+    {
+        <div class="article-card__image-wrap">
             <img src="@Model.FeaturedImageUrl" alt="@Model.Title" class="article-card__image" loading="lazy" />
-        }
-    </div>
+        </div>
+    }
     <div class="article-card__body">
         <div class="article-card__meta">@publishedDate · @Model.ReadingTimeMinutes dk okuma</div>
         <h3 class="article-card__title">@Model.Title</h3>

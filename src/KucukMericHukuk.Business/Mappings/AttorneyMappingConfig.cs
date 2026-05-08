@@ -29,7 +29,8 @@ public class AttorneyMappingConfig : IRegister
             .Map(dest => dest.Publications, src => src.Translations.Select(t => t.Publications).FirstOrDefault())
             .Map(dest => dest.MetaTitle, src => src.Translations.Select(t => t.MetaTitle).FirstOrDefault())
             .Map(dest => dest.MetaDescription, src => src.Translations.Select(t => t.MetaDescription).FirstOrDefault())
-            .Map(dest => dest.LanguageCode, src => src.Translations.Select(t => t.LanguageCode).FirstOrDefault() ?? string.Empty);
+            .Map(dest => dest.LanguageCode, src => src.Translations.Select(t => t.LanguageCode).FirstOrDefault() ?? string.Empty)
+            .Map(dest => dest.Services, src => src.Services);
 
         // Read: Entity → Admin
         config.NewConfig<Attorney, AttorneyAdminDto>()
