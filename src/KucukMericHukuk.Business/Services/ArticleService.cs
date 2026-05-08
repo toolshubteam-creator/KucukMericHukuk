@@ -57,6 +57,61 @@ public class ArticleService : IArticleService
         return _mapper.Map<List<ArticleListDto>>(combined);
     }
 
+    public async Task<Result<ArticleDetailDto>> GetBySlugAsync(
+        string languageCode, string slug, CancellationToken ct = default)
+    {
+        var article = await _uow.Articles.GetBySlugAsync(languageCode, slug, ct);
+        if (article is null)
+        {
+            return Result.Failure<ArticleDetailDto>(
+                new Error(ErrorCodes.Article.NotFound, "Makale bulunamadı."));
+        }
+
+        await _uow.Articles.IncrementViewCountAsync(article.Id, ct);
+
+        var dto = _mapper.Map<ArticleDetailDto>(article);
+        return Result.Success(dto);
+    }
+
+    public async Task<PagedResult<ArticleListDto>> GetPublishedPagedAsync(
+        string languageCode, int pageNumber, int pageSize, CancellationToken ct = default)
+    {
+        var paged = await _uow.Articles.GetPublishedPagedAsync(languageCode, pageNumber, pageSize, ct);
+        var items = _mapper.Map<List<ArticleListDto>>(paged.Items);
+        return new PagedResult<ArticleListDto>(items, paged.TotalCount, paged.PageNumber, paged.PageSize);
+    }
+
+    public async Task<PagedResult<ArticleListDto>> GetByCategoryAsync(
+        int categoryId, string languageCode, int pageNumber, int pageSize, CancellationToken ct = default)
+    {
+        var paged = await _uow.Articles.GetByCategoryAsync(categoryId, languageCode, pageNumber, pageSize, ct);
+        var items = _mapper.Map<List<ArticleListDto>>(paged.Items);
+        return new PagedResult<ArticleListDto>(items, paged.TotalCount, paged.PageNumber, paged.PageSize);
+    }
+
+    public async Task<IReadOnlyList<ArticleListDto>> GetRelatedAsync(
+        int currentArticleId, int? categoryId, string languageCode, int count, CancellationToken ct = default)
+    {
+        var related = new List<Article>();
+
+        if (categoryId.HasValue)
+        {
+            var sameCategory = await _uow.Articles.GetByCategoryAsync(categoryId.Value, languageCode, 1, count + 1, ct);
+            related.AddRange(sameCategory.Items.Where(a => a.Id != currentArticleId).Take(count));
+        }
+
+        if (related.Count < count)
+        {
+            var remaining = count - related.Count;
+            var recent = await _uow.Articles.GetRecentAsync(languageCode, count + related.Count + 1, ct);
+            var existingIds = related.Select(a => a.Id).ToHashSet();
+            existingIds.Add(currentArticleId);
+            related.AddRange(recent.Where(a => !existingIds.Contains(a.Id)).Take(remaining));
+        }
+
+        return _mapper.Map<List<ArticleListDto>>(related);
+    }
+
     public async Task<Result<ArticleAdminDto>> GetByIdAsync(int id, CancellationToken ct = default)
     {
         var article = await _uow.Articles.GetByIdForAdminAsync(id, ct);

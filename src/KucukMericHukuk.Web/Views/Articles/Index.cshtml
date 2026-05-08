@@ -1,0 +1,69 @@
+@model KucukMericHukuk.Web.ViewModels.Article.ArticleListViewModel
+@{
+    ViewData["Title"] = "Makaleler";
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+
+<section class="section-public">
+    <div class="container">
+        <div class="section-public__header">
+            <p class="section-public__eyebrow">Yayınlar</p>
+            <h1 class="section-public__title">Makaleler</h1>
+            <p class="section-public__lead">Hukuki gelişmeler, görüş yazıları ve dava değerlendirmeleri.</p>
+        </div>
+
+        <div class="article-list">
+            <aside class="article-list__sidebar">
+                <h2 class="article-list__sidebar-title">Kategoriler</h2>
+                <ul class="article-list__categories">
+                    <li>
+                        <a class="article-list__category-link @(Model.SelectedCategorySlug is null ? "is-active" : "")"
+                           asp-controller="Articles" asp-action="Index" asp-route-culture="@culture">
+                            Tümü
+                        </a>
+                    </li>
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <li>
+                            <a class="article-list__category-link @(Model.SelectedCategorySlug == cat.Slug ? "is-active" : "")"
+                               asp-controller="Articles" asp-action="Index" asp-route-culture="@culture" asp-route-category="@cat.Slug">
+                                @cat.Name
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </aside>
+
+            <div class="article-list__main">
+                @if (Model.Articles.Items.Any())
+                {
+                    <div class="row g-4">
+                        @foreach (var article in Model.Articles.Items)
+                        {
+                            <div class="col-md-6 col-lg-4">
+                                <partial name="_ArticleCard" model="article" />
+                            </div>
+                        }
+                    </div>
+
+                    <partial name="_Pagination" model="@(new KucukMericHukuk.Web.ViewModels.Common.PaginationViewModel
+                    {
+                        PageNumber = Model.Articles.PageNumber,
+                        TotalPages = Model.Articles.TotalPages,
+                        Action = "Index",
+                        Controller = "Articles",
+                        QueryParams = string.IsNullOrEmpty(Model.SelectedCategorySlug)
+                            ? new Dictionary<string, string>()
+                            : new Dictionary<string, string> { { "category", Model.SelectedCategorySlug } }
+                    })" />
+                }
+                else
+                {
+                    <p class="text-muted">Bu kategoride henüz makale bulunmamaktadır.</p>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<partial name="_CtaSection" />

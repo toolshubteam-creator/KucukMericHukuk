@@ -9,6 +9,9 @@ public interface ICategoryService
     Task<Result<CategoryListDto>> GetBySlugAsync(
         string slug, string languageCode, CancellationToken ct = default);
 
+    Task<IReadOnlyList<CategoryListDto>> GetActiveOrderedAsync(
+        string languageCode, CancellationToken ct = default);
+
     Task<Result<CategoryAdminDto>> GetByIdAsync(
         int id, CancellationToken ct = default);
 

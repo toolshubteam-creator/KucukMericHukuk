@@ -12,6 +12,9 @@
 @import url('components/article-card.css');
 @import url('components/principles.css');
 @import url('components/cta-section.css');
+@import url('components/article-list.css');
+@import url('components/article-detail.css');
+@import url('components/pagination.css');
 
 /* --- Design tokens (admin.css ile birebir aynı renk seti, ayrı dosya) --- */
 :root {

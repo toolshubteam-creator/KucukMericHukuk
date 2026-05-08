@@ -245,61 +245,71 @@ public class DbInitializer : IDbInitializer
 
         if (!await _db.Set<Article>().AnyAsync(ct))
         {
+            var cezaCat = await _db.Set<Category>()
+                .Include(c => c.Translations)
+                .FirstOrDefaultAsync(c => c.Translations.Any(t => t.Slug == "ceza-hukuku"), ct);
+            var aileCat = await _db.Set<Category>()
+                .Include(c => c.Translations)
+                .FirstOrDefaultAsync(c => c.Translations.Any(t => t.Slug == "aile-hukuku"), ct);
+
             var a1 = new Article
-        {
-            Status = ArticleStatus.Published,
-            PublishedAt = DateTime.UtcNow.AddDays(-7),
-            IsFeatured = true,
-            Translations = new List<ArticleTranslation>
             {
-                new()
+                CategoryId = cezaCat?.Id,
+                Status = ArticleStatus.Published,
+                PublishedAt = DateTime.UtcNow.AddDays(-7),
+                IsFeatured = true,
+                Translations = new List<ArticleTranslation>
                 {
-                    LanguageCode = "tr-TR",
-                    Title = "Hukuki Süreçlerde Bilinmesi Gerekenler",
-                    Slug = "hukuki-sureclerde-bilinmesi-gerekenler",
-                    Excerpt = "Bir hukuki süreç başlatmadan önce dikkat edilmesi gereken temel noktalar.",
-                    Content = "<p>Hukuki süreçler sabır ve uzman desteği gerektirir. Bu yazıda temel adımları ele alıyoruz.</p><p>Demo içerik — gerçek makale müşteri tarafından girilecek.</p>",
-                    ReadingTimeMinutes = 3
+                    new()
+                    {
+                        LanguageCode = "tr-TR",
+                        Title = "Hukuki Süreçlerde Bilinmesi Gerekenler",
+                        Slug = "hukuki-sureclerde-bilinmesi-gerekenler",
+                        Excerpt = "Bir hukuki süreç başlatmadan önce dikkat edilmesi gereken temel noktalar.",
+                        Content = "<p>Hukuki süreçler sabır ve uzman desteği gerektirir. Bu yazıda temel adımları ele alıyoruz.</p><p>Demo içerik — gerçek makale müşteri tarafından girilecek.</p>",
+                        ReadingTimeMinutes = 3
+                    }
                 }
-            }
-        };
-        var a2 = new Article
-        {
-            Status = ArticleStatus.Published,
-            PublishedAt = DateTime.UtcNow.AddDays(-14),
-            Translations = new List<ArticleTranslation>
+            };
+            var a2 = new Article
             {
-                new()
+                CategoryId = aileCat?.Id,
+                Status = ArticleStatus.Published,
+                PublishedAt = DateTime.UtcNow.AddDays(-14),
+                Translations = new List<ArticleTranslation>
                 {
-                    LanguageCode = "tr-TR",
-                    Title = "Boşanma Davalarında Çocuk Velayeti",
-                    Slug = "bosanma-davalarinda-cocuk-velayeti",
-                    Excerpt = "Velayet kararlarında mahkemenin dikkate aldığı kriterler.",
-                    Content = "<p>Velayet konusunda mahkeme çocuğun üstün yararını gözetir. Bu yazıda temel kriterleri ele alıyoruz.</p>",
-                    ReadingTimeMinutes = 4
+                    new()
+                    {
+                        LanguageCode = "tr-TR",
+                        Title = "Boşanma Davalarında Çocuk Velayeti",
+                        Slug = "bosanma-davalarinda-cocuk-velayeti",
+                        Excerpt = "Velayet kararlarında mahkemenin dikkate aldığı kriterler.",
+                        Content = "<p>Velayet konusunda mahkeme çocuğun üstün yararını gözetir. Bu yazıda temel kriterleri ele alıyoruz.</p>",
+                        ReadingTimeMinutes = 4
+                    }
                 }
-            }
-        };
-        var a3 = new Article
-        {
-            Status = ArticleStatus.Published,
-            PublishedAt = DateTime.UtcNow.AddDays(-21),
-            Translations = new List<ArticleTranslation>
+            };
+            var a3 = new Article
             {
-                new()
+                CategoryId = aileCat?.Id,
+                Status = ArticleStatus.Published,
+                PublishedAt = DateTime.UtcNow.AddDays(-21),
+                Translations = new List<ArticleTranslation>
                 {
-                    LanguageCode = "tr-TR",
-                    Title = "İş Sözleşmesi Fesih Hakları",
-                    Slug = "is-sozlesmesi-fesih-haklari",
-                    Excerpt = "İşçi ve işveren açısından fesih bildirim süreleri.",
-                    Content = "<p>İş sözleşmesinin feshi belirli kurallara tabidir. Bu yazıda işçi ve işveren açısından fesih süreçlerini ele alıyoruz.</p>",
-                    ReadingTimeMinutes = 5
+                    new()
+                    {
+                        LanguageCode = "tr-TR",
+                        Title = "Anlaşmalı Boşanmada Mal Paylaşımı",
+                        Slug = "anlasmali-bosanmada-mal-paylasimi",
+                        Excerpt = "Edinilmiş mallara katılma rejiminde temel ilkeler.",
+                        Content = "<p>Anlaşmalı boşanmada mal paylaşımı için tarafların üzerinde anlaştığı protokol mahkemece onaylanır. Bu yazıda dikkat edilecek noktaları ele alıyoruz.</p>",
+                        ReadingTimeMinutes = 5
+                    }
                 }
-            }
-        };
+            };
             _db.Set<Article>().AddRange(a1, a2, a3);
             await _db.SaveChangesAsync(ct);
-            _logger.LogInformation("Demo seed: 3 makale eklendi.");
+            _logger.LogInformation("Demo seed: 3 makale eklendi (kategorili: 1 Ceza + 2 Aile).");
         }
 
         _logger.LogInformation("Demo content seed tamamlandı.");

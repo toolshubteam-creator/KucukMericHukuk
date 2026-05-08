@@ -1,12 +1,85 @@
+@model KucukMericHukuk.Web.ViewModels.Article.ArticleDetailViewModel
+@using KucukMericHukuk.Web.Helpers
 @{
-    ViewData["Title"] = "Makale Detayı (Yakında)";
+    ViewData["Title"] = !string.IsNullOrEmpty(Model.Article.MetaTitle)
+        ? Model.Article.MetaTitle
+        : Model.Article.Title;
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+    var publishedDate = Model.Article.PublishedAt?.ToString("dd MMMM yyyy") ?? "";
 }
 
-<section class="section">
-    <div class="container container-narrow text-center">
-        <h1 class="mb-3">Makale Detayı</h1>
-        <p class="text-muted">Slug: @ViewData["Slug"]</p>
-        <p class="lead">Bu sayfa Faz 4.3'te tamamlanacak. Lütfen sonra tekrar ziyaret edin.</p>
-        <a class="btn-accent" asp-controller="Home" asp-action="Index">Ana Sayfaya Dön</a>
+<article class="article-detail">
+    <header class="article-detail__header section-public">
+        <div class="container container-narrow">
+            @if (!string.IsNullOrEmpty(Model.Article.CategoryName))
+            {
+                <p class="article-detail__category">
+                    <a asp-controller="Articles" asp-action="Index"
+                       asp-route-culture="@culture" asp-route-category="@Model.Article.CategorySlug">
+                        @Model.Article.CategoryName
+                    </a>
+                </p>
+            }
+            <h1 class="article-detail__title">@Model.Article.Title</h1>
+            <div class="article-detail__meta">
+                @if (!string.IsNullOrEmpty(Model.Article.AuthorName))
+                {
+                    <span>@Model.Article.AuthorName</span>
+                    <span class="article-detail__meta-sep">·</span>
+                }
+                <span>@publishedDate</span>
+                <span class="article-detail__meta-sep">·</span>
+                <span>@Model.Article.ReadingTimeMinutes dk okuma</span>
+            </div>
+        </div>
+    </header>
+
+    @if (!string.IsNullOrEmpty(Model.Article.FeaturedImageUrl))
+    {
+        <div class="article-detail__featured-image-wrap">
+            <div class="container container-narrow">
+                <img src="@Model.Article.FeaturedImageUrl" alt="@Model.Article.Title" class="article-detail__featured-image" loading="lazy" />
+            </div>
+        </div>
+    }
+
+    <div class="article-detail__content section-public">
+        <div class="container container-narrow">
+            <div class="article-content">
+                @Html.LazyImageHtml(Model.Article.Content)
+            </div>
+
+            @if (Model.Article.Tags.Any())
+            {
+                <div class="article-detail__tags">
+                    @foreach (var tag in Model.Article.Tags)
+                    {
+                        <span class="article-detail__tag">#@tag.Name</span>
+                    }
+                </div>
+            }
+        </div>
     </div>
-</section>
+</article>
+
+@if (Model.RelatedArticles.Any())
+{
+    <section class="section-public section-public--alt">
+        <div class="container">
+            <div class="section-public__header">
+                <p class="section-public__eyebrow">Devamı</p>
+                <h2 class="section-public__title">İlgili makaleler</h2>
+            </div>
+            <div class="row g-4">
+                @foreach (var related in Model.RelatedArticles)
+                {
+                    <div class="col-md-4">
+                        <partial name="_ArticleCard" model="related" />
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<partial name="_CtaSection" />

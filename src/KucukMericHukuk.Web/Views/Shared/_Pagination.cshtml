@@ -1,0 +1,58 @@
+@model KucukMericHukuk.Web.ViewModels.Common.PaginationViewModel
+@{
+    if (Model.TotalPages <= 1) { return; }
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+
+    var pages = new List<int>();
+    var current = Model.PageNumber;
+    var total = Model.TotalPages;
+
+    pages.Add(1);
+    for (int i = current - 1; i <= current + 1; i++)
+    {
+        if (i > 1 && i < total) pages.Add(i);
+    }
+    if (total > 1) pages.Add(total);
+    pages = pages.Distinct().OrderBy(p => p).ToList();
+
+    string PageUrl(int p)
+    {
+        var routeValues = new RouteValueDictionary { { "culture", culture }, { "page", p } };
+        foreach (var kv in Model.QueryParams) routeValues[kv.Key] = kv.Value;
+        return Url.Action(Model.Action, Model.Controller, routeValues) ?? "#";
+    }
+}
+
+<nav aria-label="Sayfalama" class="pagination-nav">
+    <ul class="pagination">
+        @if (current > 1)
+        {
+            <li class="page-item"><a class="page-link" href="@PageUrl(current - 1)" rel="prev">←</a></li>
+        }
+        else
+        {
+            <li class="page-item disabled"><span class="page-link">←</span></li>
+        }
+
+        @for (int i = 0; i < pages.Count; i++)
+        {
+            var p = pages[i];
+            if (i > 0 && pages[i] - pages[i - 1] > 1)
+            {
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            }
+            <li class="page-item @(p == current ? "active" : "")">
+                <a class="page-link" href="@PageUrl(p)">@p</a>
+            </li>
+        }
+
+        @if (current < total)
+        {
+            <li class="page-item"><a class="page-link" href="@PageUrl(current + 1)" rel="next">→</a></li>
+        }
+        else
+        {
+            <li class="page-item disabled"><span class="page-link">→</span></li>
+        }
+    </ul>
+</nav>
