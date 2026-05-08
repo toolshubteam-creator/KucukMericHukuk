@@ -19,6 +19,11 @@
 
 ## Faz 4 → Frontend (sonraki adımlar)
 
+- **Service'lerde sayfalama + kategorize gruplama**
+  - Faz 4.4 başında karar: tek sayfa grid (8-15 hizmet için yeterli)
+  - Tetik: hizmet sayısı 20+ olursa veya "Bireysel/Ticari Hukuk" gibi gruplama isteği gelirse
+  - Implementation: Service entity'sine optional `ServiceCategory` (enum/entity) + Index'te accordion ya da sekme
+
 - **Hero/header marka vurgusu — yeşil zemin alternatifleri değerlendirme**
   - Faz 4.2 sonrası gündem: kullanıcı hero/header'da yeşil arka plan istiyor mu sorusunu sordu
   - Mevcut karar: krem hero korundu (beyaz alan hakimiyeti spec'i, prestij dengesi)

@@ -1,0 +1,35 @@
+@model KucukMericHukuk.Web.ViewModels.Service.ServiceListViewModel
+@{
+    ViewData["Title"] = "Hizmet Alanlarımız";
+}
+
+<section class="section-public">
+    <div class="container">
+        <div class="section-public__header">
+            <p class="section-public__eyebrow">Hizmet Alanlarımız</p>
+            <h1 class="section-public__title">Uzmanlık alanlarımız</h1>
+            <p class="section-public__lead">
+                Hukukun farklı alanlarında profesyonel danışmanlık ve dava takibi hizmeti sunuyoruz.
+                Her bir alan için detaylı bilgi almak üzere ilgili sayfayı inceleyebilirsiniz.
+            </p>
+        </div>
+
+        @if (Model.Services.Any())
+        {
+            <div class="row g-4">
+                @foreach (var service in Model.Services)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <partial name="_ServiceCard" model="service" />
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted text-center">Şu anda yayında hizmet bulunmamaktadır.</p>
+        }
+    </div>
+</section>
+
+<partial name="_CtaSection" />

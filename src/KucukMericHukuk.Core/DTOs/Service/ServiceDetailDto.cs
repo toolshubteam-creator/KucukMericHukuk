@@ -1,3 +1,5 @@
+using KucukMericHukuk.Core.DTOs.Attorney;
+
 namespace KucukMericHukuk.Core.DTOs.Service;
 
 public class ServiceDetailDto
@@ -12,4 +14,5 @@ public class ServiceDetailDto
     public string? MetaTitle { get; set; }
     public string? MetaDescription { get; set; }
     public string LanguageCode { get; set; } = string.Empty;
+    public List<AttorneyListDto> Attorneys { get; set; } = new();
 }
