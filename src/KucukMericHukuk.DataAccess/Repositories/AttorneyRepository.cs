@@ -22,6 +22,9 @@ public class AttorneyRepository : GenericRepository<Attorney>, IAttorneyReposito
     public Task<Attorney?> GetBySlugAsync(string languageCode, string slug, CancellationToken ct = default)
         => Query().AsNoTracking()
             .Include(a => a.Translations.Where(t => t.LanguageCode == languageCode))
+            .Include(a => a.Services.Where(s => s.IsActive).OrderBy(s => s.DisplayOrder))
+                .ThenInclude(s => s.Translations.Where(t => t.LanguageCode == languageCode))
+            .AsSplitQuery()
             .FirstOrDefaultAsync(a => a.Translations.Any(t => t.LanguageCode == languageCode && t.Slug == slug), ct);
 
     public Task<Attorney?> GetByIdWithDetailsAsync(int id, string languageCode, CancellationToken ct = default)

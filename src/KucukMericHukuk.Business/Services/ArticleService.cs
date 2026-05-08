@@ -89,6 +89,13 @@ public class ArticleService : IArticleService
         return new PagedResult<ArticleListDto>(items, paged.TotalCount, paged.PageNumber, paged.PageSize);
     }
 
+    public async Task<IReadOnlyList<ArticleListDto>> GetByAuthorAsync(
+        int authorId, string languageCode, int count, CancellationToken ct = default)
+    {
+        var paged = await _uow.Articles.GetByAuthorAsync(authorId, languageCode, 1, count, ct);
+        return _mapper.Map<List<ArticleListDto>>(paged.Items);
+    }
+
     public async Task<IReadOnlyList<ArticleListDto>> GetRelatedAsync(
         int currentArticleId, int? categoryId, string languageCode, int count, CancellationToken ct = default)
     {

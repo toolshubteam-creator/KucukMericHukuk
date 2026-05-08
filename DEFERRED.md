@@ -19,6 +19,13 @@
 
 ## Faz 4 → Frontend (sonraki adımlar)
 
+- **Article AuthorId seed bağı (opsiyonel)**
+  - Faz 4.5'te demo Article'lar AuthorId=null
+  - Attorney detayında "Yazdığı makaleler" bölümü demo'da boş kalıyor (`if (UserId.HasValue)` guard atlar)
+  - Müşteri admin panelinden makale yazınca AuthorId otomatik set olur (Faz 3.4 davranışı)
+  - Demo seed güncellemesi opsiyonel — gerçek müşteri akışı zaten doğru çalışıyor
+  - Tetik: gerek görülürse Faz 5/6, yoksa hiç
+
 - **Service'lerde sayfalama + kategorize gruplama**
   - Faz 4.4 başında karar: tek sayfa grid (8-15 hizmet için yeterli)
   - Tetik: hizmet sayısı 20+ olursa veya "Bireysel/Ticari Hukuk" gibi gruplama isteği gelirse
