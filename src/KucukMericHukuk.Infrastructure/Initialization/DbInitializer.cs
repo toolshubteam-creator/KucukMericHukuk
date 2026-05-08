@@ -351,11 +351,9 @@ public class DbInitializer : IDbInitializer
         var addedPageCount = 0;
         foreach (var seed in pageSeeds)
         {
-            // Idempotent: aynı slug zaten varsa (PageKey farklı olabilir, admin manuel girişi)
-            // unique index ihlalini önlemek için atla.
-            var slugExists = await _db.Set<PageTranslation>()
-                .AnyAsync(t => t.LanguageCode == "tr-TR" && t.Slug == seed.Slug, ct);
-            if (slugExists) continue;
+            // Idempotent: PageKey'e göre kontrol (dil-bağımsız teknik ID).
+            var exists = await _db.Set<Page>().AnyAsync(p => p.PageKey == seed.Key, ct);
+            if (exists) continue;
 
             var page = new Page
             {

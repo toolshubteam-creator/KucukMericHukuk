@@ -19,6 +19,12 @@
 
 ## Faz 4 → Frontend (sonraki adımlar)
 
+- **PageKey kanonikleştirme — kalan: 'iletisim' → 'contact'**
+  - Faz 4.6 başında DB'deki Page'lerin PageKey'leri karışık konvansiyondaydı (hakkimizda Türkçe, privacy English).
+  - Faz 4.6 fix turunda Id=6 'hakkimizda' → 'about' UPDATE edildi, English canonical kabul edildi.
+  - Kalan: Id=7 'iletisim' → 'contact' (Faz 4.7 başında ContactMessage entity gelirken).
+  - Test artıkları (Id=8 'gizlilik-politikasi' IsActive=false, Id=1004 'baska-sayfa' slug='hakkimizda-2') Faz 4.9 cleanup turunda silinir.
+
 - **Article AuthorId seed bağı (opsiyonel)**
   - Faz 4.5'te demo Article'lar AuthorId=null
   - Attorney detayında "Yazdığı makaleler" bölümü demo'da boş kalıyor (`if (UserId.HasValue)` guard atlar)
