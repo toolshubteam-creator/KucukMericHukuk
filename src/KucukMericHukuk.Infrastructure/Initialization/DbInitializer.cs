@@ -134,6 +134,18 @@ public class DbInitializer : IDbInitializer
     {
         _logger.LogInformation("Demo content seed başlatılıyor (tablo başına idempotent)...");
 
+        // Faz 4.6 DEFERRED kapanışı: 'iletisim' → 'contact' kanonikleştirme (PageKey English standardı).
+        // Idempotent: zaten 'contact' ise no-op.
+        var iletisim = await _db.Set<Page>()
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(p => p.PageKey == "iletisim", ct);
+        if (iletisim != null)
+        {
+            iletisim.PageKey = "contact";
+            await _db.SaveChangesAsync(ct);
+            _logger.LogInformation("Demo seed: PageKey 'iletisim' → 'contact' güncellendi.");
+        }
+
         if (!await _db.Set<Category>().AnyAsync(ct))
         {
             var cezaCat = new Category
@@ -345,6 +357,14 @@ public class DbInitializer : IDbInitializer
                 Content = "<h2>Site Kullanım Koşulları</h2><p>Bu web sitesini ziyaret eden ve kullanan ziyaretçilerimizin uyması beklenen koşullar bu sayfada açıklanmaktadır.</p><p><em>Bu içerik müşteri tarafından detaylandırılacaktır.</em></p>",
                 MetaTitle = "Kullanım Koşulları",
                 MetaDescription = "Site kullanım koşulları."
+            },
+            new
+            {
+                Key = "disclosure", DisplayOrder = 5,
+                Title = "Aydınlatma Metni", Slug = "aydinlatma",
+                Content = "<h2>KVKK Aydınlatma Metni</h2><p>6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında, iletişim formu üzerinden tarafımıza ilettiğiniz kişisel verileriniz (ad-soyad, e-posta, telefon, mesaj içeriği) yalnızca tarafınıza geri dönüş sağlamak ve hukuki danışmanlık talebinizi değerlendirmek amacıyla işlenmektedir.</p><p>Verileriniz üçüncü kişilerle paylaşılmamaktadır. KVKK m.11 uyarınca verilerinize ilişkin haklarınızı kullanmak için bizimle iletişime geçebilirsiniz.</p><p><em>Bu metin müşteri tarafından detaylandırılacaktır.</em></p>",
+                MetaTitle = "Aydınlatma Metni — KVKK",
+                MetaDescription = "Kişisel verilerin korunması kanunu kapsamında aydınlatma metni."
             }
         };
 

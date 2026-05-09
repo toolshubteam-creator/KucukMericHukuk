@@ -19,11 +19,9 @@
 
 ## Faz 4 → Frontend (sonraki adımlar)
 
-- **PageKey kanonikleştirme — kalan: 'iletisim' → 'contact'**
-  - Faz 4.6 başında DB'deki Page'lerin PageKey'leri karışık konvansiyondaydı (hakkimizda Türkçe, privacy English).
-  - Faz 4.6 fix turunda Id=6 'hakkimizda' → 'about' UPDATE edildi, English canonical kabul edildi.
-  - Kalan: Id=7 'iletisim' → 'contact' (Faz 4.7 başında ContactMessage entity gelirken).
+- **PageKey test artıkları temizliği** (Faz 4.9)
   - Test artıkları (Id=8 'gizlilik-politikasi' IsActive=false, Id=1004 'baska-sayfa' slug='hakkimizda-2') Faz 4.9 cleanup turunda silinir.
+  - 'iletisim' → 'contact' kanonikleştirme Faz 4.8'de DbInitializer içinde idempotent UPDATE ile kapatıldı.
 
 - **Article AuthorId seed bağı (opsiyonel)**
   - Faz 4.5'te demo Article'lar AuthorId=null
@@ -65,6 +63,16 @@
   - Faz 4.7 daraltılmış scope kararıyla ertelendi
   - Faz 4.2'deki _PrinciplesSection partial Ana Sayfa'da TBB-safe değer kartlarını gösteriyor
   - Faz 5'te Testimonial entity geldiğinde gerçek müvekkil yorumları (anonim, TBB-safe) eklenir
+
+- **Cloudflare Turnstile spam koruması** (Faz 5)
+  - Faz 4.8'de honeypot ile başlangıç anti-spam koyuldu (silent reject)
+  - Cloudflare Turnstile (advanced spam koruması) Faz 5 OWASP turunda eklenecek
+  - Site key + secret + form widget + server-side verify endpoint
+
+- **ContactMessages admin liste UI** (Faz 5)
+  - Faz 4.8'de mesajlar DB'ye yazılıyor + admin'e email bildirim gidiyor; admin liste UI henüz yok
+  - Yapılacak: ContactMessages admin Area controller + liste view + okundu/yanıtlandı toggle + detay
+  - Pattern: ServicesController/Admin (PageForm benzeri) örnek alınabilir
 
 ---
 

@@ -19,6 +19,7 @@
 @import url('components/attorney-detail.css');
 @import url('components/page-detail.css');
 @import url('components/faq.css');
+@import url('components/contact.css');
 
 /* --- Design tokens (admin.css ile birebir aynı renk seti, ayrı dosya) --- */
 :root {

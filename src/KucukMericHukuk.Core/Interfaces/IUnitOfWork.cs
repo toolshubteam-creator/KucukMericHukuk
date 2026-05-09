@@ -12,6 +12,7 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
     IArticleRepository Articles { get; }
     IMediaFileRepository MediaFiles { get; }
     IFaqRepository Faqs { get; }
+    IContactMessageRepository ContactMessages { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 
