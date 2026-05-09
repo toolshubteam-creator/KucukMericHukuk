@@ -21,26 +21,35 @@ Küçükmeriç Hukuk Bürosu (Serdivan / Sakarya) için geliştirilen kurumsal w
 ### Kurulum
 
 ```bash
-# Repo klonla
+# 1) Repo klonla
 git clone https://github.com/<org>/KucukMericHukuk.git
 cd KucukMericHukuk
 
-# Bağımlılıkları yükle
+# 2) Bağımlılıkları yükle
 dotnet restore
 
-# Connection string ayarla (User Secrets önerilir)
-cd src/KucukMericHukuk.Web
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=...;Database=KucukMericHukuk;..."
+# 3) Geliştirme ayarlarını oluştur
+#    appsettings.Development.example.json -> appsettings.Development.json
+#    (Development.json .gitignore'da; sadece localde tutulur)
+cp src/KucukMericHukuk.Web/appsettings.Development.example.json \
+   src/KucukMericHukuk.Web/appsettings.Development.json
 
-# Veritabanını oluştur
-dotnet ef database update --project ../KucukMericHukuk.DataAccess
+# 4) appsettings.Development.json içinde:
+#    - ConnectionStrings:DefaultConnection — kendi SQL Server'ınız
+#    - Seed:AdminPassword — güçlü bir parola koy
+#    - EmailSettings:SmtpHost — opsiyonel; boş bırakılırsa NullEmailSender
+#      devreye girer ve mail gönderimi log'a düşer (dev rahat)
 
-# Uygulamayı çalıştır
-dotnet run
+# 5) Veritabanını oluştur
+dotnet ef database update --project src/KucukMericHukuk.DataAccess \
+                          --startup-project src/KucukMericHukuk.Web
+
+# 6) Uygulamayı çalıştır (HTTPS profili zorunlu — cookie auth Secure)
+dotnet run --project src/KucukMericHukuk.Web --launch-profile https
 ```
 
-Tarayıcıda: `https://localhost:5001`
-Admin paneli: `https://localhost:5001/admin`
+Tarayıcıda: `https://localhost:7082/tr-TR/`
+Admin paneli: `https://localhost:7082/admin/account/login`
 
 ## Klasör Yapısı
 

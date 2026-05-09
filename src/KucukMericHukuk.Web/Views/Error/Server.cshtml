@@ -1,0 +1,18 @@
+@{
+    Layout = "_BareLayout";
+    ViewData["Title"] = "Bir hata oluştu";
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+
+<section class="error-page">
+    <div class="container container-narrow text-center">
+        <p class="error-page__code">500</p>
+        <h1 class="error-page__title">Bir hata oluştu</h1>
+        <p class="error-page__lead">
+            Sunucu tarafında beklenmeyen bir sorun oluştu. Sayfayı yenileyebilir veya kısa süre sonra tekrar deneyebilirsiniz.
+        </p>
+        <div class="error-page__actions">
+            <a class="btn-accent" asp-controller="Home" asp-action="Index" asp-route-culture="@culture">Ana Sayfa</a>
+        </div>
+    </div>
+</section>

@@ -155,6 +155,11 @@ var localizationOptions = app.Services
     .GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
 app.UseRequestLocalization(localizationOptions);
 
+// 4xx/5xx yakalayıp culture-aware Error sayfasına yönlendir.
+// Sabit "tr-TR" — çok dilli destek genişlerse middleware'in RouteData'dan
+// culture'ı okuması gerekir (DEFERRED Faz 5/6).
+app.UseStatusCodePagesWithReExecute("/tr-TR/Error/{0}");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
