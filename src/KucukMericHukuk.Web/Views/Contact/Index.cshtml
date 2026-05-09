@@ -1,0 +1,90 @@
+@model KucukMericHukuk.Web.ViewModels.Contact.ContactFormViewModel
+@{
+    ViewData["Title"] = "İletişim";
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+
+<section class="section-public">
+    <div class="container">
+        <div class="section-public__header">
+            <p class="section-public__eyebrow">İletişim</p>
+            <h1 class="section-public__title">Bizimle iletişime geçin</h1>
+            <p class="section-public__lead">
+                Hukuki danışmanlık veya randevu talepleriniz için aşağıdaki formu kullanabilirsiniz.
+            </p>
+        </div>
+
+        <div class="contact-grid">
+            <aside class="contact-info">
+                <h2 class="contact-info__title">İletişim bilgileri</h2>
+                <ul class="contact-info__list">
+                    <li>
+                        <i data-lucide="map-pin" width="20" height="20"></i>
+                        <span>Serdivan / Sakarya</span>
+                    </li>
+                    <li>
+                        <i data-lucide="mail" width="20" height="20"></i>
+                        <span>info@kucukmerichukuk.av.tr</span>
+                    </li>
+                    <li>
+                        <i data-lucide="clock" width="20" height="20"></i>
+                        <span>Hafta içi 09:00 — 18:00</span>
+                    </li>
+                </ul>
+            </aside>
+
+            <form class="contact-form" method="post" asp-action="Submit" asp-route-culture="@culture" novalidate>
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="contact-form__honeypot" aria-hidden="true">
+                    <label for="Website">Website (boş bırakın)</label>
+                    <input type="text" name="Website" id="Website" tabindex="-1" autocomplete="off" />
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Name" class="form-label">Ad Soyad *</label>
+                        <input asp-for="Name" class="form-control" required autocomplete="name" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label">E-posta *</label>
+                        <input asp-for="Email" type="email" class="form-control" required autocomplete="email" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Phone" class="form-label">Telefon</label>
+                        <input asp-for="Phone" type="tel" class="form-control" autocomplete="tel" />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Subject" class="form-label">Konu *</label>
+                        <input asp-for="Subject" class="form-control" required autocomplete="off" />
+                        <span asp-validation-for="Subject" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Message" class="form-label">Mesajınız *</label>
+                        <textarea asp-for="Message" class="form-control" rows="6" required autocomplete="off"></textarea>
+                        <span asp-validation-for="Message" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input asp-for="KvkkConsent" class="form-check-input" required />
+                            <label asp-for="KvkkConsent" class="form-check-label">
+                                <a asp-controller="Pages" asp-action="Detail" asp-route-culture="@culture" asp-route-slug="aydinlatma" target="_blank">Aydınlatma metnini</a> okudum, onaylıyorum.
+                            </label>
+                            <div>
+                                <span asp-validation-for="KvkkConsent" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn-accent">Mesajı Gönder</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>

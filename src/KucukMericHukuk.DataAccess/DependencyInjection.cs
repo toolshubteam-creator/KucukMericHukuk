@@ -22,6 +22,7 @@ public static class DependencyInjection
         services.AddScoped<IArticleRepository, ArticleRepository>();
         services.AddScoped<IMediaFileRepository, MediaFileRepository>();
         services.AddScoped<IFaqRepository, FaqRepository>();
+        services.AddScoped<IContactMessageRepository, ContactMessageRepository>();
 
         // UnitOfWork
         services.AddScoped<IUnitOfWork, DataAccessUnitOfWork>();

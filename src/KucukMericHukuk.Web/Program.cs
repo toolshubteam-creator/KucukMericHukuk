@@ -5,7 +5,9 @@ using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.Entities.Identity;
 using KucukMericHukuk.DataAccess;
 using KucukMericHukuk.DataAccess.Context;
+using KucukMericHukuk.Core.Interfaces;
 using KucukMericHukuk.Infrastructure;
+using KucukMericHukuk.Infrastructure.Email;
 using KucukMericHukuk.Infrastructure.Initialization;
 using KucukMericHukuk.Web;
 using KucukMericHukuk.Web.Areas.Admin.Identity;
@@ -67,6 +69,18 @@ builder.Services.AddDataAccess();
 
 // Infrastructure (SeedOptions + DbInitializer)
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// Email (SmtpHost doluysa SmtpEmailSender, boşsa NullEmailSender — dev fallback)
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+var smtpHost = builder.Configuration["EmailSettings:SmtpHost"];
+if (!string.IsNullOrWhiteSpace(smtpHost))
+{
+    builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+}
+else
+{
+    builder.Services.AddScoped<IEmailSender, NullEmailSender>();
+}
 
 // Mapster + Business services
 builder.Services.AddBusiness();

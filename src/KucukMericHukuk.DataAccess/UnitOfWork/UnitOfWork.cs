@@ -19,6 +19,7 @@ public class UnitOfWork : IUnitOfWork
     private IArticleRepository? _articles;
     private IMediaFileRepository? _mediaFiles;
     private IFaqRepository? _faqs;
+    private IContactMessageRepository? _contactMessages;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -33,6 +34,7 @@ public class UnitOfWork : IUnitOfWork
     public IArticleRepository Articles => _articles ??= new ArticleRepository(_context);
     public IMediaFileRepository MediaFiles => _mediaFiles ??= new MediaFileRepository(_context);
     public IFaqRepository Faqs => _faqs ??= new FaqRepository(_context);
+    public IContactMessageRepository ContactMessages => _contactMessages ??= new ContactMessageRepository(_context);
 
     public Task<int> SaveChangesAsync(CancellationToken ct = default)
         => _context.SaveChangesAsync(ct);
