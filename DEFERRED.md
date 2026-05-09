@@ -19,10 +19,6 @@
 
 ## Faz 4 → Frontend (sonraki adımlar)
 
-- **PageKey test artıkları temizliği** (Faz 4.9)
-  - Test artıkları (Id=8 'gizlilik-politikasi' IsActive=false, Id=1004 'baska-sayfa' slug='hakkimizda-2') Faz 4.9 cleanup turunda silinir.
-  - 'iletisim' → 'contact' kanonikleştirme Faz 4.8'de DbInitializer içinde idempotent UPDATE ile kapatıldı.
-
 - **Article AuthorId seed bağı (opsiyonel)**
   - Faz 4.5'te demo Article'lar AuthorId=null
   - Attorney detayında "Yazdığı makaleler" bölümü demo'da boş kalıyor (`if (UserId.HasValue)` guard atlar)
@@ -34,17 +30,6 @@
   - Faz 4.4 başında karar: tek sayfa grid (8-15 hizmet için yeterli)
   - Tetik: hizmet sayısı 20+ olursa veya "Bireysel/Ticari Hukuk" gibi gruplama isteği gelirse
   - Implementation: Service entity'sine optional `ServiceCategory` (enum/entity) + Index'te accordion ya da sekme
-
-- **Hero/header marka vurgusu — yeşil zemin alternatifleri değerlendirme**
-  - Faz 4.2 sonrası gündem: kullanıcı hero/header'da yeşil arka plan istiyor mu sorusunu sordu
-  - Mevcut karar: krem hero korundu (beyaz alan hakimiyeti spec'i, prestij dengesi)
-  - Faz 4.9 son cila adımında 4 alternatif değerlendirilecek:
-    - A) Header altına ince altın çizgi (minimal vurgu)
-    - B) Hero'da decorative açık-yeşil filigran (%5 opacity arka plan)
-    - C) Hero alt-banner: küçük yeşil şerit + slogan
-    - D) Hero üstü altın eyebrow: "Küçükmeriç Hukuk Bürosu · Sakarya"
-  - Diğer 16 sayfa render olduktan sonra hero karakteri netleşince ekran görüntüleri üzerinden tek seferde karar verilecek
-  - Tetik: Faz 4.9 (404 + cookie consent + son cila adımı)
 
 ---
 
@@ -73,6 +58,22 @@
   - Faz 4.8'de mesajlar DB'ye yazılıyor + admin'e email bildirim gidiyor; admin liste UI henüz yok
   - Yapılacak: ContactMessages admin Area controller + liste view + okundu/yanıtlandı toggle + detay
   - Pattern: ServicesController/Admin (PageForm benzeri) örnek alınabilir
+
+- **Faz 4.10 / v0.4.1 — Bütüncül tasarım cila turu**
+  - Faz 4 tüm sayfalar tamamlandıktan sonra kullanıcı tarafından genel tasarım gözden geçirme talep edildi (09.05.2026)
+  - Kapsam: tasarım tutarlılığı, mikro etkileşimler, tipografi ince ayar, mobile UX
+  - Tetik: kullanıcı isteğiyle, Faz 5 öncesi mini cila turu
+
+- **Browser Link dev-time uyarıları temizliği** (Faz 5)
+  - Faz 4.8 console'unda tespit edildi: "Unload event listeners deprecated" + Cookie HTTPS uyarıları
+  - Browser Link özelliğinden kaynaklanır, production'da yok
+  - Çözüm: launchSettings.json'da hot reload toggle veya Browser Link kapat
+  - Tetik: dev-time gürültü rahatsız ederse
+
+- **Çok dilli StatusCode middleware** (Faz 6)
+  - Faz 4.9'da `UseStatusCodePagesWithReExecute("/tr-TR/Error/{0}")` sabit Türkçe culture
+  - Çok dilli destek genişlerse middleware culture-aware yeniden yazılmalı (RouteData'dan culture okuma + fallback)
+  - Tetik: İngilizce/diğer dil destekleri eklendiğinde
 
 ---
 

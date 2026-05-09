@@ -20,6 +20,8 @@
 @import url('components/page-detail.css');
 @import url('components/faq.css');
 @import url('components/contact.css');
+@import url('components/error-page.css');
+@import url('components/cookie-consent.css');
 
 /* --- Design tokens (admin.css ile birebir aynı renk seti, ayrı dosya) --- */
 :root {

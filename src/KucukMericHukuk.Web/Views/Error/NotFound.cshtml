@@ -1,0 +1,19 @@
+@{
+    Layout = "_BareLayout";
+    ViewData["Title"] = "Sayfa Bulunamadı";
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+
+<section class="error-page">
+    <div class="container container-narrow text-center">
+        <p class="error-page__code">404</p>
+        <h1 class="error-page__title">Sayfa bulunamadı</h1>
+        <p class="error-page__lead">
+            Aradığınız sayfa taşınmış, silinmiş veya hiç var olmamış olabilir.
+        </p>
+        <div class="error-page__actions">
+            <a class="btn-accent" asp-controller="Home" asp-action="Index" asp-route-culture="@culture">Ana Sayfa</a>
+            <a class="btn-link-accent" asp-controller="Contact" asp-action="Index" asp-route-culture="@culture">İletişime Geç</a>
+        </div>
+    </div>
+</section>

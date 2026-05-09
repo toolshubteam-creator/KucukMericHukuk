@@ -1,0 +1,14 @@
+@{
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+<div id="cookie-consent" class="cookie-consent" hidden role="dialog" aria-labelledby="cookie-consent-title" aria-describedby="cookie-consent-text">
+    <div class="cookie-consent__inner">
+        <p class="cookie-consent__text" id="cookie-consent-text">
+            <strong id="cookie-consent-title">Çerez kullanımı</strong> —
+            Sitemizde deneyiminizi iyileştirmek için zorunlu çerezler kullanmaktayız.
+            Detaylı bilgi için
+            <a asp-controller="Pages" asp-action="Detail" asp-route-culture="@culture" asp-route-slug="cerez-politikasi">Çerez Politikası</a> sayfamızı inceleyebilirsiniz.
+        </p>
+        <button id="cookie-consent-accept" type="button" class="cookie-consent__accept">Kabul ediyorum</button>
+    </div>
+</div>
