@@ -42,7 +42,7 @@
 | 4.5 | Attorney public liste + detay (Services + AuthorArticles) + AttorneyRepository.GetBySlugAsync include enrichment + IArticleService.GetByAuthorAsync + article-card flex column fix + AttorneyServices M:N demo seed + header nav (Avukatlarımız) | `3006ebe` |
 | 4.6 | Page render: PagesController + Detail view + page-detail.css + 4 demo seed (Hakkımızda/KVKK/Çerez/Kullanım) + header "Hakkımızda" + footer 3 alt link (KVKK/Çerez/Kullanım) + Privacy stub temizliği | `7540065` |
 | 4.7 | SSS public: Faq entity + migration + repository + service + accordion view + 6 demo seed + header SSS link | `13320a2` |
-| 4.8 | İletişim formu: ContactMessage entity + migration + form + validator + IEmailSender (Smtp/Null) + honeypot + KVKK aydınlatma Page seed + iletisim→contact UPDATE + header İletişim link | _pending_ |
+| 4.8 | İletişim formu: ContactMessage entity + migration + form + validator + IEmailSender (Smtp/Null) + honeypot + KVKK aydınlatma Page seed + iletisim→contact UPDATE + header İletişim link | `10b852a` |
 
 ---
 
