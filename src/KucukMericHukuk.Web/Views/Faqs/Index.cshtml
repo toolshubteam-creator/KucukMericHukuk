@@ -1,0 +1,49 @@
+@model KucukMericHukuk.Web.ViewModels.Faq.FaqListViewModel
+@{
+    ViewData["Title"] = "Sık Sorulan Sorular";
+}
+
+<section class="section-public">
+    <div class="container container-narrow">
+        <div class="section-public__header">
+            <p class="section-public__eyebrow">Yardım Merkezi</p>
+            <h1 class="section-public__title">Sık sorulan sorular</h1>
+            <p class="section-public__lead">
+                Hukuki süreçler, danışmanlık ve büromuza dair sıkça sorulan sorular.
+            </p>
+        </div>
+
+        @if (Model.Faqs.Any())
+        {
+            <div class="accordion faq-accordion" id="faqAccordion">
+                @for (int i = 0; i < Model.Faqs.Count; i++)
+                {
+                    var faq = Model.Faqs[i];
+                    var collapseId = $"faqCollapse{i}";
+                    var headingId = $"faqHeading{i}";
+                    <div class="accordion-item faq-item">
+                        <h2 class="accordion-header" id="@headingId">
+                            <button class="accordion-button collapsed faq-question" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#@collapseId"
+                                    aria-expanded="false" aria-controls="@collapseId">
+                                @faq.Question
+                            </button>
+                        </h2>
+                        <div id="@collapseId" class="accordion-collapse collapse"
+                             aria-labelledby="@headingId" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body faq-answer">
+                                @faq.Answer
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted text-center">Henüz yayında soru bulunmamaktadır.</p>
+        }
+    </div>
+</section>
+
+<partial name="_CtaSection" />
