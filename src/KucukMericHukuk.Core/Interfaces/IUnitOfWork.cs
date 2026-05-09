@@ -11,6 +11,7 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
     ITagRepository Tags { get; }
     IArticleRepository Articles { get; }
     IMediaFileRepository MediaFiles { get; }
+    IFaqRepository Faqs { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 

@@ -50,6 +50,24 @@
 
 ---
 
+## Faz 4 → Frontend (Faz 5 / sonrasına ertelenen)
+
+- **Faq admin CRUD** (Faz 5)
+  - Faz 4.7'de SSS sayfası public-only oluşturuldu, admin tarafına Faqs eklenmedi
+  - Müşteri SSS düzenleme talebinde Faz 5'te admin Area'ya FaqsController + form view + CRUD eklenir
+  - Pattern: ServicesController/Admin (PageForm benzeri) örnek alınabilir
+
+- **Galeri sayfası** (Faz 5)
+  - Faz 4.7 daraltılmış scope kararıyla ertelendi
+  - Yapılacaklar: MediaFile.IsPublic field eklemek (migration), admin tarafında "public" toggle, /Galeri public sayfası grid render
+
+- **Referanslar/Testimonial entity ve sayfası** (Faz 5)
+  - Faz 4.7 daraltılmış scope kararıyla ertelendi
+  - Faz 4.2'deki _PrinciplesSection partial Ana Sayfa'da TBB-safe değer kartlarını gösteriyor
+  - Faz 5'te Testimonial entity geldiğinde gerçek müvekkil yorumları (anonim, TBB-safe) eklenir
+
+---
+
 ## Faz 5 → Güvenlik & SEO
 
 - **Email confirmation** (Identity)

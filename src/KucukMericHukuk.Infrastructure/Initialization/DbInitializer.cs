@@ -386,6 +386,76 @@ public class DbInitializer : IDbInitializer
             _logger.LogInformation("Demo seed: tüm PageKey'ler zaten mevcut, sayfa eklenmedi.");
         }
 
+        if (!await _db.Set<Faq>().AnyAsync(ct))
+        {
+            var faqs = new[]
+            {
+                new Faq
+                {
+                    DisplayOrder = 1, IsActive = true,
+                    Translations = new List<FaqTranslation>
+                    {
+                        new() { LanguageCode = "tr-TR",
+                            Question = "Ücretsiz danışmanlık veriyor musunuz?",
+                            Answer = "İlk görüşmemizi kısa bir tanışma seansı olarak ücretsiz yürütüyoruz. Davanın detaylarına girildiğinde, hizmet kapsamına göre ücretlendirme yapılır." }
+                    }
+                },
+                new Faq
+                {
+                    DisplayOrder = 2, IsActive = true,
+                    Translations = new List<FaqTranslation>
+                    {
+                        new() { LanguageCode = "tr-TR",
+                            Question = "Hangi hukuk alanlarında çalışıyorsunuz?",
+                            Answer = "Ceza, aile, iş, gayrimenkul ve ticaret hukuku başta olmak üzere geniş bir alanda hizmet veriyoruz. Detaylı bilgi için Hizmet Alanları sayfamızı inceleyebilirsiniz." }
+                    }
+                },
+                new Faq
+                {
+                    DisplayOrder = 3, IsActive = true,
+                    Translations = new List<FaqTranslation>
+                    {
+                        new() { LanguageCode = "tr-TR",
+                            Question = "Vekalet sürecinizi nasıl ilerletiyorsunuz?",
+                            Answer = "İlk görüşmenin ardından dava değerlendirmesi yapılır, vekaletname düzenlenir ve süreç müvekkille birlikte planlanır. Her aşamada bilgilendirme yapılır." }
+                    }
+                },
+                new Faq
+                {
+                    DisplayOrder = 4, IsActive = true,
+                    Translations = new List<FaqTranslation>
+                    {
+                        new() { LanguageCode = "tr-TR",
+                            Question = "Online görüşme imkânınız var mı?",
+                            Answer = "Evet, talebiniz halinde Zoom veya Google Meet üzerinden online görüşme planlayabiliyoruz. Şehir dışı müvekkillerimiz için bu seçenek aktif olarak kullanılmaktadır." }
+                    }
+                },
+                new Faq
+                {
+                    DisplayOrder = 5, IsActive = true,
+                    Translations = new List<FaqTranslation>
+                    {
+                        new() { LanguageCode = "tr-TR",
+                            Question = "Davam ne kadar sürer?",
+                            Answer = "Dava süresi konusu, mahkemenin yoğunluğu, delil durumu ve karşı tarafın tutumu gibi faktörlere bağlıdır. İlk görüşmede genel bir takvim öngörüsü sunulabilir." }
+                    }
+                },
+                new Faq
+                {
+                    DisplayOrder = 6, IsActive = true,
+                    Translations = new List<FaqTranslation>
+                    {
+                        new() { LanguageCode = "tr-TR",
+                            Question = "Belgelerimi sizinle paylaşmam güvenli mi?",
+                            Answer = "Tüm müvekkil bilgileri Avukatlık Kanunu çerçevesinde sır saklama yükümlülüğü kapsamındadır. Dijital belgeleriniz şifreli ortamlarda saklanır." }
+                    }
+                }
+            };
+            _db.Set<Faq>().AddRange(faqs);
+            await _db.SaveChangesAsync(ct);
+            _logger.LogInformation("Demo seed: 6 SSS eklendi.");
+        }
+
         var attorneys = await _db.Set<Attorney>().Include(a => a.Services).ToListAsync(ct);
         var allServices = await _db.Set<Service>().ToListAsync(ct);
         var anyChange = false;

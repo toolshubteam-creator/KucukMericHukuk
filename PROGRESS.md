@@ -40,7 +40,8 @@
 | 4.3 | Article public liste + detay: 4 service method (`GetBySlugAsync` + `GetPublishedPagedAsync` + `GetByCategoryAsync` + `GetRelatedAsync`), `ICategoryService.GetActiveOrderedAsync`, slug-based attribute routing, sidebar kategori filtresi, Bootstrap pagination + eliding, `IHtmlHelper.LazyImageHtml`, related articles fallback, Article seed kategori bağı (1 Ceza + 2 Aile), 5 birim test | `6d20869` |
 | 4.4 | Service public liste + detay: ServiceDetailDto.Attorneys + repo Attorneys/Translations include + AsSplitQuery, 2 view (Index 3-kolon grid + Detail hero+content+attorneys+others+cta), service-detail.css, header nav (Hizmetler + Makaleler) | `cecd776` |
 | 4.5 | Attorney public liste + detay (Services + AuthorArticles) + AttorneyRepository.GetBySlugAsync include enrichment + IArticleService.GetByAuthorAsync + article-card flex column fix + AttorneyServices M:N demo seed + header nav (Avukatlarımız) | `3006ebe` |
-| 4.6 | Page render: PagesController + Detail view + page-detail.css + 4 demo seed (Hakkımızda/KVKK/Çerez/Kullanım) + header "Hakkımızda" + footer 3 alt link (KVKK/Çerez/Kullanım) + Privacy stub temizliği | _pending_ |
+| 4.6 | Page render: PagesController + Detail view + page-detail.css + 4 demo seed (Hakkımızda/KVKK/Çerez/Kullanım) + header "Hakkımızda" + footer 3 alt link (KVKK/Çerez/Kullanım) + Privacy stub temizliği | `7540065` |
+| 4.7 | SSS public: Faq entity + migration + repository + service + accordion view + 6 demo seed + header SSS link | _pending_ |
 
 ---
 
