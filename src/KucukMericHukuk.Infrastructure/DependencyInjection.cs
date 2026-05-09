@@ -2,6 +2,7 @@ using KucukMericHukuk.Core.Interfaces.Services;
 using KucukMericHukuk.Infrastructure.FileStorage;
 using KucukMericHukuk.Infrastructure.Initialization;
 using KucukMericHukuk.Infrastructure.Security;
+using KucukMericHukuk.Infrastructure.Seo;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,6 +23,9 @@ public static class DependencyInjection
         // Medya: dosya saklama + görsel işleme
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
         services.AddScoped<IImageProcessor, SkiaSharpProcessor>();
+
+        // SEO: JSON-LD üreticisi (SiteInfoOptions Web katmanında register, burada IOptions ile çözülür)
+        services.AddScoped<IJsonLdService, JsonLdService>();
 
         return services;
     }

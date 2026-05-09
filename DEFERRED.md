@@ -226,6 +226,17 @@
   - Şu an view-level entegrasyonla manuel doğrulanıyor; CI safe-net için unit test eklenebilir
   - Tetik: regresyon yaşanırsa veya Faz 5 sonu cleanup
 
+- **Müşteri iletişim bilgileri** (Faz 0 → SiteInfo doldurma)
+  - Faz 5.2'de SiteInfoOptions'a Telephone, Email, StreetAddress, PostalCode, Latitude/Longitude alanları eklendi
+  - Müşteri verince appsettings.json + appsettings.Development.json'a yazılır
+  - LegalService schema bu alanlarla zenginleşir; şu an boş alanlar schema'da render edilmez
+  - Tetik: Faz 0 müşteri içerik teslimatı
+
+- **Service detay JSON-LD** (Faz 5.4 / Faz 6)
+  - Faz 5.2'de Article + Person + FAQPage işlendi; Service detay için LegalService alt-tipi (örn. ProfessionalService) düşünülebilir
+  - Service detay zaten LegalService'in bir parçası; ayrı schema marjinal ek değer
+  - Tetik: Faz 5.4 breadcrumb turunda yeniden değerlendir
+
 
 
 - **Production seed credentials**

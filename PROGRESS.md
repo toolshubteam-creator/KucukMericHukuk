@@ -44,7 +44,8 @@ SEO altyapısı (meta tags, JSON-LD, sitemap, robots, breadcrumb), güvenlik tur
 ### Tamamlanan Adımlar
 | Adım | Açıklama | Commit |
 | --- | --- | --- |
-| 5.1 | SEO meta tag altyapısı: SiteInfoOptions (Core/Common) + MetaTagsHelpers (MetaTags + CanonicalForArticles) + 14 sayfa ViewData set + default OG image (1200x630) + appsettings.Development.example.json güncelleme | _pending_ |
+| 5.1 | SEO meta tag altyapısı: SiteInfoOptions (Core/Common) + MetaTagsHelpers (MetaTags + CanonicalForArticles) + 14 sayfa ViewData set + default OG image (1200x630) + appsettings.Development.example.json güncelleme | `25aad7f` |
+| 5.2 | JSON-LD schema: IJsonLdService (Infrastructure/Seo) + 5 schema (LegalService, WebSite, Article, Person, FAQPage) + site-wide layout + 3 detail view + SiteInfoOptions adres/iletişim/geo alanları + 6 birim test | _pending_ |
 
 ---
 

@@ -1,5 +1,6 @@
 @model KucukMericHukuk.Web.ViewModels.Attorney.AttorneyDetailViewModel
 @using KucukMericHukuk.Web.Helpers
+@inject KucukMericHukuk.Core.Interfaces.Services.IJsonLdService JsonLd
 @{
     ViewData["Title"] = !string.IsNullOrEmpty(Model.Attorney.MetaTitle)
         ? Model.Attorney.MetaTitle
@@ -11,6 +12,10 @@
     ViewData["OgType"] = "profile";
 
     var hasPhoto = !string.IsNullOrEmpty(Model.Attorney.ProfileImageUrl);
+}
+
+@section Head {
+    @Html.JsonLd(JsonLd.BuildPerson(Model.Attorney))
 }
 
 <article class="attorney-detail">

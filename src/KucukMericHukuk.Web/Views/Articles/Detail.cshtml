@@ -1,5 +1,6 @@
 @model KucukMericHukuk.Web.ViewModels.Article.ArticleDetailViewModel
 @using KucukMericHukuk.Web.Helpers
+@inject KucukMericHukuk.Core.Interfaces.Services.IJsonLdService JsonLd
 @{
     ViewData["Title"] = !string.IsNullOrEmpty(Model.Article.MetaTitle)
         ? Model.Article.MetaTitle
@@ -12,6 +13,10 @@
 
     var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
     var publishedDate = Model.Article.PublishedAt?.ToString("dd MMMM yyyy") ?? "";
+}
+
+@section Head {
+    @Html.JsonLd(JsonLd.BuildArticle(Model.Article))
 }
 
 <article class="article-detail">
