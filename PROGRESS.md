@@ -43,7 +43,7 @@
 | 4.6 | Page render: PagesController + Detail view + page-detail.css + 4 demo seed (Hakkımızda/KVKK/Çerez/Kullanım) + header "Hakkımızda" + footer 3 alt link (KVKK/Çerez/Kullanım) + Privacy stub temizliği | `7540065` |
 | 4.7 | SSS public: Faq entity + migration + repository + service + accordion view + 6 demo seed + header SSS link | `13320a2` |
 | 4.8 | İletişim formu: ContactMessage entity + migration + form + validator + IEmailSender (Smtp/Null) + honeypot + KVKK aydınlatma Page seed + iletisim→contact UPDATE + header İletişim link | `10b852a` |
-| 4.9 | 404+500 custom sayfalar (_BareLayout) + UseStatusCodePagesWithReExecute + cookie consent banner (vanilla JS, localStorage) + DB temizlik (Pages.Id=8,1004) + appsettings.Development.example.json + README dev kurulum + DEFERRED kapatma | _pending_ |
+| 4.9 | 404+500 custom sayfalar (_BareLayout) + UseStatusCodePagesWithReExecute + cookie consent banner (vanilla JS, localStorage) + DB temizlik (Pages.Id=8,1004) + appsettings.Development.example.json + README dev kurulum + DEFERRED kapatma | `7402028` |
 
 ---
 
