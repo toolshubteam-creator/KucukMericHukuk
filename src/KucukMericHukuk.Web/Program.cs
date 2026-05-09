@@ -1,6 +1,7 @@
 using System.Globalization;
 using FluentValidation.AspNetCore;
 using KucukMericHukuk.Business;
+using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.Entities.Identity;
 using KucukMericHukuk.DataAccess;
@@ -69,6 +70,10 @@ builder.Services.AddDataAccess();
 
 // Infrastructure (SeedOptions + DbInitializer)
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// Site bilgileri (SEO meta tags, sitemap üretimi vb. için ortak config)
+builder.Services.Configure<SiteInfoOptions>(
+    builder.Configuration.GetSection(SiteInfoOptions.SectionName));
 
 // Email (SmtpHost doluysa SmtpEmailSender, boşsa NullEmailSender — dev fallback)
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));

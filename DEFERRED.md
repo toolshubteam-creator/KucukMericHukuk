@@ -215,6 +215,19 @@
 
 ## Faz 6 → Yayına Alma
 
+- **SiteSettings entity** (Faz 6)
+  - Faz 5.1'de SiteInfoOptions appsettings'tan okunuyor; müşterinin admin panelinden yönetmesi mümkün değil
+  - Müşteri site adı, OG image, GA4/GTM kodları, sosyal medya linklerini panelden yönetmek isterse SiteSettings entity gerek (key-value veya structured single-row)
+  - Pattern: PageConfiguration benzeri admin Form view + key-value liste; Options pattern korunur, SiteInfoOptions DB'den hydrate edilir
+  - Tetik: Faz 6 yayın hazırlığı veya müşteri talebi
+
+- **MetaTagsHelpers birim test** (Faz 5.10 / Faz 6)
+  - Suffix mantığı (ana sayfa istisnası), OG image absolute URL, canonical override, robots default
+  - Şu an view-level entegrasyonla manuel doğrulanıyor; CI safe-net için unit test eklenebilir
+  - Tetik: regresyon yaşanırsa veya Faz 5 sonu cleanup
+
+
+
 - **Production seed credentials**
   - `Seed__AdminPassword` env var ile farklı + güçlü değer
   - User Secrets sadece dev

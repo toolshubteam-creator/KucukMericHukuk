@@ -2,6 +2,7 @@
 @using KucukMericHukuk.Web.Helpers
 @{
     ViewData["Title"] = !string.IsNullOrEmpty(Model.Page.MetaTitle) ? Model.Page.MetaTitle : Model.Page.Title;
+    ViewData["MetaDescription"] = Model.Page.MetaDescription;
 }
 
 <article class="page-detail">

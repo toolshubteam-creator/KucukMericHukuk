@@ -4,6 +4,11 @@
     ViewData["Title"] = !string.IsNullOrEmpty(Model.Service.MetaTitle)
         ? Model.Service.MetaTitle
         : Model.Service.Name;
+    ViewData["MetaDescription"] = !string.IsNullOrEmpty(Model.Service.MetaDescription)
+        ? Model.Service.MetaDescription
+        : Model.Service.ShortDescription;
+    ViewData["OgImage"] = Model.Service.FeaturedImage;
+
     var iconName = string.IsNullOrEmpty(Model.Service.Icon) ? "scale" : Model.Service.Icon;
 }
 

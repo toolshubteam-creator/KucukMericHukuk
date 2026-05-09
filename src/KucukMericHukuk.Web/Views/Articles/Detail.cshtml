@@ -4,6 +4,12 @@
     ViewData["Title"] = !string.IsNullOrEmpty(Model.Article.MetaTitle)
         ? Model.Article.MetaTitle
         : Model.Article.Title;
+    ViewData["MetaDescription"] = !string.IsNullOrEmpty(Model.Article.MetaDescription)
+        ? Model.Article.MetaDescription
+        : Model.Article.Excerpt;
+    ViewData["OgImage"] = Model.Article.FeaturedImageUrl;
+    ViewData["OgType"] = "article";
+
     var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
     var publishedDate = Model.Article.PublishedAt?.ToString("dd MMMM yyyy") ?? "";
 }

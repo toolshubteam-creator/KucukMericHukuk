@@ -13,10 +13,38 @@
 | 2 | Yönetim paneli iskelet & temel modüller | 2 hafta | ✅ Tamamlandı |
 | 3 | İçerik yönetimi modülleri | 2 hafta | ✅ Tamamlandı |
 | 4 | Frontend tasarım & geliştirme | 3 hafta | ✅ Tamamlandı |
-| 5 | SEO, entegrasyon, güvenlik | 1 hafta | ⏳ Beklemede |
+| 5 | SEO, entegrasyon, güvenlik | 1 hafta | 🔄 Devam ediyor |
 | 6 | Test, düzeltme, yayına alma | 1 hafta | ⏳ Beklemede |
 
 **Toplam:** 10 hafta (+2 hafta tampon önerisi)
+
+---
+
+## FAZ 5 — SEO, Güvenlik, Admin Geri Dönüşleri — 🔄 BAŞLADI
+
+**Başlama Tarihi:** 09.05.2026
+
+### Hedef
+SEO altyapısı (meta tags, JSON-LD, sitemap, robots, breadcrumb), güvenlik turu (CDN SRI, RateLimit, security headers, global exception middleware, Cloudflare Turnstile), Faz 4'ten admin geri dönüşleri (Faq CRUD, ContactMessages liste).
+
+### 10 Alt-Adım Planı
+| # | Konu |
+| --- | --- |
+| 5.1 | SEO meta tag altyapısı |
+| 5.2 | JSON-LD schema |
+| 5.3 | Sitemap.xml + robots.txt |
+| 5.4 | Breadcrumb component + schema |
+| 5.5 | CDN SRI hash + sürüm pin |
+| 5.6 | Cloudflare Turnstile |
+| 5.7 | RateLimit + global exception middleware + security headers |
+| 5.8 | Faq admin CRUD |
+| 5.9 | ContactMessages admin liste UI |
+| 5.10 | Faz 5 kapanış + tag v0.5.0 |
+
+### Tamamlanan Adımlar
+| Adım | Açıklama | Commit |
+| --- | --- | --- |
+| 5.1 | SEO meta tag altyapısı: SiteInfoOptions (Core/Common) + MetaTagsHelpers (MetaTags + CanonicalForArticles) + 14 sayfa ViewData set + default OG image (1200x630) + appsettings.Development.example.json güncelleme | _pending_ |
 
 ---
 

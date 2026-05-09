@@ -1,6 +1,13 @@
 @model KucukMericHukuk.Web.ViewModels.Article.ArticleListViewModel
 @{
     ViewData["Title"] = "Makaleler";
+    ViewData["MetaDescription"] = "Hukuki gelişmeler, görüş yazıları ve dava değerlendirmeleri. Ceza, aile, iş ve ticaret hukukuna dair güncel yazılar.";
+
+    if (!string.IsNullOrEmpty(Model.SelectedCategorySlug) || Model.Articles.PageNumber > 1)
+    {
+        ViewData["CanonicalUrl"] = Html.CanonicalForArticles(Model.SelectedCategorySlug, Model.Articles.PageNumber);
+    }
+
     var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
 }
 
