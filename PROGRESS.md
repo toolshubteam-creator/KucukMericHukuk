@@ -12,7 +12,7 @@
 | 1 | Proje kurulumu & mimari | 1 hafta | ✅ Tamamlandı |
 | 2 | Yönetim paneli iskelet & temel modüller | 2 hafta | ✅ Tamamlandı |
 | 3 | İçerik yönetimi modülleri | 2 hafta | ✅ Tamamlandı |
-| 4 | Frontend tasarım & geliştirme | 3 hafta | 🔄 Devam ediyor |
+| 4 | Frontend tasarım & geliştirme | 3 hafta | ✅ Tamamlandı |
 | 5 | SEO, entegrasyon, güvenlik | 1 hafta | ⏳ Beklemede |
 | 6 | Test, düzeltme, yayına alma | 1 hafta | ⏳ Beklemede |
 
@@ -20,16 +20,72 @@
 
 ---
 
-## FAZ 4 — Frontend (Tasarım & Geliştirme) — 🔄 BAŞLADI
+## FAZ 4 — Frontend (Tasarım & Geliştirme) — ✅ TAMAMLANDI
 
 **Başlama Tarihi:** 08.05.2026
+**Tamamlanma Tarihi:** 09.05.2026
+**Tag:** v0.4.0
+**Süre:** ~2 oturum (planlama + 9 alt-adım)
 
-### Hedef
+### Kapsam
+17 public sayfa + responsive + SEO temelleri + KVKK uyumlu form + custom 404. Admin tarafına dönüş yok (Faz 1-3'te kurulmuş yapı korundu).
 
-- 17 public sayfa (Ana, Hakkımızda, Avukatlarımız +detay, Hizmetler +detay, Makaleler +detay, SSS, Galeri, Referanslar, İletişim, Randevu Al, KVKK/Çerez/Kullanım, 404)
-- Tasarım yönü: Yeşil (#0F2A23) + Altın (#C9A961) + Krem (#FAF7F2), Playfair Display + Inter, 8px ölçü, mobile-first
-- Frontend kapsamı: ContactMessage entity + minimal Faq entity (kararlaştırıldı, faz başı strateji notu)
-- DEFERRED'a kaydırılan: Testimonial entity, Appointment entity (Faz 4.5/Faz 5)
+### Yeni Entity'ler
+- Faq + FaqTranslation (Faz 4.7) — migration AddFaq
+- ContactMessage (Faz 4.8) — migration AddContactMessage
+
+### Public Controller'lar
+HomeController.Index, ServicesController, ArticlesController, AttorneysController, PagesController, FaqsController, ContactController, ErrorController
+
+### Yeni Servisler / Genişletmeler
+- IFaqService, IContactMessageService (yeni)
+- IServiceService.GetActiveOrderedAsync, IAttorneyService.GetActiveOrderedAsync, IArticleService.GetFeaturedOrRecentAsync + GetBySlugAsync + GetPublishedPagedAsync + GetByCategoryAsync + GetRelatedAsync + GetByAuthorAsync (Faz 1 hazır altyapı + public expose)
+- ICategoryService.GetActiveOrderedAsync (sidebar)
+- IEmailSender + SmtpEmailSender + NullEmailSender (Faz 4.8)
+
+### Tasarım Sistemi
+- Design token (admin ile aynı renk paleti, public-özel tipografi)
+- Playfair Display + Inter (Google Fonts CDN)
+- 18 component CSS dosyası
+- 6 yeniden kullanılabilir partial (_HeroSection, _ServiceCard, _AttorneyCard, _ArticleCard, _PrinciplesSection, _CtaSection)
+- Yardımcı: _Pagination, _CookieConsent, _SiteHeader, _SiteFooter
+- Vanilla JS (jQuery yok), scroll fade-up, cookie consent
+
+### Önemli Altyapı Kararları
+- Slug-based attribute routing Order=0 pattern
+- Repository GetBySlugAsync M:N include + AsSplitQuery (ServiceRepository, AttorneyRepository)
+- Per-record idempotent demo seed (PageKey-bazlı, Slug-bazlı değil)
+- PageKey English canonical (about/privacy/cookie/terms/disclosure/contact)
+- Form submit PRG pattern (Post-Redirect-Get)
+- Honeypot anti-spam
+- StatusCode middleware: UseStatusCodePagesWithReExecute("/tr-TR/Error/{0}")
+
+### Test
+- Build: 0/0 ✓
+- Test: 231/231 PASSED (208 birim + 23 integration; +5 yeni Article public test Faz 4.3)
+- 9/9 manuel browser teyit turu
+
+### Faz 4'te Kapatılan DEFERRED Notları
+- PageKey kanonikleştirme (iletisim → contact)
+- Hero/header marka vurgusu kararı (mevcut kararla)
+- Test artıkları temizliği (Pages.Id=8, 1004)
+- Article card boş image-wrap fix (Faz 4.4.1 → Faz 4.5'e gömüldü)
+
+### Faz 5'e Aktarılan DEFERRED Notları
+- Faq admin CRUD
+- ContactMessages admin liste UI
+- Galeri sayfası (MediaFile.IsPublic + Index)
+- Testimonial entity + Referanslar sayfası
+- Cloudflare Turnstile spam koruması
+- CDN SRI hash (Bootstrap, Lucide, Tabler, Choices.js, Quill, SweetAlert2)
+- Token DRY refactor (admin + public ortak tokens.css)
+- Google Fonts self-host
+- Çok dilli StatusCode middleware
+- Browser Link dev-time uyarıları temizliği
+- Faz 4.10 / v0.4.1 — bütüncül tasarım cila turu (kullanıcı isteği)
+
+### Geliştirici Onboarding
+appsettings.Development.example.json template + README.md "Geliştirme Ortamı Kurulumu" bölümü.
 
 ### Tamamlanan Adımlar
 
