@@ -49,7 +49,7 @@ SEO altyapısı (meta tags, JSON-LD, sitemap, robots, breadcrumb), güvenlik tur
 | 5.3 | Sitemap.xml + robots.txt: ISitemapService (Infrastructure/Seo) + 2 yeni repo method (Article + Page sitemap helper) + SeoController (/sitemap.xml + /robots.txt) + 4 birim test | `12eb2e0` |
 | 5.4 | Breadcrumb component + BreadcrumbList JSON-LD: BreadcrumbItem POCO + _Breadcrumb partial + IJsonLdService.BuildBreadcrumbList + 9 view ViewData set + site.css breadcrumb block + 3 birim test | `03ffe21` |
 | 5.5 | CDN SRI hash + sürüm pin: Bootstrap 5.3.3 (CSS+JS) + Lucide @latest→1.14.0 pin + Quill 2.0.3 (CSS+JS) — 3 layout (public/bare/admin) + 2 partial (_QuillStyles/_QuillScripts), sha384 integrity + crossorigin="anonymous"; scripts/sri-check.{sh,ps1} hash üretici eklendi | `d2f73d5` |
-| 5.5-fix | SRI tamamlama: Tabler core (1.4.0 CSS+JS) + Tabler icons-webfont (3.42.0) + SweetAlert2 (11.26.24) + Choices.js (11.1.0 CSS+JS) — _AdminLayout (4) + Login (3) + Articles/Create (2) + Articles/Edit (2) = 11 integrity attribute, 6 yeni hash | _pending_ |
+| 5.5-fix | SRI tamamlama: Tabler core (1.4.0 CSS+JS) + Tabler icons-webfont (3.42.0) + SweetAlert2 (11.26.24) + Choices.js (11.1.0 CSS+JS) — _AdminLayout (4) + Login (3) + Articles/Create (2) + Articles/Edit (2) = 11 integrity attribute, 6 yeni hash | `5ee7271` |
 
 ---
 
