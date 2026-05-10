@@ -104,17 +104,24 @@
   - Implementation: woff2 dosyalarını `wwwroot/fonts/` altına indir, @font-face ile bağla
   - Tetik: Faz 5/6 PageSpeed optimizasyon turunda
 
-- **Lucide Icons CDN: SRI hash + sürüm pin**
-  - Faz 4.2'de `unpkg.com/lucide@latest` CDN'inden SRI'siz yüklendi
-  - Mevcut SRI deferral maddesine paralel: Faz 5 OWASP turunda SRI eklenecek
-  - `@latest` yerine sabit sürüm pinleme (ör: `lucide@0.x.x`) aynı turun parçası
+- **CDN SRI integrity hash — Tabler 1.4.0 (core+icons) + Choices.js 11.1.0 + SweetAlert2 11.26.24**
+  - Faz 5.5'te Bootstrap (5.3.3 CSS+JS), Lucide (1.14.0 pin), Quill (2.0.3 CSS+JS) SRI'lendi (sha384 + crossorigin)
+  - Tabler core CSS+JS, Tabler icons CSS, Choices.js CSS+JS, SweetAlert2 SRI'siz kaldı (admin + Login)
+  - scripts/sri-check.{sh,ps1} URL listesine eklenip yeniden çalıştırılır, hash'ler 5 dosyaya yapıştırılır
+  - OWASP A06: Vulnerable Components
+  - Tetik: Faz 5.7 OWASP Top 10 audit turunda kalan CDN'ler
 
-- **CDN SRI integrity hash — admin + public Bootstrap, Tabler, Choices.js, Quill, SweetAlert2**
-  - Faz 4.1 başında durma noktası: admin layout'unda Bootstrap JS SRI'siz yükleniyor (Faz 3.3.1 kararı), public'te de aynı politikayla devam edildi (5.3.3 CDN, hash yok)
-  - Diğer CDN'ler (Tabler 1.4.0, Choices.js 11.1.0, Quill 2.0.3, SweetAlert2) de SRI'siz yükleniyor
-  - OWASP A06: Vulnerable Components — supply chain saldırısına karşı koruma
-  - Implementation: tüm CDN <link>/<script> tag'lerine integrity="sha384-..." crossorigin="anonymous" ekle, hash'leri jsdelivr/CDN sağlayıcılarının SRI generator'ından üret
-  - Tetik: Faz 5 OWASP Top 10 audit turunda — admin + public birlikte
+- **Self-hosting CDN dosyaları** (Faz 6 / yayın hazırlığı)
+  - Faz 5.5'te CDN + SRI ile gidildi — tedarik zinciri saldırılarına karşı korumalı, ama CDN downtime'a bağımlı
+  - Yayın öncesi bootstrap.min.css + js + lucide.min.js + quill.snow.css + quill.js wwwroot/lib/ altına self-host edilebilir
+  - asp-append-version cache busting ile birlikte
+  - Tetik: Production öncesi karar veya CDN downtime yaşanırsa
+
+- **CI'da SRI doğrulama** (Faz 6+ / CI pipeline)
+  - Faz 5.5'te scripts/sri-check.{sh,ps1} manuel çalıştırılır
+  - GitHub Actions workflow: PR'da scripts/sri-check.sh çalıştır, layout'taki integrity attribute'larıyla karşılaştır, uyuşmazlık varsa fail
+  - Bootstrap/Lucide/Quill sürümü güncellenirken hash güncellenmeyi unutursa production'da kırılma riski → CI bunu yakalar
+  - Tetik: Faz 6 CI/CD kurulumu
 
 - **robots.txt admin yönetimi** (Faz 6 / SiteSettings entity)
   - Faz 5.3'te robots.txt SitemapService.BuildRobotsTxt() ile hardcoded

@@ -48,6 +48,7 @@ SEO altyapısı (meta tags, JSON-LD, sitemap, robots, breadcrumb), güvenlik tur
 | 5.2 | JSON-LD schema: IJsonLdService (Infrastructure/Seo) + 5 schema (LegalService, WebSite, Article, Person, FAQPage) + site-wide layout + 3 detail view + SiteInfoOptions adres/iletişim/geo alanları + 6 birim test | `9190bf5` |
 | 5.3 | Sitemap.xml + robots.txt: ISitemapService (Infrastructure/Seo) + 2 yeni repo method (Article + Page sitemap helper) + SeoController (/sitemap.xml + /robots.txt) + 4 birim test | `12eb2e0` |
 | 5.4 | Breadcrumb component + BreadcrumbList JSON-LD: BreadcrumbItem POCO + _Breadcrumb partial + IJsonLdService.BuildBreadcrumbList + 9 view ViewData set + site.css breadcrumb block + 3 birim test | `03ffe21` |
+| 5.5 | CDN SRI hash + sürüm pin: Bootstrap 5.3.3 (CSS+JS) + Lucide @latest→1.14.0 pin + Quill 2.0.3 (CSS+JS) — 3 layout (public/bare/admin) + 2 partial (_QuillStyles/_QuillScripts), sha384 integrity + crossorigin="anonymous"; scripts/sri-check.{sh,ps1} hash üretici eklendi | _pending_ |
 
 ---
 
