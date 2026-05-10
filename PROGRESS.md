@@ -47,7 +47,7 @@ SEO altyapısı (meta tags, JSON-LD, sitemap, robots, breadcrumb), güvenlik tur
 | 5.1 | SEO meta tag altyapısı: SiteInfoOptions (Core/Common) + MetaTagsHelpers (MetaTags + CanonicalForArticles) + 14 sayfa ViewData set + default OG image (1200x630) + appsettings.Development.example.json güncelleme | `25aad7f` |
 | 5.2 | JSON-LD schema: IJsonLdService (Infrastructure/Seo) + 5 schema (LegalService, WebSite, Article, Person, FAQPage) + site-wide layout + 3 detail view + SiteInfoOptions adres/iletişim/geo alanları + 6 birim test | `9190bf5` |
 | 5.3 | Sitemap.xml + robots.txt: ISitemapService (Infrastructure/Seo) + 2 yeni repo method (Article + Page sitemap helper) + SeoController (/sitemap.xml + /robots.txt) + 4 birim test | `12eb2e0` |
-| 5.4 | Breadcrumb component + BreadcrumbList JSON-LD: BreadcrumbItem POCO + _Breadcrumb partial + IJsonLdService.BuildBreadcrumbList + 9 view ViewData set + site.css breadcrumb block + 3 birim test | _pending_ |
+| 5.4 | Breadcrumb component + BreadcrumbList JSON-LD: BreadcrumbItem POCO + _Breadcrumb partial + IJsonLdService.BuildBreadcrumbList + 9 view ViewData set + site.css breadcrumb block + 3 birim test | `03ffe21` |
 
 ---
 
