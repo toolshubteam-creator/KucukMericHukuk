@@ -1,12 +1,15 @@
 using KucukMericHukuk.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace KucukMericHukuk.Web.Controllers;
 
 /// <summary>
 /// SEO endpoint'leri: /sitemap.xml ve /robots.txt
 /// Culture prefix YOK — bu dosyalar root-level olmak zorunda (Google standardı).
+/// RateLimit muaf (Faz 5.7) — crawler'lar yüksek frekansla tarar.
 /// </summary>
+[DisableRateLimiting]
 public class SeoController : Controller
 {
     private readonly ISitemapService _sitemapService;

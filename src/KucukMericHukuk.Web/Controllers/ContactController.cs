@@ -2,6 +2,7 @@ using KucukMericHukuk.Core.DTOs.Contact;
 using KucukMericHukuk.Core.Interfaces.Services;
 using KucukMericHukuk.Web.ViewModels.Contact;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace KucukMericHukuk.Web.Controllers;
 
@@ -27,6 +28,7 @@ public class ContactController : Controller
     [HttpPost]
     [Route("{culture:culture}/Contact/Submit")]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("contact-form")]
     public async Task<IActionResult> Submit(ContactFormViewModel vm, CancellationToken ct)
     {
         var lang = System.Globalization.CultureInfo.CurrentUICulture.Name;

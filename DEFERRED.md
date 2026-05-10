@@ -77,16 +77,6 @@
 - **Email confirmation** (Identity)
   - Faz 1'de kapalı bırakıldı, seed user EmailConfirmed=true ile geçiyor
 
-- **AspNetCoreRateLimit** middleware
-  - Brute-force ek koruma (Identity lockout zaten var)
-
-- **Global exception middleware**
-  - Beklenmedik exception'ları yakala, log + 500 sayfası
-  - 2.4a kararı: custom exception'lar service'te yakalanır, üst exception'lar
-    middleware'e düşer
-
-- **OWASP Top 10 audit**
-
 - **Token DRY refactor — admin + public ortak `tokens.css`**
   - Faz 4.1'de admin.css :root token'ları ve site.css :root token'ları aynı renk değerleriyle iki dosyada duplicate yazıldı
   - Refactor: ortak `wwwroot/css/tokens.css` her iki layout'ta `<link>` ile yüklenir
@@ -248,6 +238,31 @@
   - SRI hash bozulur (her güncellemede deploy fail), pin yapılmaz (Cloudflare resmi pratiği)
   - Diğer CDN dosyalarımız (Bootstrap, Lucide, Tabler, Quill, SweetAlert2, Choices) pin+SRI'lı; Turnstile istisna
   - sri-check.{sh,ps1} URL listesine EKLENMEZ
+
+- **CSP nonce-based hardening** (Faz 6+ / OWASP)
+  - Faz 5.7'de CSP'de script-src 'unsafe-inline' var (JSON-LD ve Razor inline script'ler için)
+  - 'unsafe-inline' XSS payload'ları çalıştırır — pragmatik ama tam koruma değil
+  - Hardening: Razor middleware'i nonce üretir, inline script'lerde nonce attribute, CSP'de script-src 'self' 'nonce-{rand}'
+  - Kapsam: ~15 inline script tag (JSON-LD partial'lar + cookie-consent + cf-turnstile callback)
+  - Tetik: Penetration test sonucu veya production OWASP audit
+
+- **Distributed RateLimit** (Faz 6+ / scale)
+  - Faz 5.7'de in-memory limiter (tek instance bağımlı)
+  - Çoklu instance deploy'da (load balancer arkasında) limit per-instance — gerçek limit 5*N olur
+  - Çözüm: Redis-backed RateLimiter (StackExchange.Redis + custom partition store)
+  - Tetik: Production'da çoklu instance ihtiyacı
+
+- **CSP Report-URI / report-to** (Faz 6+ / monitoring)
+  - Faz 5.7'de CSP enforce mode (block); violation log'u yok
+  - Production'da csp-report-only header eklenip /api/csp-report endpoint kurulabilir
+  - Violation analytics → Sentry/Datadog
+  - Tetik: Production CSP tuning
+
+- **HSTS preload list** (Faz 6 / yayın)
+  - Faz 5.7'de HSTS aktif (UseHsts default) ama "preload" directive yok
+  - Browser preload listesine domain eklenirse ilk request bile HTTPS olur
+  - Şart: Domain HTTPS-only, includeSubDomains, max-age >= 1 yıl, hstspreload.org'a kayıt
+  - Tetik: Müşteri canlıya alma sonrası
 
 ---
 
