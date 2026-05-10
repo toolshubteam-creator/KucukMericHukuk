@@ -27,6 +27,9 @@ public static class DependencyInjection
         // SEO: JSON-LD üreticisi (SiteInfoOptions Web katmanında register, burada IOptions ile çözülür)
         services.AddScoped<IJsonLdService, JsonLdService>();
 
+        // SEO: sitemap.xml + robots.txt üreticisi
+        services.AddScoped<ISitemapService, SitemapService>();
+
         return services;
     }
 }

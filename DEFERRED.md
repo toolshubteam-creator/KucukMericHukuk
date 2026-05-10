@@ -116,9 +116,26 @@
   - Implementation: tüm CDN <link>/<script> tag'lerine integrity="sha384-..." crossorigin="anonymous" ekle, hash'leri jsdelivr/CDN sağlayıcılarının SRI generator'ından üret
   - Tetik: Faz 5 OWASP Top 10 audit turunda — admin + public birlikte
 
-- **Sitemap.xml otomatik üretici** (Infrastructure)
+- **robots.txt admin yönetimi** (Faz 6 / SiteSettings entity)
+  - Faz 5.3'te robots.txt SitemapService.BuildRobotsTxt() ile hardcoded
+  - Spec mad. 5.1: "robots.txt içeriği admin panelinden düzenlenebilir"
+  - Faz 6'da SiteSettings entity geldiğinde DB'den okunur (key: "robots.txt"); Service tek satır değişir
+  - Tetik: Faz 6 yayın hazırlığı veya müşteri talebi
 
-- **robots.txt dinamik yönetim**
+- **Sitemap caching** (Faz 6 / performans)
+  - Faz 5.3'te request-time generation (DB hit her istekte: 4 query)
+  - Crawler trafiği yüksekleşirse 1h MemoryCache eklenir
+  - Tetik: Google Search Console'da crawl hatası veya yüksek crawl rate
+
+- **Sitemap index** (Faz 6+ / scale)
+  - Faz 5.3'te tek sitemap.xml (limit 50.000 URL — yıllarca yetişir)
+  - 50.000+ URL'e ulaşılırsa article-sitemap.xml + service-sitemap.xml + ... bölünür
+  - Tetik: URL count >10.000 (erken uyarı)
+
+- **Hreflang + multi-language sitemap** (Faz 6+ / lokalizasyon)
+  - Faz 5.3'te tek dil (tr-TR), URL'lerde culture prefix dahil
+  - Multi-language eklenirse her URL için xhtml:link rel="alternate" hreflang="..." entry
+  - Tetik: İkinci dil eklenmesi (Faz 6+ ürün kararı)
 
 - **SlugHelper minimum uzunluk fallback (SEO koruma)**
   - Sorun: Bozuk encoding'li input (ör. yanlış UTF-8) SlugHelper'a girince

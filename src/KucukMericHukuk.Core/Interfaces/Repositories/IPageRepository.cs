@@ -21,4 +21,9 @@ public interface IPageRepository : IGenericRepository<Page>
         CancellationToken ct = default);
     Task<Page?> GetByIdIncludingDeletedAsync(int id, CancellationToken ct = default);
     Task<bool> PageKeyExistsAsync(string pageKey, int? excludeId = null, CancellationToken ct = default);
+
+    /// <summary>
+    /// Sitemap için: tüm aktif Page'ler + translation (slug için).
+    /// </summary>
+    Task<IReadOnlyList<Page>> GetAllActiveForSitemapAsync(string languageCode, CancellationToken ct = default);
 }

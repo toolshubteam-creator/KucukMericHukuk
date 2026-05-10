@@ -30,4 +30,10 @@ public interface IArticleRepository : IGenericRepository<Article>
     Task<Article?> GetByIdForAdminAsync(int id, CancellationToken ct = default);
 
     Task<Article?> GetByIdIncludingDeletedAsync(int id, CancellationToken ct = default);
+
+    /// <summary>
+    /// Sitemap için: tüm published article'ları slug + PublishedAt + UpdatedAt ile.
+    /// Translation include eder (Slug için), pagination YOK.
+    /// </summary>
+    Task<IReadOnlyList<Article>> GetAllPublishedForSitemapAsync(string languageCode, CancellationToken ct = default);
 }
