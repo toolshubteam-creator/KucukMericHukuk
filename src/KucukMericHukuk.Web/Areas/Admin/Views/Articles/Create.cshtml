@@ -5,8 +5,11 @@
 
 @section Styles {
     <partial name="_QuillStyles" />
+    @* Choices.js CSS — 11.1.0 + sha384 SRI (Faz 5.5-fix) *@
     <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/choices.js@@11.1.0/public/assets/styles/choices.min.css" />
+          href="https://cdn.jsdelivr.net/npm/choices.js@@11.1.0/public/assets/styles/choices.min.css"
+          integrity="sha384-n0GACcBzAGKp29zpmkTj4eje26AGm3wqHG9TROENrVHXySIkFf8nwmY5IgVr5qen"
+          crossorigin="anonymous" />
 }
 
 <div class="page-header">
@@ -41,7 +44,10 @@
 </form>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/choices.js@@11.1.0/public/assets/scripts/choices.min.js"></script>
+    @* Choices.js — 11.1.0 + sha384 SRI (Faz 5.5-fix) *@
+    <script src="https://cdn.jsdelivr.net/npm/choices.js@@11.1.0/public/assets/scripts/choices.min.js"
+            integrity="sha384-WXCib67DFM/o9ln5XWnf/xepwCGB7NzCdkB7J8Iy8tSgnOR5s3iVHB7LobqBEWCv"
+            crossorigin="anonymous"></script>
     <partial name="_QuillScripts" />
     <partial name="_MediaPickerModal" />
     <script src="~/js/admin/media-picker.js" asp-append-version="true"></script>
