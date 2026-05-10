@@ -10,6 +10,13 @@
     ViewData["OgImage"] = Model.Service.FeaturedImage;
 
     var iconName = string.IsNullOrEmpty(Model.Service.Icon) ? "scale" : Model.Service.Icon;
+
+    ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
+    {
+        new("Ana Sayfa", "/tr-TR/"),
+        new("Hizmet Alanlarımız", "/tr-TR/Services"),
+        new(Model.Service.Name, null)
+    };
 }
 
 <article class="service-detail">

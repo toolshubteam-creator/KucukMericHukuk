@@ -115,6 +115,51 @@ public class JsonLdServiceTests
     }
 
     [Fact]
+    public void BuildBreadcrumbList_returns_empty_for_no_items()
+    {
+        var json = _sut.BuildBreadcrumbList(Array.Empty<(string, string?)>());
+        json.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void BuildBreadcrumbList_includes_position_starting_at_one()
+    {
+        var items = new (string, string?)[]
+        {
+            ("Ana Sayfa", "/tr-TR/"),
+            ("Makaleler", "/tr-TR/Articles"),
+            ("Test Makale", null)
+        };
+        var json = _sut.BuildBreadcrumbList(items);
+        using var doc = JsonDocument.Parse(json);
+
+        doc.RootElement.GetProperty("@type").GetString().Should().Be("BreadcrumbList");
+        var elements = doc.RootElement.GetProperty("itemListElement");
+        elements.GetArrayLength().Should().Be(3);
+        elements[0].GetProperty("position").GetInt32().Should().Be(1);
+        elements[0].GetProperty("name").GetString().Should().Be("Ana Sayfa");
+        elements[2].GetProperty("position").GetInt32().Should().Be(3);
+        elements[2].GetProperty("name").GetString().Should().Be("Test Makale");
+    }
+
+    [Fact]
+    public void BuildBreadcrumbList_omits_item_url_when_null_and_makes_others_absolute()
+    {
+        var items = new (string, string?)[]
+        {
+            ("Ana Sayfa", "/tr-TR/"),
+            ("Current Page", null)
+        };
+        var json = _sut.BuildBreadcrumbList(items);
+        using var doc = JsonDocument.Parse(json);
+        var elements = doc.RootElement.GetProperty("itemListElement");
+
+        elements[0].GetProperty("item").GetString()
+            .Should().Be("https://kucukmerichukuk.av.tr/tr-TR/");
+        elements[1].TryGetProperty("item", out _).Should().BeFalse();
+    }
+
+    [Fact]
     public void BuildFaqPage_serializes_question_array()
     {
         var faqs = new List<FaqListDto>

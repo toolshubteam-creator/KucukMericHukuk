@@ -137,6 +137,12 @@
   - Multi-language eklenirse her URL için xhtml:link rel="alternate" hreflang="..." entry
   - Tetik: İkinci dil eklenmesi (Faz 6+ ürün kararı)
 
+- **Breadcrumb için CMS-yönetilebilir hiyerarşi** (Faz 6+)
+  - Faz 5.4'te breadcrumb hierarchies hardcoded view'larda ("Hizmet Alanlarımız", "Avukatlarımız" vb.)
+  - Müşteri terminoloji değişikliği talebinde 5+ view düzenlenmesi gerekir
+  - SiteSettings entity geldiğinde label'ler key-value'dan okunabilir
+  - Tetik: Müşteri terminoloji değişikliği talebi
+
 - **SlugHelper minimum uzunluk fallback (SEO koruma)**
   - Sorun: Bozuk encoding'li input (ör. yanlış UTF-8) SlugHelper'a girince
     anlamsız kısa slug üretebilir (örn. "av-test-avukat-fd" — son "-fd"

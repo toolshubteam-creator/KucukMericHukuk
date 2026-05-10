@@ -13,6 +13,13 @@
 
     var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
     var publishedDate = Model.Article.PublishedAt?.ToString("dd MMMM yyyy") ?? "";
+
+    ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
+    {
+        new("Ana Sayfa", "/tr-TR/"),
+        new("Makaleler", "/tr-TR/Articles"),
+        new(Model.Article.Title, null)
+    };
 }
 
 @section Head {

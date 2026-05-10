@@ -12,6 +12,13 @@
     ViewData["OgType"] = "profile";
 
     var hasPhoto = !string.IsNullOrEmpty(Model.Attorney.ProfileImageUrl);
+
+    ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
+    {
+        new("Ana Sayfa", "/tr-TR/"),
+        new("Avukatlarımız", "/tr-TR/Attorneys"),
+        new(Model.Attorney.FullName, null)
+    };
 }
 
 @section Head {

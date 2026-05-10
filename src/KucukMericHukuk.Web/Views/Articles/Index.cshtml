@@ -9,6 +9,12 @@
     }
 
     var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+
+    ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
+    {
+        new("Ana Sayfa", "/tr-TR/"),
+        new("Makaleler", null)
+    };
 }
 
 <section class="section-public">

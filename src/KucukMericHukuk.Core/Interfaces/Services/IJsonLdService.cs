@@ -14,4 +14,10 @@ public interface IJsonLdService
     string BuildArticle(ArticleDetailDto article);
     string BuildPerson(AttorneyDetailDto attorney);
     string BuildFaqPage(IEnumerable<FaqListDto> faqs);
+
+    /// <summary>
+    /// BreadcrumbList schema. Her item position 1'den başlar.
+    /// items: (label, absoluteUrl?) — son item URL null olabilir (current page).
+    /// </summary>
+    string BuildBreadcrumbList(IEnumerable<(string Label, string? Url)> items);
 }

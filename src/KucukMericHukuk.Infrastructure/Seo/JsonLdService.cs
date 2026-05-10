@@ -137,6 +137,38 @@ public class JsonLdService : IJsonLdService
         return SerializeWithoutNulls(schema);
     }
 
+    public string BuildBreadcrumbList(IEnumerable<(string Label, string? Url)> items)
+    {
+        var itemList = items.ToList();
+        if (itemList.Count == 0)
+            return string.Empty;
+
+        var schema = new Dictionary<string, object?>
+        {
+            ["@context"] = "https://schema.org",
+            ["@type"] = "BreadcrumbList",
+            ["itemListElement"] = itemList.Select((item, index) =>
+            {
+                var listItem = new Dictionary<string, object?>
+                {
+                    ["@type"] = "ListItem",
+                    ["position"] = index + 1,
+                    ["name"] = item.Label
+                };
+                if (!string.IsNullOrEmpty(item.Url))
+                {
+                    var absoluteUrl = item.Url.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                        ? item.Url
+                        : BaseUrl + (item.Url.StartsWith("/") ? item.Url : "/" + item.Url);
+                    listItem["item"] = absoluteUrl;
+                }
+                return listItem;
+            }).ToArray()
+        };
+
+        return JsonSerializer.Serialize(schema, _jsonOptions);
+    }
+
     public string BuildFaqPage(IEnumerable<FaqListDto> faqs)
     {
         var schema = new Dictionary<string, object?>

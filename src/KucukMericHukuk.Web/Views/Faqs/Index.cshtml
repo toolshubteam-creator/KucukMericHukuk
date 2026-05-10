@@ -3,6 +3,12 @@
 @{
     ViewData["Title"] = "Sık Sorulan Sorular";
     ViewData["MetaDescription"] = "Küçükmeriç Hukuk Bürosu — sık sorulan sorular ve hukuki danışmanlık süreçleri hakkında bilgiler.";
+
+    ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
+    {
+        new("Ana Sayfa", "/tr-TR/"),
+        new("Sık Sorulan Sorular", null)
+    };
 }
 
 @section Head {

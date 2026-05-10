@@ -1,0 +1,34 @@
+@using KucukMericHukuk.Core.Interfaces.Services
+@using KucukMericHukuk.Web.Helpers
+@inject IJsonLdService JsonLd
+
+@{
+    var breadcrumbs = ViewData["Breadcrumbs"] as IReadOnlyList<BreadcrumbItem>;
+}
+
+@if (breadcrumbs is { Count: > 0 })
+{
+    <nav class="breadcrumb-nav" aria-label="breadcrumb">
+        <div class="container">
+            <ol class="breadcrumb-list">
+                @for (var i = 0; i < breadcrumbs.Count; i++)
+                {
+                    var item = breadcrumbs[i];
+                    var isLast = i == breadcrumbs.Count - 1;
+                    <li class="breadcrumb-item @(isLast ? "is-current" : "")">
+                        @if (item.IsCurrent || isLast)
+                        {
+                            <span aria-current="page">@item.Label</span>
+                        }
+                        else
+                        {
+                            <a href="@item.Url">@item.Label</a>
+                        }
+                    </li>
+                }
+            </ol>
+        </div>
+    </nav>
+
+    @Html.JsonLd(JsonLd.BuildBreadcrumbList(breadcrumbs.Select(b => (b.Label, b.Url))))
+}

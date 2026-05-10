@@ -3,6 +3,12 @@
 @{
     ViewData["Title"] = !string.IsNullOrEmpty(Model.Page.MetaTitle) ? Model.Page.MetaTitle : Model.Page.Title;
     ViewData["MetaDescription"] = Model.Page.MetaDescription;
+
+    ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
+    {
+        new("Ana Sayfa", "/tr-TR/"),
+        new(Model.Page.Title, null)
+    };
 }
 
 <article class="page-detail">
