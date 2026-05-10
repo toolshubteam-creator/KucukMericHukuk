@@ -51,7 +51,7 @@ SEO altyapısı (meta tags, JSON-LD, sitemap, robots, breadcrumb), güvenlik tur
 | 5.5 | CDN SRI hash + sürüm pin: Bootstrap 5.3.3 (CSS+JS) + Lucide @latest→1.14.0 pin + Quill 2.0.3 (CSS+JS) — 3 layout (public/bare/admin) + 2 partial (_QuillStyles/_QuillScripts), sha384 integrity + crossorigin="anonymous"; scripts/sri-check.{sh,ps1} hash üretici eklendi | `d2f73d5` |
 | 5.5-fix | SRI tamamlama: Tabler core (1.4.0 CSS+JS) + Tabler icons-webfont (3.42.0) + SweetAlert2 (11.26.24) + Choices.js (11.1.0 CSS+JS) — _AdminLayout (4) + Login (3) + Articles/Create (2) + Articles/Edit (2) = 11 integrity attribute, 6 yeni hash | `5ee7271` |
 | 5.6 | Cloudflare Turnstile (Contact form bot koruması): TurnstileOptions (Core/Common) + ITurnstileVerifier (Infrastructure/Security) + IHttpClientFactory typed client + ContactForm widget (managed mode, demo key default) + controller verify + 5 birim test | `66887aa` |
-| 5.7 | RateLimit + GlobalExceptionMiddleware + SecurityHeaders: 3 named policy (contact-form 5/dk, admin-login 5/dk, global 200/dk), structured exception logging + 500 redirect, 5 OWASP header (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, CSP) + HSTS prod-only, 6 integration test, hatalı /Home/Error rotası temizlendi | _pending_ |
+| 5.7 | RateLimit + GlobalExceptionMiddleware + SecurityHeaders: 3 named policy (contact-form 5/dk, admin-login 5/dk, global 200/dk), structured exception logging + 500 redirect, 5 OWASP header (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, CSP) + HSTS prod-only, 6 integration test, hatalı /Home/Error rotası temizlendi | `991359a` |
 
 ---
 
