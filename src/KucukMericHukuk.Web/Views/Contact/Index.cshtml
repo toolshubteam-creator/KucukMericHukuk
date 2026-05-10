@@ -1,9 +1,12 @@
 @model KucukMericHukuk.Web.ViewModels.Contact.ContactFormViewModel
+@inject Microsoft.Extensions.Options.IOptions<KucukMericHukuk.Core.Common.TurnstileOptions> TurnstileOptions
 @{
     ViewData["Title"] = "İletişim";
     ViewData["MetaDescription"] = "Küçükmeriç Hukuk Bürosu ile iletişime geçin. Serdivan/Sakarya — randevu ve danışmanlık talepleri.";
 
     var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+    var turnstileSiteKey = TurnstileOptions.Value.SiteKey;
+    var turnstileEnabled = TurnstileOptions.Value.Enabled;
 
     ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
     {
@@ -88,6 +91,16 @@
                             </div>
                         </div>
                     </div>
+                    @if (turnstileEnabled)
+                    {
+                        <div class="col-12">
+                            <div class="cf-turnstile"
+                                 data-sitekey="@turnstileSiteKey"
+                                 data-response-field-name="TurnstileToken"
+                                 data-theme="light"
+                                 data-size="normal"></div>
+                        </div>
+                    }
                     <div class="col-12">
                         <button type="submit" class="btn-accent">Mesajı Gönder</button>
                     </div>
@@ -96,3 +109,11 @@
         </div>
     </div>
 </section>
+
+@section Scripts {
+    @if (turnstileEnabled)
+    {
+        @* Turnstile JS — Cloudflare maintained, sürüm pin/SRI uygulanmaz (DEFERRED notu) *@
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    }
+}

@@ -30,6 +30,9 @@ public static class DependencyInjection
         // SEO: sitemap.xml + robots.txt üreticisi
         services.AddScoped<ISitemapService, SitemapService>();
 
+        // Cloudflare Turnstile bot doğrulama (Faz 5.6) — typed HttpClient
+        services.AddHttpClient<ITurnstileVerifier, TurnstileVerifier>();
+
         return services;
     }
 }

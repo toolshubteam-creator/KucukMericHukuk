@@ -8,10 +8,12 @@ namespace KucukMericHukuk.Web.Controllers;
 public class ContactController : Controller
 {
     private readonly IContactMessageService _contactService;
+    private readonly ITurnstileVerifier _turnstile;
 
-    public ContactController(IContactMessageService contactService)
+    public ContactController(IContactMessageService contactService, ITurnstileVerifier turnstile)
     {
         _contactService = contactService;
+        _turnstile = turnstile;
     }
 
     [HttpGet]
@@ -28,6 +30,16 @@ public class ContactController : Controller
     public async Task<IActionResult> Submit(ContactFormViewModel vm, CancellationToken ct)
     {
         var lang = System.Globalization.CultureInfo.CurrentUICulture.Name;
+
+        // Turnstile bot doğrulama (honeypot ikinci katman, service-level)
+        var remoteIp = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var turnstileOk = await _turnstile.VerifyAsync(vm.TurnstileToken, remoteIp, ct);
+        if (!turnstileOk)
+        {
+            ModelState.AddModelError(string.Empty,
+                "Bot doğrulaması başarısız oldu. Lütfen sayfayı yenileyip tekrar deneyin.");
+            return View("Index", vm);
+        }
 
         var dto = new ContactFormDto
         {

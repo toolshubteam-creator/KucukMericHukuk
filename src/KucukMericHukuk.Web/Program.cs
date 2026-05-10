@@ -75,6 +75,10 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.Configure<SiteInfoOptions>(
     builder.Configuration.GetSection(SiteInfoOptions.SectionName));
 
+// Cloudflare Turnstile (Contact form bot koruması, Faz 5.6)
+builder.Services.Configure<TurnstileOptions>(
+    builder.Configuration.GetSection(TurnstileOptions.SectionName));
+
 // Email (SmtpHost doluysa SmtpEmailSender, boşsa NullEmailSender — dev fallback)
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 var smtpHost = builder.Configuration["EmailSettings:SmtpHost"];

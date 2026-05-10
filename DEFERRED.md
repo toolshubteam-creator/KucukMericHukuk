@@ -49,11 +49,6 @@
   - Faz 4.2'deki _PrinciplesSection partial Ana Sayfa'da TBB-safe değer kartlarını gösteriyor
   - Faz 5'te Testimonial entity geldiğinde gerçek müvekkil yorumları (anonim, TBB-safe) eklenir
 
-- **Cloudflare Turnstile spam koruması** (Faz 5)
-  - Faz 4.8'de honeypot ile başlangıç anti-spam koyuldu (silent reject)
-  - Cloudflare Turnstile (advanced spam koruması) Faz 5 OWASP turunda eklenecek
-  - Site key + secret + form widget + server-side verify endpoint
-
 - **ContactMessages admin liste UI** (Faz 5)
   - Faz 4.8'de mesajlar DB'ye yazılıyor + admin'e email bildirim gidiyor; admin liste UI henüz yok
   - Yapılacak: ContactMessages admin Area controller + liste view + okundu/yanıtlandı toggle + detay
@@ -233,6 +228,26 @@
       DI override (test fixture'ında)
     - VEYA `TempPath` bazlı `LocalFileStorageService` variant + test sonrası
       cleanup hook (`IAsyncLifetime`)
+
+- **Production Turnstile key'leri** (Faz 0 / yayın hazırlığı)
+  - Faz 5.6'da appsettings'te demo key'ler (always pass) — `1x00000000000000000000AA` + `1x0000000000000000000000000000000AA`
+  - Müşteri Cloudflare hesabında domain (kucukmerichukuk.av.tr) ekleyip gerçek SiteKey + SecretKey alacak
+  - SecretKey commit edilmez — appsettings.Production.json veya environment variable
+  - README'de prod kurulum adımına eklenmeli (Faz 6)
+  - Tetik: Yayına alma adımı
+
+- **Admin Login Turnstile** (Faz 6 / yayın öncesi)
+  - Faz 5.6'da sadece Contact form'da
+  - Admin login Identity lockout (5 attempt → 15 dk lockout) ile korunuyor; RateLimit Faz 5.7'de eklenecek
+  - Bot hedefi olursa (örn. credential stuffing kampanyası) admin login'e de eklenir
+  - ITurnstileVerifier zaten hazır, sadece Login.cshtml + AccountController.Login(POST) entegrasyonu
+  - Tetik: Production'da brute-force log'larında pattern görülürse
+
+- **Turnstile JS pin/SRI istisna** (kalıcı not)
+  - challenges.cloudflare.com/turnstile/v0/api.js Cloudflare server-maintained, otomatik update
+  - SRI hash bozulur (her güncellemede deploy fail), pin yapılmaz (Cloudflare resmi pratiği)
+  - Diğer CDN dosyalarımız (Bootstrap, Lucide, Tabler, Quill, SweetAlert2, Choices) pin+SRI'lı; Turnstile istisna
+  - sri-check.{sh,ps1} URL listesine EKLENMEZ
 
 ---
 
