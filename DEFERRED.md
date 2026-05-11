@@ -289,11 +289,13 @@
 
 ## Faz 6 → Yayına Alma
 
-- **SiteSettings entity** (Faz 6)
-  - Faz 5.1'de SiteInfoOptions appsettings'tan okunuyor; müşterinin admin panelinden yönetmesi mümkün değil
-  - Müşteri site adı, OG image, GA4/GTM kodları, sosyal medya linklerini panelden yönetmek isterse SiteSettings entity gerek (key-value veya structured single-row)
-  - Pattern: PageConfiguration benzeri admin Form view + key-value liste; Options pattern korunur, SiteInfoOptions DB'den hydrate edilir
-  - Tetik: Faz 6 yayın hazırlığı veya müşteri talebi
+- **Kullanıcı yönetimi modülü (admin CRUD)** (Faz 6)
+  - Spec madde 5.1'de listelenmiş ama Faz 2'de yapılmamış (Faz 2: Page/Tag/Service/Category/Attorney CRUD, AspNetUsers yok)
+  - Faz 6.1 manuel teyitinde fark edildi: Editor rolü 403 testi UI üzerinden yapılamadı
+  - Kapsam: Admin Area'da Users controller — Index (liste), Create, Edit (rol değiştirme + şifre reset), Delete (soft, AspNetIdentity)
+  - DbInitializer seed: SuperAdmin yok kararı (Faz 5 kararı), sadece Admin + Editor + Author rolleri yönetilir
+  - Rol atama: bir user'a tek rol (mevcut seed pattern); multi-role gerekirse genişletilir
+  - Tetik: Faz 6 alt-adımı (önerilen sıra: 6.2'den sonra, içerik modülleri öncesi — yetki testlerinin kalıcı UI üzerinden yapılabilmesi için)
 
 - **MetaTagsHelpers birim test** (Faz 5.10 / Faz 6)
   - Suffix mantığı (ana sayfa istisnası), OG image absolute URL, canonical override, robots default
@@ -301,10 +303,10 @@
   - Tetik: regresyon yaşanırsa veya Faz 5 sonu cleanup
 
 - **Müşteri iletişim bilgileri** (Faz 0 → SiteInfo doldurma)
-  - Faz 5.2'de SiteInfoOptions'a Telephone, Email, StreetAddress, PostalCode, Latitude/Longitude alanları eklendi
-  - Müşteri verince appsettings.json + appsettings.Development.json'a yazılır
+  - Faz 6.1'de SiteSettings entity eklendi — yapısal hazır, admin /admin/site-settings sayfasından düzenleyebilir
+  - Müşteri Telephone, Email, StreetAddress, PostalCode, Latitude/Longitude değerlerini admin panelinden girer
   - LegalService schema bu alanlarla zenginleşir; şu an boş alanlar schema'da render edilmez
-  - Tetik: Faz 0 müşteri içerik teslimatı
+  - Tetik: Faz 0 müşteri içerik teslimatı (artık yalnızca müşteri tarafı blocker, geliştirme tarafı tamam)
 
 - **Service detay JSON-LD** (Faz 5.4 / Faz 6)
   - Faz 5.2'de Article + Person + FAQPage işlendi; Service detay için LegalService alt-tipi (örn. ProfessionalService) düşünülebilir
