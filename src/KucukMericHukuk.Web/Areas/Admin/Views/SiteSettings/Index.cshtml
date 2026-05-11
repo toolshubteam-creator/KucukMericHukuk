@@ -1,0 +1,129 @@
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.SiteSettings.SiteSettingsViewModel
+@{
+    ViewData["Title"] = "Site Ayarları";
+
+    string GroupLabel(string g) => g switch
+    {
+        "SiteInfo" => "Site Bilgileri",
+        "Seo" => "SEO",
+        "Integration" => "Entegrasyonlar",
+        _ => g
+    };
+
+    string GroupIcon(string g) => g switch
+    {
+        "SiteInfo" => "ti-info-circle",
+        "Seo" => "ti-search",
+        "Integration" => "ti-plug",
+        _ => "ti-settings"
+    };
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">Site Ayarları</h2>
+            <div class="text-secondary">Site bilgileri, SEO ve üçüncü taraf entegrasyonları yönetimi</div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string okMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@okMsg</div>
+}
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+
+<div class="card mt-3">
+    <div class="card-body">
+        <ul class="nav nav-tabs mb-3" role="tablist">
+            @foreach (var group in Model.Groups)
+            {
+                var isActive = group.Group == Model.ActiveGroup;
+                var tabId = $"tab-{group.Group.ToLowerInvariant()}";
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link @(isActive ? "active" : "")"
+                       data-bs-toggle="tab" href="#@tabId" role="tab">
+                        <i class="ti @GroupIcon(group.Group) me-1"></i> @GroupLabel(group.Group)
+                    </a>
+                </li>
+            }
+        </ul>
+
+        <div class="tab-content">
+            @foreach (var group in Model.Groups)
+            {
+                var isActive = group.Group == Model.ActiveGroup;
+                var tabId = $"tab-{group.Group.ToLowerInvariant()}";
+
+                <div class="tab-pane fade @(isActive ? "show active" : "")" id="@tabId" role="tabpanel">
+                    <form asp-action="Update" asp-controller="SiteSettings" asp-area="Admin"
+                          method="post" autocomplete="off">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Group" value="@group.Group" />
+
+                        @foreach (var setting in group.Settings)
+                        {
+                            var inputId = $"setting-{setting.Key}";
+                            var inputType = setting.DataType switch
+                            {
+                                "email" => "email",
+                                "url" => "url",
+                                "int" => "number",
+                                "decimal" => "number",
+                                "bool" => "checkbox",
+                                _ => "text"
+                            };
+                            var inputStep = setting.DataType == "decimal" ? "any" : null;
+
+                            <div class="mb-3 row">
+                                <label for="@inputId" class="col-sm-3 col-form-label">@setting.Key</label>
+                                <div class="col-sm-9">
+                                    @if (setting.DataType == "bool")
+                                    {
+                                        var isChecked = string.Equals(setting.Value, "true", StringComparison.OrdinalIgnoreCase);
+                                        <div class="form-check form-switch">
+                                            <input type="hidden" name="Values[@setting.Key]" value="false" />
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                                   id="@inputId" name="Values[@setting.Key]" value="true"
+                                                   @(isChecked ? "checked" : "") />
+                                        </div>
+                                    }
+                                    else if (setting.Key == "Description" || setting.Key == "OpeningHoursDescription")
+                                    {
+                                        <textarea id="@inputId" name="Values[@setting.Key]"
+                                                  class="form-control" rows="3"
+                                                  maxlength="4000">@setting.Value</textarea>
+                                    }
+                                    else
+                                    {
+                                        <input id="@inputId" name="Values[@setting.Key]"
+                                               type="@inputType"
+                                               @(inputStep != null ? $"step={inputStep}" : "")
+                                               value="@setting.Value"
+                                               class="form-control"
+                                               maxlength="4000" />
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(setting.Description))
+                                    {
+                                        <small class="form-hint">@setting.Description</small>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ti ti-device-floppy me-1"></i> @GroupLabel(group.Group) Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</div>

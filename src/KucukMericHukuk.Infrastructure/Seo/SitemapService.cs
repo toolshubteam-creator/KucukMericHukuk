@@ -19,7 +19,7 @@ public class SitemapService : ISitemapService
     private readonly IPageRepository _pages;
 
     public SitemapService(
-        IOptions<SiteInfoOptions> siteInfo,
+        IOptionsSnapshot<SiteInfoOptions> siteInfo,
         IArticleRepository articles,
         IServiceRepository services,
         IAttorneyRepository attorneys,

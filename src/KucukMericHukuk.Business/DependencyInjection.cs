@@ -37,6 +37,10 @@ public static class DependencyInjection
         services.AddScoped<IMediaService, MediaService>();
         services.AddScoped<IFaqService, FaqService>();
         services.AddScoped<IContactMessageService, ContactMessageService>();
+        services.AddScoped<ISiteSettingsService, SiteSettingsService>();
+
+        // SiteSettingsService memory cache kullanır (5dk TTL, update sonrası InvalidateCache).
+        services.AddMemoryCache();
 
         return services;
     }

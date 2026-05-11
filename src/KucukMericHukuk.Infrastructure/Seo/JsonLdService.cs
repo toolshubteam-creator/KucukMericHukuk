@@ -20,7 +20,7 @@ public class JsonLdService : IJsonLdService
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    public JsonLdService(IOptions<SiteInfoOptions> siteInfo)
+    public JsonLdService(IOptionsSnapshot<SiteInfoOptions> siteInfo)
     {
         _siteInfo = siteInfo.Value;
     }
