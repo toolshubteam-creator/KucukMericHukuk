@@ -72,4 +72,9 @@ public static class ErrorCodes
         public const string NotFound = "Faq.NotFound";
         public const string TranslationRequired = "Faq.TranslationRequired";
     }
+
+    public static class ContactMessage
+    {
+        public const string NotFound = "ContactMessage.NotFound";
+    }
 }

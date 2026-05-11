@@ -44,11 +44,6 @@
   - Faz 4.2'deki _PrinciplesSection partial Ana Sayfa'da TBB-safe değer kartlarını gösteriyor
   - Faz 5'te Testimonial entity geldiğinde gerçek müvekkil yorumları (anonim, TBB-safe) eklenir
 
-- **ContactMessages admin liste UI** (Faz 5)
-  - Faz 4.8'de mesajlar DB'ye yazılıyor + admin'e email bildirim gidiyor; admin liste UI henüz yok
-  - Yapılacak: ContactMessages admin Area controller + liste view + okundu/yanıtlandı toggle + detay
-  - Pattern: ServicesController/Admin (PageForm benzeri) örnek alınabilir
-
 - **Faz 4.10 / v0.4.1 — Bütüncül tasarım cila turu**
   - Faz 4 tüm sayfalar tamamlandıktan sonra kullanıcı tarafından genel tasarım gözden geçirme talep edildi (09.05.2026)
   - Kapsam: tasarım tutarlılığı, mikro etkileşimler, tipografi ince ayar, mobile UX
@@ -269,6 +264,26 @@
   - Faz 5.8'de manuel DisplayOrder number input
   - SortableJS ile drag-drop pattern eklenebilir (admin Index'te), tek POST ile batch update endpoint
   - Tetik: Müşteri çok sayıda SSS eklerse, sıralama elle yönetilemez hale gelirse
+
+- **ContactMessage in-app reply** (Faz 6 / müşteri talebi)
+  - Faz 5.9'da "mailto:" linkiyle dış mail client (Outlook/Gmail) açılıyor
+  - In-app reply: Reply view + IEmailSender ile cevap gönder + ContactMessageReply entity (history)
+  - Tetik: Müşteri admin panelden direkt cevap yazma talebi
+
+- **ContactMessages tarih aralığı filtresi** (Faz 6 / UX)
+  - Faz 5.9'da Status + Keyword filter var, tarih aralığı yok
+  - DateRangePicker (flatpickr veya bootstrap-daterangepicker) + repo'da CreatedAt filter
+  - Tetik: Yüksek hacim (100+ mesaj/ay)
+
+- **Admin Dashboard widget — okunmamış mesaj sayısı** (Faz 5.10 / kapanış adımı)
+  - Dashboard'da "X okunmamış mesaj" + son 5 mesaj quick-view
+  - IContactMessageService.GetUnreadCountAsync + GetRecentAsync method'ları gerek
+  - Tetik: Faz 5.10 kapanış check (Dashboard zenginleştirme)
+
+- **ContactMessage retention policy** (Faz 6+ / KVKK)
+  - Mesajlar süresiz saklanıyor; KVKK uyumluluk için retention (6 ay/1 yıl sonra otomatik anonimleştir veya sil)
+  - Hangfire/scheduled job pattern
+  - Tetik: KVKK denetimi veya yasal danışmanlık talebi
 
 ---
 
