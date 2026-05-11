@@ -1,6 +1,8 @@
 using System.Globalization;
+using System.Threading.RateLimiting;
 using FluentValidation.AspNetCore;
 using KucukMericHukuk.Business;
+using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.Entities.Identity;
 using KucukMericHukuk.DataAccess;
@@ -12,10 +14,12 @@ using KucukMericHukuk.Infrastructure.Initialization;
 using KucukMericHukuk.Web;
 using KucukMericHukuk.Web.Areas.Admin.Identity;
 using KucukMericHukuk.Web.Localization;
+using KucukMericHukuk.Web.Middleware;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Localization.Routing;
 using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -64,11 +68,73 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ReturnUrlParameter = "returnUrl";
 });
 
+// Rate limiting (Faz 5.7) — 3 named policy + global IP-bazlı limiter
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, ct) =>
+    {
+        var retryAfter = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var ts)
+            ? (int)ts.TotalSeconds
+            : 60;
+
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.Headers["Retry-After"] = retryAfter.ToString();
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsync(
+            $"{{\"error\":\"rate-limit-exceeded\",\"retryAfter\":{retryAfter}}}", ct);
+    };
+
+    options.AddPolicy("contact-form", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: GetClientIp(httpContext),
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            }));
+
+    options.AddPolicy("admin-login", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: GetClientIp(httpContext),
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            }));
+
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: GetClientIp(httpContext),
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 200,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0
+            }));
+
+    static string GetClientIp(HttpContext ctx)
+        => ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+});
+
 // Repository + UnitOfWork
 builder.Services.AddDataAccess();
 
 // Infrastructure (SeedOptions + DbInitializer)
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// Site bilgileri (SEO meta tags, sitemap üretimi vb. için ortak config)
+builder.Services.Configure<SiteInfoOptions>(
+    builder.Configuration.GetSection(SiteInfoOptions.SectionName));
+
+// Cloudflare Turnstile (Contact form bot koruması, Faz 5.6)
+builder.Services.Configure<TurnstileOptions>(
+    builder.Configuration.GetSection(TurnstileOptions.SectionName));
 
 // Email (SmtpHost doluysa SmtpEmailSender, boşsa NullEmailSender — dev fallback)
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
@@ -139,9 +205,14 @@ builder.Services.AddControllersWithViews(options =>
 
 var app = builder.Build();
 
+// Security headers (Faz 5.7) — EN ÜST (her response'a uygulanır)
+app.UseMiddleware<SecurityHeadersMiddleware>();
+
+// Global exception handler (Faz 5.7) — production'da unhandled'ı yakalar, structured log
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
@@ -149,6 +220,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Rate limiter (Faz 5.7) — routing'ten SONRA, auth'tan ÖNCE
+app.UseRateLimiter();
 
 // Localization middleware: routing'ten SONRA, auth'tan ÖNCE
 var localizationOptions = app.Services

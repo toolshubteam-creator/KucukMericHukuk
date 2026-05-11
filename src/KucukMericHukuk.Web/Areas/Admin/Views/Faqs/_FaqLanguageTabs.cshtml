@@ -1,0 +1,50 @@
+@using KucukMericHukuk.Core.Constants
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Faqs.FaqFormViewModel
+@{
+    var supportedLanguages = LanguageCodes.Supported;
+}
+
+<ul class="nav nav-tabs mb-3" role="tablist">
+    @{
+        var firstTab = true;
+        foreach (var lang in supportedLanguages)
+        {
+            var tabId = $"faqlang-{lang.Replace("-", "_")}";
+            <li class="nav-item" role="presentation">
+                <a class="nav-link @(firstTab ? "active" : "")"
+                   data-bs-toggle="tab" href="#@tabId" role="tab">@lang</a>
+            </li>
+            firstTab = false;
+        }
+    }
+</ul>
+
+<div class="tab-content">
+    @{
+        var firstPane = true;
+        for (var i = 0; i < Model.Translations.Count; i++)
+        {
+            var t = Model.Translations[i];
+            var tabId = $"faqlang-{t.LanguageCode.Replace("-", "_")}";
+
+            <div class="tab-pane fade @(firstPane ? "show active" : "")" id="@tabId" role="tabpanel">
+                <input type="hidden" asp-for="Translations[i].Id" />
+                <input type="hidden" asp-for="Translations[i].LanguageCode" />
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].Question" class="form-label required"></label>
+                    <input asp-for="Translations[i].Question" class="form-control" maxlength="300" />
+                    <span asp-validation-for="Translations[i].Question" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Translations[i].Answer" class="form-label required"></label>
+                    <textarea asp-for="Translations[i].Answer" class="form-control" rows="6" maxlength="2000"></textarea>
+                    <span asp-validation-for="Translations[i].Answer" class="invalid-feedback d-block"></span>
+                    <small class="form-hint">Düz metin. HTML kullanmayın (otomatik escape edilir).</small>
+                </div>
+            </div>
+            firstPane = false;
+        }
+    }
+</div>

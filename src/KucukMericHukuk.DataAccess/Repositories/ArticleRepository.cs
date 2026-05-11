@@ -153,4 +153,18 @@ public class ArticleRepository : GenericRepository<Article>, IArticleRepository
             .Include(a => a.Tags)
             .AsSplitQuery()
             .FirstOrDefaultAsync(a => a.Id == id, ct);
+
+    public async Task<IReadOnlyList<Article>> GetAllPublishedForSitemapAsync(
+        string languageCode, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Include(a => a.Translations.Where(t => t.LanguageCode == languageCode))
+            .Where(a => a.Status == ArticleStatus.Published
+                     && a.PublishedAt != null
+                     && a.PublishedAt <= DateTime.UtcNow
+                     && a.Translations.Any(t => t.LanguageCode == languageCode && !string.IsNullOrEmpty(t.Slug)))
+            .OrderByDescending(a => a.PublishedAt)
+            .ToListAsync(ct);
+    }
 }

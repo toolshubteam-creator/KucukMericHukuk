@@ -1,6 +1,13 @@
 @model KucukMericHukuk.Web.ViewModels.Service.ServiceListViewModel
 @{
     ViewData["Title"] = "Hizmet Alanlarımız";
+    ViewData["MetaDescription"] = "Küçükmeriç Hukuk Bürosu uzmanlık alanları: ceza, aile, iş, miras, gayrimenkul, ticaret ve idare hukuku.";
+
+    ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
+    {
+        new("Ana Sayfa", "/tr-TR/"),
+        new("Hizmet Alanlarımız", null)
+    };
 }
 
 <section class="section-public">

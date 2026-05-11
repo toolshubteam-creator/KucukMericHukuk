@@ -1,10 +1,28 @@
 @model KucukMericHukuk.Web.ViewModels.Attorney.AttorneyDetailViewModel
 @using KucukMericHukuk.Web.Helpers
+@inject KucukMericHukuk.Core.Interfaces.Services.IJsonLdService JsonLd
 @{
     ViewData["Title"] = !string.IsNullOrEmpty(Model.Attorney.MetaTitle)
         ? Model.Attorney.MetaTitle
         : Model.Attorney.FullName;
+    ViewData["MetaDescription"] = !string.IsNullOrEmpty(Model.Attorney.MetaDescription)
+        ? Model.Attorney.MetaDescription
+        : Model.Attorney.ShortBio;
+    ViewData["OgImage"] = Model.Attorney.ProfileImageUrl;
+    ViewData["OgType"] = "profile";
+
     var hasPhoto = !string.IsNullOrEmpty(Model.Attorney.ProfileImageUrl);
+
+    ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
+    {
+        new("Ana Sayfa", "/tr-TR/"),
+        new("Avukatlarımız", "/tr-TR/Attorneys"),
+        new(Model.Attorney.FullName, null)
+    };
+}
+
+@section Head {
+    @Html.JsonLd(JsonLd.BuildPerson(Model.Attorney))
 }
 
 <article class="attorney-detail">

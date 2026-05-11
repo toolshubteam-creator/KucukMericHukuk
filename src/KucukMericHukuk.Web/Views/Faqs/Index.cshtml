@@ -1,6 +1,21 @@
 @model KucukMericHukuk.Web.ViewModels.Faq.FaqListViewModel
+@inject KucukMericHukuk.Core.Interfaces.Services.IJsonLdService JsonLd
 @{
     ViewData["Title"] = "Sık Sorulan Sorular";
+    ViewData["MetaDescription"] = "Küçükmeriç Hukuk Bürosu — sık sorulan sorular ve hukuki danışmanlık süreçleri hakkında bilgiler.";
+
+    ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
+    {
+        new("Ana Sayfa", "/tr-TR/"),
+        new("Sık Sorulan Sorular", null)
+    };
+}
+
+@section Head {
+    @if (Model.Faqs.Any())
+    {
+        @Html.JsonLd(JsonLd.BuildFaqPage(Model.Faqs))
+    }
 }
 
 <section class="section-public">

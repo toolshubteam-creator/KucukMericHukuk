@@ -66,4 +66,15 @@ public static class ErrorCodes
         public const string ProcessingFailed = "Media.ProcessingFailed";
         public const string StorageFailed = "Media.StorageFailed";
     }
+
+    public static class Faq
+    {
+        public const string NotFound = "Faq.NotFound";
+        public const string TranslationRequired = "Faq.TranslationRequired";
+    }
+
+    public static class ContactMessage
+    {
+        public const string NotFound = "ContactMessage.NotFound";
+    }
 }

@@ -1,3 +1,4 @@
+@inject KucukMericHukuk.Core.Interfaces.Services.IJsonLdService JsonLd
 @{
     var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
 }
@@ -6,23 +7,31 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@(ViewData["Title"] ?? "Küçükmeriç Hukuk Bürosu")</title>
+    @Html.MetaTags()
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-    @* Bootstrap CSS — 5.3.3 jsdelivr, SRI'siz (admin politikasıyla tutarlı, Faz 5 OWASP turunda SRI eklenecek) *@
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@@5.3.3/dist/css/bootstrap.min.css" />
+    @* Bootstrap CSS — 5.3.3 jsdelivr + sha384 SRI (Faz 5.5) *@
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@@5.3.3/dist/css/bootstrap.min.css"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous" />
 
     <link rel="stylesheet" href="~/css/site/site.css" asp-append-version="true" />
 
     @await RenderSectionAsync("Head", required: false)
+
+    @* Site-wide JSON-LD schema *@
+    @Html.JsonLd(JsonLd.BuildLegalService())
+    @Html.JsonLd(JsonLd.BuildWebSite())
 </head>
 <body>
     <partial name="_SiteHeader" />
 
     <main role="main">
+        <partial name="_Breadcrumb" />
         @RenderBody()
     </main>
 
@@ -30,10 +39,14 @@
 
     <partial name="_CookieConsent" />
 
-    @* Bootstrap JS bundle — admin layout ile birebir aynı *@
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    @* Lucide icons — Faz 4.2 (SRI hash + sürüm pin Faz 5 OWASP audit'e DEFERRED) *@
-    <script src="https://unpkg.com/lucide@@latest"></script>
+    @* Bootstrap JS bundle — 5.3.3 + sha384 SRI (Faz 5.5) *@
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+    @* Lucide icons — 1.14.0 pin + sha384 SRI (Faz 5.5; @@latest tag yerine pinli sürüm) *@
+    <script src="https://unpkg.com/lucide@@1.14.0/dist/umd/lucide.min.js"
+            integrity="sha384-jB6ZXxyEV94yzTxgLMvrwwNbn/pTTqwrMDI+v8FV5o5FnId/yn3DJwSdrDujU9A7"
+            crossorigin="anonymous"></script>
     <script src="~/js/site/site.js" asp-append-version="true"></script>
     <script src="~/js/site/cookie-consent.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

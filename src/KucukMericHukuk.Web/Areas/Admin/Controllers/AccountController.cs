@@ -3,6 +3,7 @@ using KucukMericHukuk.Web.Areas.Admin.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace KucukMericHukuk.Web.Areas.Admin.Controllers;
 
@@ -41,6 +42,7 @@ public class AccountController : Controller
     [HttpPost("login")]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("admin-login")]
     public async Task<IActionResult> Login(LoginViewModel model)
     {
         ViewData["Title"] = "Giriş Yap";

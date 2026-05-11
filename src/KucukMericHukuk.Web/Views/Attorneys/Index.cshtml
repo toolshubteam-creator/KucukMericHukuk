@@ -1,7 +1,15 @@
 @model KucukMericHukuk.Web.ViewModels.Attorney.AttorneyListViewModel
 @{
     ViewData["Title"] = "Avukatlarımız";
+    ViewData["MetaDescription"] = "Küçükmeriç Hukuk Bürosu avukat ekibi. Deneyimli avukatlarımızla tanışın.";
+
     var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+
+    ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
+    {
+        new("Ana Sayfa", "/tr-TR/"),
+        new("Avukatlarımız", null)
+    };
 }
 
 <section class="section-public">

@@ -1,0 +1,217 @@
+@using KucukMericHukuk.Core.DTOs.Contact
+@using KucukMericHukuk.Web.Areas.Admin.ViewModels.Shared
+@model KucukMericHukuk.Core.DTOs.Common.PagedResult<KucukMericHukuk.Core.DTOs.Contact.ContactMessageListDto>
+@{
+    ViewData["Title"] = "İletişim Mesajları";
+    var query = ViewBag.Query as ContactMessageQueryDto ?? new ContactMessageQueryDto();
+
+    var paginationVm = new PaginationViewModel
+    {
+        PageNumber = Model.PageNumber,
+        TotalPages = Model.TotalPages,
+        HasPrevious = Model.HasPrevious,
+        HasNext = Model.HasNext,
+        GetPageUrl = pageNum => Url.Action("Index", "ContactMessages", new
+        {
+            area = "Admin",
+            keyword = query.Keyword,
+            status = (int)query.Status,
+            page = pageNum,
+            pageSize = query.PageSize,
+            includeDeleted = query.IncludeDeleted
+        }) ?? "#"
+    };
+
+    var statusOptions = new[]
+    {
+        (ContactMessageStatusFilter.All, "Hepsi"),
+        (ContactMessageStatusFilter.Unread, "Okunmamış"),
+        (ContactMessageStatusFilter.Read, "Okunmuş"),
+        (ContactMessageStatusFilter.Answered, "Yanıtlanmış")
+    };
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">İletişim Mesajları</h2>
+            <div class="text-secondary">Toplam @Model.TotalCount kayıt</div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string okMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@okMsg</div>
+}
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+
+<div class="card mt-3">
+    <div class="card-body border-bottom">
+        <form asp-action="Index" asp-controller="ContactMessages" asp-area="Admin" method="get">
+            <div class="row g-2 align-items-center">
+                <div class="col-md">
+                    <input type="search" name="keyword" value="@query.Keyword"
+                           class="form-control" placeholder="Ad, e-posta, konu veya mesaj içinde ara..." />
+                </div>
+                <div class="col-md-auto">
+                    <select name="status" class="form-select">
+                        @foreach (var (val, label) in statusOptions)
+                        {
+                            if (query.Status == val)
+                            {
+                                <option value="@((int)val)" selected>@label</option>
+                            }
+                            else
+                            {
+                                <option value="@((int)val)">@label</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <label class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox"
+                               name="includeDeleted" value="true"
+                               @(query.IncludeDeleted ? "checked" : "") />
+                        <span class="form-check-label">Silinmişleri göster</span>
+                    </label>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="ti ti-search me-1"></i> Ara
+                    </button>
+                    <a asp-action="Index" asp-controller="ContactMessages" asp-area="Admin"
+                       class="btn btn-outline-secondary">Temizle</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">Mesaj bulunamadı</p>
+            <p class="empty-subtitle text-secondary">
+                @if (!string.IsNullOrWhiteSpace(query.Keyword))
+                {
+                    <text>"@query.Keyword" araması için sonuç yok.</text>
+                }
+                else
+                {
+                    <text>Henüz hiç iletişim mesajı gelmemiş.</text>
+                }
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter">
+                <thead>
+                    <tr>
+                        <th style="width:160px">Tarih</th>
+                        <th style="width:240px">Gönderen</th>
+                        <th>Konu / Önizleme</th>
+                        <th style="width:140px">Durum</th>
+                        <th class="w-1">Eylemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.Items)
+                    {
+                        var rowClass = m.IsDeleted ? "text-muted" : (!m.IsRead ? "fw-bold" : "");
+
+                        <tr class="@rowClass">
+                            <td>@m.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                <div>@m.Name</div>
+                                <small class="text-secondary">@m.Email</small>
+                            </td>
+                            <td>
+                                <div>@m.Subject</div>
+                                <small class="text-secondary">@m.MessagePreview</small>
+                            </td>
+                            <td>
+                                @if (m.IsDeleted)
+                                {
+                                    <span class="badge bg-danger-lt">Silinmiş</span>
+                                }
+                                else if (m.IsAnswered)
+                                {
+                                    <span class="badge bg-success-lt">Yanıtlandı</span>
+                                }
+                                else if (m.IsRead)
+                                {
+                                    <span class="badge bg-info-lt">Okundu</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning-lt">Yeni</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-controller="ContactMessages" asp-area="Admin"
+                                   asp-route-id="@m.Id" class="btn btn-sm btn-outline-secondary"
+                                   title="Detay"><i class="ti ti-eye"></i></a>
+
+                                @if (!m.IsDeleted)
+                                {
+                                    <form asp-action="ToggleRead" asp-controller="ContactMessages" asp-area="Admin"
+                                          asp-route-id="@m.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary"
+                                                title="@(m.IsRead ? "Okunmadı olarak işaretle" : "Okundu olarak işaretle")">
+                                            @if (m.IsRead)
+                                            {
+                                                <i class="ti ti-mail"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="ti ti-mail-opened"></i>
+                                            }
+                                        </button>
+                                    </form>
+                                    <form asp-action="Delete" asp-controller="ContactMessages" asp-area="Admin"
+                                          asp-route-id="@m.Id" method="post" class="d-inline"
+                                          data-confirm="Bu mesajı silmek istediğinizden emin misiniz? Daha sonra geri yükleyebilirsiniz."
+                                          data-confirm-title="Mesajı Sil"
+                                          data-confirm-button="Sil">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Restore" asp-controller="ContactMessages" asp-area="Admin"
+                                          asp-route-id="@m.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Geri Yükle">
+                                            <i class="ti ti-restore"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                <strong>@((Model.PageNumber - 1) * Model.PageSize + 1)</strong> -
+                <strong>@Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)</strong>
+                arası, toplam <strong>@Model.TotalCount</strong> kayıt
+            </p>
+            <div class="ms-auto">
+                <partial name="_Pagination" model="paginationVm" />
+            </div>
+        </div>
+    }
+</div>

@@ -33,38 +33,23 @@
 
 ---
 
-## Faz 4 → Frontend (Faz 5 / sonrasına ertelenen)
+## Faz 4 → Frontend (Faz 6'ya ertelenen)
 
-- **Faq admin CRUD** (Faz 5)
-  - Faz 4.7'de SSS sayfası public-only oluşturuldu, admin tarafına Faqs eklenmedi
-  - Müşteri SSS düzenleme talebinde Faz 5'te admin Area'ya FaqsController + form view + CRUD eklenir
-  - Pattern: ServicesController/Admin (PageForm benzeri) örnek alınabilir
-
-- **Galeri sayfası** (Faz 5)
-  - Faz 4.7 daraltılmış scope kararıyla ertelendi
+- **Galeri sayfası** (Faz 6)
+  - Faz 4.7 daraltılmış scope kararıyla ertelendi, Faz 5'te de açılmadı
   - Yapılacaklar: MediaFile.IsPublic field eklemek (migration), admin tarafında "public" toggle, /Galeri public sayfası grid render
 
-- **Referanslar/Testimonial entity ve sayfası** (Faz 5)
-  - Faz 4.7 daraltılmış scope kararıyla ertelendi
+- **Referanslar/Testimonial entity ve sayfası** (Faz 6)
+  - Faz 4.7 daraltılmış scope kararıyla ertelendi, Faz 5'te de açılmadı
   - Faz 4.2'deki _PrinciplesSection partial Ana Sayfa'da TBB-safe değer kartlarını gösteriyor
-  - Faz 5'te Testimonial entity geldiğinde gerçek müvekkil yorumları (anonim, TBB-safe) eklenir
-
-- **Cloudflare Turnstile spam koruması** (Faz 5)
-  - Faz 4.8'de honeypot ile başlangıç anti-spam koyuldu (silent reject)
-  - Cloudflare Turnstile (advanced spam koruması) Faz 5 OWASP turunda eklenecek
-  - Site key + secret + form widget + server-side verify endpoint
-
-- **ContactMessages admin liste UI** (Faz 5)
-  - Faz 4.8'de mesajlar DB'ye yazılıyor + admin'e email bildirim gidiyor; admin liste UI henüz yok
-  - Yapılacak: ContactMessages admin Area controller + liste view + okundu/yanıtlandı toggle + detay
-  - Pattern: ServicesController/Admin (PageForm benzeri) örnek alınabilir
+  - Faz 6'da Testimonial entity geldiğinde gerçek müvekkil yorumları (anonim, TBB-safe) eklenir
 
 - **Faz 4.10 / v0.4.1 — Bütüncül tasarım cila turu**
   - Faz 4 tüm sayfalar tamamlandıktan sonra kullanıcı tarafından genel tasarım gözden geçirme talep edildi (09.05.2026)
   - Kapsam: tasarım tutarlılığı, mikro etkileşimler, tipografi ince ayar, mobile UX
-  - Tetik: kullanıcı isteğiyle, Faz 5 öncesi mini cila turu
+  - Tetik: kullanıcı isteğiyle, Faz 6 yayın öncesi cila turu
 
-- **Browser Link dev-time uyarıları temizliği** (Faz 5)
+- **Browser Link dev-time uyarıları temizliği** (Faz 6)
   - Faz 4.8 console'unda tespit edildi: "Unload event listeners deprecated" + Cookie HTTPS uyarıları
   - Browser Link özelliğinden kaynaklanır, production'da yok
   - Çözüm: launchSettings.json'da hot reload toggle veya Browser Link kapat
@@ -77,20 +62,10 @@
 
 ---
 
-## Faz 5 → Güvenlik & SEO
+## Faz 6'ya Aktarılan (Faz 5 boyunca eklendi)
 
 - **Email confirmation** (Identity)
   - Faz 1'de kapalı bırakıldı, seed user EmailConfirmed=true ile geçiyor
-
-- **AspNetCoreRateLimit** middleware
-  - Brute-force ek koruma (Identity lockout zaten var)
-
-- **Global exception middleware**
-  - Beklenmedik exception'ları yakala, log + 500 sayfası
-  - 2.4a kararı: custom exception'lar service'te yakalanır, üst exception'lar
-    middleware'e düşer
-
-- **OWASP Top 10 audit**
 
 - **Token DRY refactor — admin + public ortak `tokens.css`**
   - Faz 4.1'de admin.css :root token'ları ve site.css :root token'ları aynı renk değerleriyle iki dosyada duplicate yazıldı
@@ -104,21 +79,44 @@
   - Implementation: woff2 dosyalarını `wwwroot/fonts/` altına indir, @font-face ile bağla
   - Tetik: Faz 5/6 PageSpeed optimizasyon turunda
 
-- **Lucide Icons CDN: SRI hash + sürüm pin**
-  - Faz 4.2'de `unpkg.com/lucide@latest` CDN'inden SRI'siz yüklendi
-  - Mevcut SRI deferral maddesine paralel: Faz 5 OWASP turunda SRI eklenecek
-  - `@latest` yerine sabit sürüm pinleme (ör: `lucide@0.x.x`) aynı turun parçası
+- **Self-hosting CDN dosyaları** (Faz 6 / yayın hazırlığı)
+  - Faz 5.5'te CDN + SRI ile gidildi — tedarik zinciri saldırılarına karşı korumalı, ama CDN downtime'a bağımlı
+  - Yayın öncesi bootstrap.min.css + js + lucide.min.js + quill.snow.css + quill.js wwwroot/lib/ altına self-host edilebilir
+  - asp-append-version cache busting ile birlikte
+  - Tetik: Production öncesi karar veya CDN downtime yaşanırsa
 
-- **CDN SRI integrity hash — admin + public Bootstrap, Tabler, Choices.js, Quill, SweetAlert2**
-  - Faz 4.1 başında durma noktası: admin layout'unda Bootstrap JS SRI'siz yükleniyor (Faz 3.3.1 kararı), public'te de aynı politikayla devam edildi (5.3.3 CDN, hash yok)
-  - Diğer CDN'ler (Tabler 1.4.0, Choices.js 11.1.0, Quill 2.0.3, SweetAlert2) de SRI'siz yükleniyor
-  - OWASP A06: Vulnerable Components — supply chain saldırısına karşı koruma
-  - Implementation: tüm CDN <link>/<script> tag'lerine integrity="sha384-..." crossorigin="anonymous" ekle, hash'leri jsdelivr/CDN sağlayıcılarının SRI generator'ından üret
-  - Tetik: Faz 5 OWASP Top 10 audit turunda — admin + public birlikte
+- **CI'da SRI doğrulama** (Faz 6+ / CI pipeline)
+  - Faz 5.5'te scripts/sri-check.{sh,ps1} manuel çalıştırılır
+  - GitHub Actions workflow: PR'da scripts/sri-check.sh çalıştır, layout'taki integrity attribute'larıyla karşılaştır, uyuşmazlık varsa fail
+  - Bootstrap/Lucide/Quill sürümü güncellenirken hash güncellenmeyi unutursa production'da kırılma riski → CI bunu yakalar
+  - Tetik: Faz 6 CI/CD kurulumu
 
-- **Sitemap.xml otomatik üretici** (Infrastructure)
+- **robots.txt admin yönetimi** (Faz 6 / SiteSettings entity)
+  - Faz 5.3'te robots.txt SitemapService.BuildRobotsTxt() ile hardcoded
+  - Spec mad. 5.1: "robots.txt içeriği admin panelinden düzenlenebilir"
+  - Faz 6'da SiteSettings entity geldiğinde DB'den okunur (key: "robots.txt"); Service tek satır değişir
+  - Tetik: Faz 6 yayın hazırlığı veya müşteri talebi
 
-- **robots.txt dinamik yönetim**
+- **Sitemap caching** (Faz 6 / performans)
+  - Faz 5.3'te request-time generation (DB hit her istekte: 4 query)
+  - Crawler trafiği yüksekleşirse 1h MemoryCache eklenir
+  - Tetik: Google Search Console'da crawl hatası veya yüksek crawl rate
+
+- **Sitemap index** (Faz 6+ / scale)
+  - Faz 5.3'te tek sitemap.xml (limit 50.000 URL — yıllarca yetişir)
+  - 50.000+ URL'e ulaşılırsa article-sitemap.xml + service-sitemap.xml + ... bölünür
+  - Tetik: URL count >10.000 (erken uyarı)
+
+- **Hreflang + multi-language sitemap** (Faz 6+ / lokalizasyon)
+  - Faz 5.3'te tek dil (tr-TR), URL'lerde culture prefix dahil
+  - Multi-language eklenirse her URL için xhtml:link rel="alternate" hreflang="..." entry
+  - Tetik: İkinci dil eklenmesi (Faz 6+ ürün kararı)
+
+- **Breadcrumb için CMS-yönetilebilir hiyerarşi** (Faz 6+)
+  - Faz 5.4'te breadcrumb hierarchies hardcoded view'larda ("Hizmet Alanlarımız", "Avukatlarımız" vb.)
+  - Müşteri terminoloji değişikliği talebinde 5+ view düzenlenmesi gerekir
+  - SiteSettings entity geldiğinde label'ler key-value'dan okunabilir
+  - Tetik: Müşteri terminoloji değişikliği talebi
 
 - **SlugHelper minimum uzunluk fallback (SEO koruma)**
   - Sorun: Bozuk encoding'li input (ör. yanlış UTF-8) SlugHelper'a girince
@@ -211,9 +209,109 @@
     - VEYA `TempPath` bazlı `LocalFileStorageService` variant + test sonrası
       cleanup hook (`IAsyncLifetime`)
 
+- **Production Turnstile key'leri** (Faz 0 / yayın hazırlığı)
+  - Faz 5.6'da appsettings'te demo key'ler (always pass) — `1x00000000000000000000AA` + `1x0000000000000000000000000000000AA`
+  - Müşteri Cloudflare hesabında domain (kucukmerichukuk.av.tr) ekleyip gerçek SiteKey + SecretKey alacak
+  - SecretKey commit edilmez — appsettings.Production.json veya environment variable
+  - README'de prod kurulum adımına eklenmeli (Faz 6)
+  - Tetik: Yayına alma adımı
+
+- **Admin Login Turnstile** (Faz 6 / yayın öncesi)
+  - Faz 5.6'da sadece Contact form'da
+  - Admin login Identity lockout (5 attempt → 15 dk lockout) ile korunuyor; RateLimit Faz 5.7'de eklenecek
+  - Bot hedefi olursa (örn. credential stuffing kampanyası) admin login'e de eklenir
+  - ITurnstileVerifier zaten hazır, sadece Login.cshtml + AccountController.Login(POST) entegrasyonu
+  - Tetik: Production'da brute-force log'larında pattern görülürse
+
+- **Turnstile JS pin/SRI istisna** (kalıcı not)
+  - challenges.cloudflare.com/turnstile/v0/api.js Cloudflare server-maintained, otomatik update
+  - SRI hash bozulur (her güncellemede deploy fail), pin yapılmaz (Cloudflare resmi pratiği)
+  - Diğer CDN dosyalarımız (Bootstrap, Lucide, Tabler, Quill, SweetAlert2, Choices) pin+SRI'lı; Turnstile istisna
+  - sri-check.{sh,ps1} URL listesine EKLENMEZ
+
+- **CSP nonce-based hardening** (Faz 6+ / OWASP)
+  - Faz 5.7'de CSP'de script-src 'unsafe-inline' var (JSON-LD ve Razor inline script'ler için)
+  - 'unsafe-inline' XSS payload'ları çalıştırır — pragmatik ama tam koruma değil
+  - Hardening: Razor middleware'i nonce üretir, inline script'lerde nonce attribute, CSP'de script-src 'self' 'nonce-{rand}'
+  - Kapsam: ~15 inline script tag (JSON-LD partial'lar + cookie-consent + cf-turnstile callback)
+  - Tetik: Penetration test sonucu veya production OWASP audit
+
+- **Distributed RateLimit** (Faz 6+ / scale)
+  - Faz 5.7'de in-memory limiter (tek instance bağımlı)
+  - Çoklu instance deploy'da (load balancer arkasında) limit per-instance — gerçek limit 5*N olur
+  - Çözüm: Redis-backed RateLimiter (StackExchange.Redis + custom partition store)
+  - Tetik: Production'da çoklu instance ihtiyacı
+
+- **CSP Report-URI / report-to** (Faz 6+ / monitoring)
+  - Faz 5.7'de CSP enforce mode (block); violation log'u yok
+  - Production'da csp-report-only header eklenip /api/csp-report endpoint kurulabilir
+  - Violation analytics → Sentry/Datadog
+  - Tetik: Production CSP tuning
+
+- **HSTS preload list** (Faz 6 / yayın)
+  - Faz 5.7'de HSTS aktif (UseHsts default) ama "preload" directive yok
+  - Browser preload listesine domain eklenirse ilk request bile HTTPS olur
+  - Şart: Domain HTTPS-only, includeSubDomains, max-age >= 1 yıl, hstspreload.org'a kayıt
+  - Tetik: Müşteri canlıya alma sonrası
+
+- **Faq Quill editor** (Faz 6+ / müşteri talebi)
+  - Faz 5.8'de Answer plain textarea (KISS prensibi, HTML escape default)
+  - Müşteri zengin format (link, list, kalın) ister isterse Quill entegrasyonu yapılabilir
+  - Gerek: public view'da `@Html.Raw(faq.Answer)` + HtmlSanitizer + JSON-LD FAQPage text strip (`Regex.Replace`)
+  - Tetik: Müşteri talebi veya bir SSS link/list ihtiyacı doğarsa
+
+- **Faq DisplayOrder drag-drop UI** (Faz 6+ / UX)
+  - Faz 5.8'de manuel DisplayOrder number input
+  - SortableJS ile drag-drop pattern eklenebilir (admin Index'te), tek POST ile batch update endpoint
+  - Tetik: Müşteri çok sayıda SSS eklerse, sıralama elle yönetilemez hale gelirse
+
+- **ContactMessage in-app reply** (Faz 6 / müşteri talebi)
+  - Faz 5.9'da "mailto:" linkiyle dış mail client (Outlook/Gmail) açılıyor
+  - In-app reply: Reply view + IEmailSender ile cevap gönder + ContactMessageReply entity (history)
+  - Tetik: Müşteri admin panelden direkt cevap yazma talebi
+
+- **ContactMessages tarih aralığı filtresi** (Faz 6 / UX)
+  - Faz 5.9'da Status + Keyword filter var, tarih aralığı yok
+  - DateRangePicker (flatpickr veya bootstrap-daterangepicker) + repo'da CreatedAt filter
+  - Tetik: Yüksek hacim (100+ mesaj/ay)
+
+- **Admin Dashboard widget — okunmamış mesaj sayısı** (Faz 6 / Dashboard zenginleştirme)
+  - Dashboard'da "X okunmamış mesaj" + son 5 mesaj quick-view
+  - IContactMessageService.GetUnreadCountAsync + GetRecentAsync method'ları gerek
+  - Faz 5.10 kapanışında değerlendirildi, Faz 6'da Dashboard zenginleştirme turunda ele alınır
+
+- **ContactMessage retention policy** (Faz 6+ / KVKK)
+  - Mesajlar süresiz saklanıyor; KVKK uyumluluk için retention (6 ay/1 yıl sonra otomatik anonimleştir veya sil)
+  - Hangfire/scheduled job pattern
+  - Tetik: KVKK denetimi veya yasal danışmanlık talebi
+
 ---
 
 ## Faz 6 → Yayına Alma
+
+- **SiteSettings entity** (Faz 6)
+  - Faz 5.1'de SiteInfoOptions appsettings'tan okunuyor; müşterinin admin panelinden yönetmesi mümkün değil
+  - Müşteri site adı, OG image, GA4/GTM kodları, sosyal medya linklerini panelden yönetmek isterse SiteSettings entity gerek (key-value veya structured single-row)
+  - Pattern: PageConfiguration benzeri admin Form view + key-value liste; Options pattern korunur, SiteInfoOptions DB'den hydrate edilir
+  - Tetik: Faz 6 yayın hazırlığı veya müşteri talebi
+
+- **MetaTagsHelpers birim test** (Faz 5.10 / Faz 6)
+  - Suffix mantığı (ana sayfa istisnası), OG image absolute URL, canonical override, robots default
+  - Şu an view-level entegrasyonla manuel doğrulanıyor; CI safe-net için unit test eklenebilir
+  - Tetik: regresyon yaşanırsa veya Faz 5 sonu cleanup
+
+- **Müşteri iletişim bilgileri** (Faz 0 → SiteInfo doldurma)
+  - Faz 5.2'de SiteInfoOptions'a Telephone, Email, StreetAddress, PostalCode, Latitude/Longitude alanları eklendi
+  - Müşteri verince appsettings.json + appsettings.Development.json'a yazılır
+  - LegalService schema bu alanlarla zenginleşir; şu an boş alanlar schema'da render edilmez
+  - Tetik: Faz 0 müşteri içerik teslimatı
+
+- **Service detay JSON-LD** (Faz 5.4 / Faz 6)
+  - Faz 5.2'de Article + Person + FAQPage işlendi; Service detay için LegalService alt-tipi (örn. ProfessionalService) düşünülebilir
+  - Service detay zaten LegalService'in bir parçası; ayrı schema marjinal ek değer
+  - Tetik: Faz 5.4 breadcrumb turunda yeniden değerlendir
+
+
 
 - **Production seed credentials**
   - `Seed__AdminPassword` env var ile farklı + güçlü değer

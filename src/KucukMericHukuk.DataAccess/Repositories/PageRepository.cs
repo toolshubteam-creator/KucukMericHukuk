@@ -89,4 +89,16 @@ public class PageRepository : GenericRepository<Page>, IPageRepository
             query = query.Where(p => p.Id != excludeId.Value);
         return query.AnyAsync(ct);
     }
+
+    public async Task<IReadOnlyList<Page>> GetAllActiveForSitemapAsync(
+        string languageCode, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Include(p => p.Translations.Where(t => t.LanguageCode == languageCode))
+            .Where(p => p.IsActive
+                     && p.Translations.Any(t => t.LanguageCode == languageCode && !string.IsNullOrEmpty(t.Slug)))
+            .OrderBy(p => p.DisplayOrder)
+            .ToListAsync(ct);
+    }
 }

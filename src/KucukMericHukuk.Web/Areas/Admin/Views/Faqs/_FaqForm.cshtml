@@ -1,0 +1,22 @@
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Faqs.FaqFormViewModel
+
+<div class="card mt-3">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label asp-for="DisplayOrder" class="form-label"></label>
+                <input asp-for="DisplayOrder" type="number" min="0" class="form-control" />
+                <span asp-validation-for="DisplayOrder" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-9 d-flex align-items-end">
+                <label class="form-check form-switch">
+                    <input asp-for="IsActive" class="form-check-input" />
+                    <span class="form-check-label">Aktif (yayında)</span>
+                </label>
+            </div>
+        </div>
+
+        <h4 class="mt-4">Çeviriler</h4>
+        <partial name="_FaqLanguageTabs" model="Model" />
+    </div>
+</div>
