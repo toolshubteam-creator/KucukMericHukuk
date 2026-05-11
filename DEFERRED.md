@@ -33,23 +33,23 @@
 
 ---
 
-## Faz 4 → Frontend (Faz 5 / sonrasına ertelenen)
+## Faz 4 → Frontend (Faz 6'ya ertelenen)
 
-- **Galeri sayfası** (Faz 5)
-  - Faz 4.7 daraltılmış scope kararıyla ertelendi
+- **Galeri sayfası** (Faz 6)
+  - Faz 4.7 daraltılmış scope kararıyla ertelendi, Faz 5'te de açılmadı
   - Yapılacaklar: MediaFile.IsPublic field eklemek (migration), admin tarafında "public" toggle, /Galeri public sayfası grid render
 
-- **Referanslar/Testimonial entity ve sayfası** (Faz 5)
-  - Faz 4.7 daraltılmış scope kararıyla ertelendi
+- **Referanslar/Testimonial entity ve sayfası** (Faz 6)
+  - Faz 4.7 daraltılmış scope kararıyla ertelendi, Faz 5'te de açılmadı
   - Faz 4.2'deki _PrinciplesSection partial Ana Sayfa'da TBB-safe değer kartlarını gösteriyor
-  - Faz 5'te Testimonial entity geldiğinde gerçek müvekkil yorumları (anonim, TBB-safe) eklenir
+  - Faz 6'da Testimonial entity geldiğinde gerçek müvekkil yorumları (anonim, TBB-safe) eklenir
 
 - **Faz 4.10 / v0.4.1 — Bütüncül tasarım cila turu**
   - Faz 4 tüm sayfalar tamamlandıktan sonra kullanıcı tarafından genel tasarım gözden geçirme talep edildi (09.05.2026)
   - Kapsam: tasarım tutarlılığı, mikro etkileşimler, tipografi ince ayar, mobile UX
-  - Tetik: kullanıcı isteğiyle, Faz 5 öncesi mini cila turu
+  - Tetik: kullanıcı isteğiyle, Faz 6 yayın öncesi cila turu
 
-- **Browser Link dev-time uyarıları temizliği** (Faz 5)
+- **Browser Link dev-time uyarıları temizliği** (Faz 6)
   - Faz 4.8 console'unda tespit edildi: "Unload event listeners deprecated" + Cookie HTTPS uyarıları
   - Browser Link özelliğinden kaynaklanır, production'da yok
   - Çözüm: launchSettings.json'da hot reload toggle veya Browser Link kapat
@@ -62,7 +62,7 @@
 
 ---
 
-## Faz 5 → Güvenlik & SEO
+## Faz 6'ya Aktarılan (Faz 5 boyunca eklendi)
 
 - **Email confirmation** (Identity)
   - Faz 1'de kapalı bırakıldı, seed user EmailConfirmed=true ile geçiyor
@@ -275,10 +275,10 @@
   - DateRangePicker (flatpickr veya bootstrap-daterangepicker) + repo'da CreatedAt filter
   - Tetik: Yüksek hacim (100+ mesaj/ay)
 
-- **Admin Dashboard widget — okunmamış mesaj sayısı** (Faz 5.10 / kapanış adımı)
+- **Admin Dashboard widget — okunmamış mesaj sayısı** (Faz 6 / Dashboard zenginleştirme)
   - Dashboard'da "X okunmamış mesaj" + son 5 mesaj quick-view
   - IContactMessageService.GetUnreadCountAsync + GetRecentAsync method'ları gerek
-  - Tetik: Faz 5.10 kapanış check (Dashboard zenginleştirme)
+  - Faz 5.10 kapanışında değerlendirildi, Faz 6'da Dashboard zenginleştirme turunda ele alınır
 
 - **ContactMessage retention policy** (Faz 6+ / KVKK)
   - Mesajlar süresiz saklanıyor; KVKK uyumluluk için retention (6 ay/1 yıl sonra otomatik anonimleştir veya sil)

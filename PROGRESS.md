@@ -13,19 +13,22 @@
 | 2 | Yönetim paneli iskelet & temel modüller | 2 hafta | ✅ Tamamlandı |
 | 3 | İçerik yönetimi modülleri | 2 hafta | ✅ Tamamlandı |
 | 4 | Frontend tasarım & geliştirme | 3 hafta | ✅ Tamamlandı |
-| 5 | SEO, entegrasyon, güvenlik | 1 hafta | 🔄 Devam ediyor |
+| 5 | SEO, entegrasyon, güvenlik | 1 hafta | ✅ Tamamlandı |
 | 6 | Test, düzeltme, yayına alma | 1 hafta | ⏳ Beklemede |
 
 **Toplam:** 10 hafta (+2 hafta tampon önerisi)
 
 ---
 
-## FAZ 5 — SEO, Güvenlik, Admin Geri Dönüşleri — 🔄 BAŞLADI
+## FAZ 5 — SEO, Güvenlik, Admin Geri Dönüşleri — ✅ TAMAMLANDI
 
 **Başlama Tarihi:** 09.05.2026
+**Tamamlanma Tarihi:** 11.05.2026
+**Tag:** v0.5.0
+**Süre:** ~10 alt-adım + 1 hot-fix
 
-### Hedef
-SEO altyapısı (meta tags, JSON-LD, sitemap, robots, breadcrumb), güvenlik turu (CDN SRI, RateLimit, security headers, global exception middleware, Cloudflare Turnstile), Faz 4'ten admin geri dönüşleri (Faq CRUD, ContactMessages liste).
+### Kapsam
+SEO altyapısı (meta tags, JSON-LD, sitemap, robots, breadcrumb), güvenlik turu (CDN SRI, Cloudflare Turnstile, RateLimit, global exception middleware, security headers), Faz 4'ten admin geri dönüşleri (Faq CRUD, ContactMessages liste UI). Hatalı `/Home/Error` rotası temizlendi.
 
 ### 10 Alt-Adım Planı
 | # | Konu |
@@ -54,6 +57,65 @@ SEO altyapısı (meta tags, JSON-LD, sitemap, robots, breadcrumb), güvenlik tur
 | 5.7 | RateLimit + GlobalExceptionMiddleware + SecurityHeaders: 3 named policy (contact-form 5/dk, admin-login 5/dk, global 200/dk), structured exception logging + 500 redirect, 5 OWASP header (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, CSP) + HSTS prod-only, 6 integration test, hatalı /Home/Error rotası temizlendi | `991359a` |
 | 5.8 | Faq admin CRUD: 3 yeni DTO (FaqQueryDto + FaqAdminDto/FaqTranslationDto + FaqInputDto/FaqTranslationInputDto) + IFaqRepository 3 method (GetAdminPagedAsync, GetByIdWithTranslationsAsync, GetByIdIncludingDeletedAsync) + IFaqService 7 method (GetByIdAsync, GetPagedAsync, CreateAsync, UpdateAsync, DeleteAsync, RestoreAsync, HardDeleteAsync) + FaqMappingConfig genişletme (admin + input) + FaqInputValidator + FaqsController (Admin, 9 action) + FaqFormViewModel/FaqListViewModel/FaqFormMappingConfig + 5 view (Index/Create/Edit/Details/_FaqForm/_FaqLanguageTabs) + _AdminSidebar SSS item (ti-message-question) + 12 unit test, ErrorCodes.Faq nested class | `5700cc0` |
 | 5.9 | ContactMessages admin liste UI: 3 yeni DTO (ContactMessageQueryDto+StatusFilter enum, ContactMessageListDto, ContactMessageAdminDto) + IContactMessageRepository 2 method (GetAdminPagedAsync, GetByIdIncludingDeletedAsync) + IContactMessageService 6 admin method (GetPagedAsync, GetByIdAsync, MarkAsReadAsync, ToggleReadAsync, ToggleAnsweredAsync, DeleteAsync, RestoreAsync) + ContactMessageMappingConfig (Mapster, MessagePreview 120 char) + ContactMessagesController (Admin, 6 action) + 2 view (Index/Details) + _AdminSidebar Mesajlar item (ti-mail) + 8 unit test, ErrorCodes.ContactMessage nested class, Details auto-mark IsRead (gmail pattern, idempotent), mevcut SaveAsync + admin notification email DOKUNULMADI | `73fb824` |
+| 5.10 | Faz 5 kapanış: PROGRESS.md final özet + DEFERRED.md Faz 6 konsolidasyon + tag v0.5.0 | bu commit |
+
+### SEO Altyapısı (5.1–5.4)
+- ViewData-based meta tag mimarisi (Title, Description, OgImage, OgType, CanonicalUrl, Robots)
+- 5 schema.org JSON-LD: LegalService + WebSite + Article + Person + FAQPage + BreadcrumbList
+- Sitemap.xml (request-time, single sitemap, lastmod dahil), robots.txt (controller endpoint)
+- Breadcrumb component layout-level (ViewData boşsa render yok)
+
+### Güvenlik (5.5, 5.5-fix, 5.6, 5.7)
+- 11 CDN dosyası SRI hash (sha384) + sürüm pin: Bootstrap 5.3.3, Lucide 1.14.0, Tabler 1.4.0, Tabler icons-webfont 3.42.0, Quill 2.0.3, Choices.js 11.1.0, SweetAlert2 11.26.24
+- Cloudflare Turnstile (managed mode, demo key default, ContactForm)
+- RateLimit 3 named policy: contact-form (5/dk), admin-login (5/dk), global-public (200/dk)
+- GlobalExceptionMiddleware: structured logging (path/IP/user) + production 500 redirect
+- 5 OWASP header + CSP (jsdelivr + unpkg + cloudflare + fonts allow) + HSTS prod-only
+
+### Admin Geri Dönüşleri (5.8, 5.9)
+- Faq tam CRUD (Index/Create/Edit/Details/Delete/Restore/HardDelete) + 12 unit test
+- ContactMessages liste UI (Index + Details auto-mark IsRead, ToggleAnswered, Delete/Restore) + 8 unit test
+- Mailto-based "yanıt ver" (in-app reply Faz 6'ya DEFERRED)
+
+### Önemli Altyapı Kararları
+- SiteInfoOptions: appsettings.json + Options pattern (DB-backed SiteSettings Faz 6'ya)
+- Title suffix layout otomatik: "Sayfa | Küçükmeriç Hukuk Bürosu"; Ana Sayfa istisna (Tagline)
+- IJsonLdService Infrastructure/Seo namespace altında — Sitemap servisi de aynı yerde
+- BreadcrumbItem POCO + IsCurrent (URL=null)
+- CDN sürüm pin politikası: Cloudflare Turnstile istisnası (server-maintained, pin yok)
+- RateLimit in-memory (distributed Faz 6+ scale gerekirse)
+- CSP pragmatik script 'unsafe-inline' (nonce-based hardening Faz 6+ DEFERRED)
+- ContactMessage HardDelete YOK (KVKK hassasiyeti, soft + restore yeter)
+
+### Test
+- Build: 0/0 ✓
+- Test: 275/275 PASSED (246 birim + 29 integration; Faz 5'te +44 yeni test: 6 JsonLd + 4 Sitemap + 3 Breadcrumb + 5 Turnstile + 6 Middleware/Headers/RateLimit/Exception + 12 Faq + 8 ContactMessage admin)
+- Her alt-adım sonrası manuel browser teyit turu
+
+### Faz 5'te Kapatılan DEFERRED Notları
+- Faq admin CRUD
+- ContactMessages admin liste UI
+- Cloudflare Turnstile spam koruması
+- CDN SRI hash (Bootstrap, Lucide, Tabler, Choices.js, Quill, SweetAlert2)
+
+### Faz 6'ya Aktarılan DEFERRED Notları
+- DB-backed SiteSettings entity (admin'den site bilgisi yönetimi)
+- Müşteri iletişim bilgileri doldurma (SiteInfo: Telephone, Email, StreetAddress, PostalCode, Latitude/Longitude)
+- Production Turnstile key'leri
+- robots.txt admin yönetimi (SiteSettings entity üzerinden)
+- Sitemap caching + Sitemap index + Hreflang multi-language
+- Admin Login Turnstile (brute force pattern görülürse)
+- Self-hosting CDN dosyaları + CI'da SRI doğrulama task'ı
+- CSP nonce-based hardening + CSP Report-URI / report-to endpoint
+- Distributed RateLimit (Redis-backed)
+- HSTS preload list kaydı
+- MetaTagsHelpers birim test (regresyon safe-net)
+- Breadcrumb için CMS-yönetilebilir hiyerarşi
+- Faq Quill editor + Faq DisplayOrder drag-drop UI
+- ContactMessages in-app reply + tarih aralığı filtresi + Dashboard widget + retention policy
+- Service detay JSON-LD (LegalService alt-tipi değerlendirme)
+- Galeri sayfası + Testimonial entity (Faz 4'ten ertelenmiş)
+- Token DRY refactor + Google Fonts self-host + Çok dilli StatusCode middleware
 
 ---
 
