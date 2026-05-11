@@ -5,7 +5,7 @@ using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Enums;
 using KucukMericHukuk.Core.Interfaces.Repositories;
 using KucukMericHukuk.Infrastructure.Seo;
-using Microsoft.Extensions.Options;
+using KucukMericHukuk.Tests.Infrastructure;
 using Moq;
 
 namespace KucukMericHukuk.Tests.Infrastructure.Seo;
@@ -24,7 +24,7 @@ public class SitemapServiceTests
     private readonly Mock<IPageRepository> _pages = new();
 
     private SitemapService Sut() => new(
-        Options.Create(_siteInfo),
+        new OptionsSnapshotStub<SiteInfoOptions>(_siteInfo),
         _articles.Object, _services.Object, _attorneys.Object, _pages.Object);
 
     private void SetupAllEmpty()

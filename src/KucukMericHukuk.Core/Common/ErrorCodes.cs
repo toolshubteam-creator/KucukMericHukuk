@@ -77,4 +77,11 @@ public static class ErrorCodes
     {
         public const string NotFound = "ContactMessage.NotFound";
     }
+
+    public static class SiteSetting
+    {
+        public const string NotFound = "SiteSetting.NotFound";
+        public const string ValidationFailed = "SiteSetting.ValidationFailed";
+        public const string GroupNotFound = "SiteSetting.GroupNotFound";
+    }
 }

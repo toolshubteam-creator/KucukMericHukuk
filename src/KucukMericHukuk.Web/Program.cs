@@ -129,8 +129,11 @@ builder.Services.AddDataAccess();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 // Site bilgileri (SEO meta tags, sitemap üretimi vb. için ortak config)
+// Önce appsettings.json'dan bind, sonra DB'den hydrate (SiteInfoOptionsConfigurator)
 builder.Services.Configure<SiteInfoOptions>(
     builder.Configuration.GetSection(SiteInfoOptions.SectionName));
+builder.Services.AddSingleton<IConfigureOptions<SiteInfoOptions>,
+    KucukMericHukuk.Infrastructure.Configuration.SiteInfoOptionsConfigurator>();
 
 // Cloudflare Turnstile (Contact form bot koruması, Faz 5.6)
 builder.Services.Configure<TurnstileOptions>(

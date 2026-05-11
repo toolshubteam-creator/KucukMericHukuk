@@ -1,3 +1,4 @@
+using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Entities.Identity;
 using KucukMericHukuk.Core.Entities.Translations;
@@ -5,6 +6,7 @@ using KucukMericHukuk.Core.Enums;
 using KucukMericHukuk.DataAccess.Context;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -18,6 +20,7 @@ public class DbInitializer : IDbInitializer
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly AppDbContext _db;
     private readonly SeedOptions _seedOptions;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<DbInitializer> _logger;
 
     public DbInitializer(
@@ -25,12 +28,14 @@ public class DbInitializer : IDbInitializer
         UserManager<ApplicationUser> userManager,
         AppDbContext db,
         IOptions<SeedOptions> seedOptions,
+        IConfiguration configuration,
         ILogger<DbInitializer> logger)
     {
         _roleManager = roleManager;
         _userManager = userManager;
         _db = db;
         _seedOptions = seedOptions.Value;
+        _configuration = configuration;
         _logger = logger;
     }
 
@@ -38,6 +43,7 @@ public class DbInitializer : IDbInitializer
     {
         await SeedRolesAsync();
         await SeedAdminUserAsync();
+        await SeedSiteSettingsAsync(cancellationToken);
 
         if (_seedOptions.SeedDemoContent)
         {
@@ -128,6 +134,80 @@ public class DbInitializer : IDbInitializer
         _logger.LogInformation(
             "İlk admin kullanıcı oluşturuldu: {Email} (FullName: {FullName})",
             user.Email, user.FullName);
+    }
+
+    private async Task SeedSiteSettingsAsync(CancellationToken ct)
+    {
+        // SiteInfo section appsettings'ten okunur; admin sonradan DB'den günceller.
+        // Idempotent: Key bazlı kontrol, mevcutsa atla (kullanıcının değişikliklerini ezme).
+        var siteInfoSection = _configuration.GetSection(SiteInfoOptions.SectionName);
+
+        // (Key, Group, DataType, Description, DisplayOrder)
+        var seedDefinitions = new (string Key, string Group, string DataType, string? Description, int DisplayOrder)[]
+        {
+            // SiteInfo group
+            (SiteSettingKeys.Name, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.String, "Site/firma adı (header logo yanı, browser tab).", 1),
+            (SiteSettingKeys.Tagline, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.String, "Kısa slogan (Ana sayfa title suffix).", 2),
+            (SiteSettingKeys.Description, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.String, "Genel meta description fallback (her sayfada özel yoksa).", 3),
+            (SiteSettingKeys.BaseUrl, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.Url, "Kanonik domain (örn. https://kucukmerichukuk.av.tr).", 4),
+            (SiteSettingKeys.Locale, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.String, "OpenGraph locale (örn. tr_TR).", 5),
+            (SiteSettingKeys.TwitterHandle, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.String, "@kucukmerichukuk gibi Twitter/X kullanıcı adı (varsa).", 6),
+            (SiteSettingKeys.Telephone, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.String, "İletişim telefonu (LegalService schema + footer).", 7),
+            (SiteSettingKeys.Email, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.Email, "Genel iletişim e-postası.", 8),
+            (SiteSettingKeys.StreetAddress, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.String, "Ofis cadde/sokak adresi.", 9),
+            (SiteSettingKeys.AddressLocality, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.String, "İlçe (örn. Serdivan).", 10),
+            (SiteSettingKeys.AddressRegion, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.String, "İl (örn. Sakarya).", 11),
+            (SiteSettingKeys.PostalCode, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.String, "Posta kodu.", 12),
+            (SiteSettingKeys.AddressCountry, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.String, "ISO 3166 ülke kodu (örn. TR).", 13),
+            (SiteSettingKeys.Latitude, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.Decimal, "GeoCoordinates enlem (örn. 40.7889).", 14),
+            (SiteSettingKeys.Longitude, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.Decimal, "GeoCoordinates boylam (örn. 30.4036).", 15),
+            (SiteSettingKeys.AreaServed, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.String, "LegalService.areaServed alanı (örn. Sakarya, Türkiye).", 16),
+            (SiteSettingKeys.OpeningHoursDescription, SiteSettingKeys.Groups.SiteInfo, SiteSettingKeys.DataTypes.String, "Çalışma saatleri açıklama metni.", 17),
+
+            // Seo group
+            (SiteSettingKeys.DefaultOgImage, SiteSettingKeys.Groups.Seo, SiteSettingKeys.DataTypes.String, "Sayfa özel görsel yoksa kullanılacak OG image yolu.", 1),
+            (SiteSettingKeys.GoogleSearchConsoleVerification, SiteSettingKeys.Groups.Seo, SiteSettingKeys.DataTypes.String, "Google Search Console meta verification token.", 2),
+
+            // Integration group
+            (SiteSettingKeys.GoogleAnalyticsId, SiteSettingKeys.Groups.Integration, SiteSettingKeys.DataTypes.String, "GA4 measurement ID (G-XXXXXXXXXX).", 1),
+            (SiteSettingKeys.GoogleTagManagerId, SiteSettingKeys.Groups.Integration, SiteSettingKeys.DataTypes.String, "GTM container ID (GTM-XXXXXXX).", 2),
+            (SiteSettingKeys.MicrosoftClarityId, SiteSettingKeys.Groups.Integration, SiteSettingKeys.DataTypes.String, "Microsoft Clarity project ID.", 3),
+            (SiteSettingKeys.FacebookPixelId, SiteSettingKeys.Groups.Integration, SiteSettingKeys.DataTypes.String, "Facebook Pixel ID.", 4),
+        };
+
+        var addedCount = 0;
+        foreach (var def in seedDefinitions)
+        {
+            var exists = await _db.Set<SiteSetting>().AnyAsync(s => s.Key == def.Key, ct);
+            if (exists) continue;
+
+            // SiteInfo group için appsettings'ten initial value oku; diğer gruplar boş başlar
+            string? initialValue = def.Group == SiteSettingKeys.Groups.SiteInfo
+                ? siteInfoSection[def.Key]
+                : null;
+
+            _db.Set<SiteSetting>().Add(new SiteSetting
+            {
+                Key = def.Key,
+                Value = initialValue,
+                Group = def.Group,
+                DataType = def.DataType,
+                Description = def.Description,
+                DisplayOrder = def.DisplayOrder,
+                CreatedAt = DateTime.UtcNow,
+            });
+            addedCount++;
+        }
+
+        if (addedCount > 0)
+        {
+            await _db.SaveChangesAsync(ct);
+            _logger.LogInformation("SiteSettings seed: {Count} yeni ayar eklendi (appsettings SiteInfo bölümünden hydrate).", addedCount);
+        }
+        else
+        {
+            _logger.LogInformation("SiteSettings seed: tüm key'ler zaten mevcut, ekleme yapılmadı.");
+        }
     }
 
     private async Task SeedDemoContentAsync(CancellationToken ct)

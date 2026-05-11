@@ -20,6 +20,7 @@ public class UnitOfWork : IUnitOfWork
     private IMediaFileRepository? _mediaFiles;
     private IFaqRepository? _faqs;
     private IContactMessageRepository? _contactMessages;
+    private ISiteSettingRepository? _siteSettings;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -35,6 +36,7 @@ public class UnitOfWork : IUnitOfWork
     public IMediaFileRepository MediaFiles => _mediaFiles ??= new MediaFileRepository(_context);
     public IFaqRepository Faqs => _faqs ??= new FaqRepository(_context);
     public IContactMessageRepository ContactMessages => _contactMessages ??= new ContactMessageRepository(_context);
+    public ISiteSettingRepository SiteSettings => _siteSettings ??= new SiteSettingRepository(_context);
 
     public Task<int> SaveChangesAsync(CancellationToken ct = default)
         => _context.SaveChangesAsync(ct);

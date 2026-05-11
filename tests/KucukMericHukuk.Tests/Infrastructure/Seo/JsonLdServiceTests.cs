@@ -5,7 +5,7 @@ using KucukMericHukuk.Core.DTOs.Article;
 using KucukMericHukuk.Core.DTOs.Attorney;
 using KucukMericHukuk.Core.DTOs.Faq;
 using KucukMericHukuk.Infrastructure.Seo;
-using Microsoft.Extensions.Options;
+using KucukMericHukuk.Tests.Infrastructure;
 
 namespace KucukMericHukuk.Tests.Infrastructure.Seo;
 
@@ -30,7 +30,7 @@ public class JsonLdServiceTests
             AddressCountry = "TR",
             AreaServed = "Sakarya, Türkiye"
         };
-        _sut = new JsonLdService(Options.Create(_siteInfo));
+        _sut = new JsonLdService(new OptionsSnapshotStub<SiteInfoOptions>(_siteInfo));
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class JsonLdServiceTests
     public void BuildLegalService_omits_empty_properties()
     {
         var emptyOpts = new SiteInfoOptions { Name = "X", BaseUrl = "https://x.tr" };
-        var sut = new JsonLdService(Options.Create(emptyOpts));
+        var sut = new JsonLdService(new OptionsSnapshotStub<SiteInfoOptions>(emptyOpts));
         var json = sut.BuildLegalService();
         using var doc = JsonDocument.Parse(json);
 

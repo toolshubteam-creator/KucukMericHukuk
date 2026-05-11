@@ -28,7 +28,7 @@ public static class MetaTagsHelpers
         var viewData = htmlHelper.ViewData;
         var ctx = htmlHelper.ViewContext.HttpContext;
         var siteInfo = ctx.RequestServices
-            .GetRequiredService<IOptions<SiteInfoOptions>>()
+            .GetRequiredService<IOptionsSnapshot<SiteInfoOptions>>()
             .Value;
 
         // Title
@@ -108,7 +108,7 @@ public static class MetaTagsHelpers
     {
         var ctx = htmlHelper.ViewContext.HttpContext;
         var siteInfo = ctx.RequestServices
-            .GetRequiredService<IOptions<SiteInfoOptions>>()
+            .GetRequiredService<IOptionsSnapshot<SiteInfoOptions>>()
             .Value;
 
         var basePath = siteInfo.BaseUrl.TrimEnd('/') + ctx.Request.Path;
