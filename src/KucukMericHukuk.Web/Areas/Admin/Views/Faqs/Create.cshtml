@@ -1,0 +1,35 @@
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Faqs.FaqFormViewModel
+@{
+    ViewData["Title"] = "Yeni SSS";
+}
+
+<div class="page-header">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <nav aria-label="breadcrumbs">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-action="Index" asp-controller="Faqs" asp-area="Admin">Sık Sorulan Sorular</a>
+                    </li>
+                    <li class="breadcrumb-item active">Yeni SSS</li>
+                </ol>
+            </nav>
+            <h2 class="page-title">Yeni SSS</h2>
+        </div>
+    </div>
+</div>
+
+<form asp-action="Create" asp-controller="Faqs" asp-area="Admin" method="post"
+      autocomplete="off" novalidate>
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+    <partial name="_FaqForm" model="Model" />
+
+    <div class="card-footer mt-3 d-flex">
+        <a asp-action="Index" asp-controller="Faqs" asp-area="Admin" class="btn btn-link">Vazgeç</a>
+        <button type="submit" class="btn btn-primary ms-auto">
+            <i class="ti ti-plus me-1"></i> Oluştur
+        </button>
+    </div>
+</form>

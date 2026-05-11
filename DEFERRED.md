@@ -35,11 +35,6 @@
 
 ## Faz 4 → Frontend (Faz 5 / sonrasına ertelenen)
 
-- **Faq admin CRUD** (Faz 5)
-  - Faz 4.7'de SSS sayfası public-only oluşturuldu, admin tarafına Faqs eklenmedi
-  - Müşteri SSS düzenleme talebinde Faz 5'te admin Area'ya FaqsController + form view + CRUD eklenir
-  - Pattern: ServicesController/Admin (PageForm benzeri) örnek alınabilir
-
 - **Galeri sayfası** (Faz 5)
   - Faz 4.7 daraltılmış scope kararıyla ertelendi
   - Yapılacaklar: MediaFile.IsPublic field eklemek (migration), admin tarafında "public" toggle, /Galeri public sayfası grid render
@@ -263,6 +258,17 @@
   - Browser preload listesine domain eklenirse ilk request bile HTTPS olur
   - Şart: Domain HTTPS-only, includeSubDomains, max-age >= 1 yıl, hstspreload.org'a kayıt
   - Tetik: Müşteri canlıya alma sonrası
+
+- **Faq Quill editor** (Faz 6+ / müşteri talebi)
+  - Faz 5.8'de Answer plain textarea (KISS prensibi, HTML escape default)
+  - Müşteri zengin format (link, list, kalın) ister isterse Quill entegrasyonu yapılabilir
+  - Gerek: public view'da `@Html.Raw(faq.Answer)` + HtmlSanitizer + JSON-LD FAQPage text strip (`Regex.Replace`)
+  - Tetik: Müşteri talebi veya bir SSS link/list ihtiyacı doğarsa
+
+- **Faq DisplayOrder drag-drop UI** (Faz 6+ / UX)
+  - Faz 5.8'de manuel DisplayOrder number input
+  - SortableJS ile drag-drop pattern eklenebilir (admin Index'te), tek POST ile batch update endpoint
+  - Tetik: Müşteri çok sayıda SSS eklerse, sıralama elle yönetilemez hale gelirse
 
 ---
 

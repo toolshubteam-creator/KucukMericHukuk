@@ -1,0 +1,188 @@
+@using KucukMericHukuk.Web.Areas.Admin.ViewModels.Shared
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Faqs.FaqListViewModel
+@{
+    ViewData["Title"] = "Sık Sorulan Sorular";
+
+    var paginationVm = new PaginationViewModel
+    {
+        PageNumber = Model.PageNumber,
+        TotalPages = Model.TotalPages,
+        HasPrevious = Model.HasPrevious,
+        HasNext = Model.HasNext,
+        GetPageUrl = pageNum => Url.Action("Index", "Faqs", new
+        {
+            area = "Admin",
+            keyword = Model.Query.Keyword,
+            page = pageNum,
+            pageSize = Model.Query.PageSize,
+            languageCode = Model.Query.LanguageCode,
+            includeDeleted = Model.Query.IncludeDeleted
+        }) ?? "#"
+    };
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">Sık Sorulan Sorular</h2>
+            <div class="text-secondary">Toplam @Model.TotalCount kayıt</div>
+        </div>
+        <div class="col-auto">
+            <a asp-action="Create" asp-controller="Faqs" asp-area="Admin" class="btn btn-primary">
+                <i class="ti ti-plus me-1"></i> Yeni SSS
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string okMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@okMsg</div>
+}
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+
+<div class="card mt-3">
+    <div class="card-body border-bottom">
+        <form asp-action="Index" asp-controller="Faqs" asp-area="Admin" method="get">
+            <div class="row g-2">
+                <div class="col-md">
+                    <input type="search" name="keyword" value="@Model.Query.Keyword"
+                           class="form-control" placeholder="Soru veya cevapta ara..." />
+                </div>
+                <div class="col-md-auto">
+                    <label class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox"
+                               name="includeDeleted" value="true"
+                               @(Model.Query.IncludeDeleted ? "checked" : "") />
+                        <span class="form-check-label">Silinmişleri göster</span>
+                    </label>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="ti ti-search me-1"></i> Ara
+                    </button>
+                    <a asp-action="Index" asp-controller="Faqs" asp-area="Admin"
+                       class="btn btn-outline-secondary">Temizle</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">SSS bulunamadı</p>
+            <p class="empty-subtitle text-secondary">
+                @if (!string.IsNullOrWhiteSpace(Model.Query.Keyword))
+                {
+                    <text>"@Model.Query.Keyword" araması için sonuç yok.</text>
+                }
+                else
+                {
+                    <text>Henüz hiç SSS eklenmemiş.</text>
+                }
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap">
+                <thead>
+                    <tr>
+                        <th style="width:80px">Sıra</th>
+                        <th>Soru</th>
+                        <th style="width:120px">Durum</th>
+                        <th class="w-1">Eylemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        var firstTr = item.Translations?.FirstOrDefault(t => t.LanguageCode == Model.Query.LanguageCode)
+                                   ?? item.Translations?.FirstOrDefault();
+                        var question = firstTr?.Question ?? "(çeviri yok)";
+
+                        <tr>
+                            <td>@item.DisplayOrder</td>
+                            <td>@question</td>
+                            <td>
+                                @if (item.IsDeleted)
+                                {
+                                    <span class="badge bg-danger-lt">Silinmiş</span>
+                                }
+                                else if (item.IsActive)
+                                {
+                                    <span class="badge bg-success-lt">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-lt">Pasif</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-controller="Faqs" asp-area="Admin"
+                                   asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary"
+                                   title="Detay"><i class="ti ti-eye"></i></a>
+
+                                @if (!item.IsDeleted)
+                                {
+                                    <a asp-action="Edit" asp-controller="Faqs" asp-area="Admin"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-outline-primary" title="Düzenle">
+                                        <i class="ti ti-edit"></i>
+                                    </a>
+                                    <form asp-action="Delete" asp-controller="Faqs" asp-area="Admin"
+                                          asp-route-id="@item.Id" method="post" class="d-inline"
+                                          data-confirm="Bu SSS kaydını silmek istediğinizden emin misiniz? Daha sonra geri yükleyebilirsiniz."
+                                          data-confirm-title="SSS Sil"
+                                          data-confirm-button="Sil">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Restore" asp-controller="Faqs" asp-area="Admin"
+                                          asp-route-id="@item.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Geri Yükle">
+                                            <i class="ti ti-restore"></i>
+                                        </button>
+                                    </form>
+                                    <form asp-action="HardDelete" asp-controller="Faqs" asp-area="Admin"
+                                          asp-route-id="@item.Id" method="post" class="d-inline"
+                                          data-confirm="Bu SSS kaydı KALICI olarak silinecek. Bu işlem GERİ ALINAMAZ. Devam edilsin mi?"
+                                          data-confirm-title="Kalıcı Silme"
+                                          data-confirm-button="Tamamen Sil"
+                                          data-confirm-variant="danger">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Tamamen Sil">
+                                            <i class="ti ti-x"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                <strong>@((Model.PageNumber - 1) * Model.PageSize + 1)</strong> -
+                <strong>@Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)</strong>
+                arası, toplam <strong>@Model.TotalCount</strong> kayıt
+            </p>
+            <div class="ms-auto">
+                <partial name="_Pagination" model="paginationVm" />
+            </div>
+        </div>
+    }
+</div>
