@@ -65,6 +65,19 @@
                         <div class="datagrid-content">@(Model.AltText ?? "—")</div>
                     </div>
                     <div class="datagrid-item">
+                        <div class="datagrid-title">Galeride Göster</div>
+                        <div class="datagrid-content">
+                            @if (Model.IsPublic)
+                            {
+                                <span class="badge bg-success-lt">Public</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary-lt">Private</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="datagrid-item">
                         <div class="datagrid-title">URL</div>
                         <div class="datagrid-content"><code class="text-break">@Model.Url</code></div>
                     </div>

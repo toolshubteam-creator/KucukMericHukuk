@@ -91,6 +91,7 @@ public class MediasController : Controller
         {
             Id = result.Value.Id,
             AltText = result.Value.AltText,
+            IsPublic = result.Value.IsPublic,
         };
 
         ViewBag.Media = result.Value;
@@ -112,7 +113,7 @@ public class MediasController : Controller
             return View(form);
         }
 
-        var input = new MediaUpdateInputDto { Id = id, AltText = form.AltText };
+        var input = new MediaUpdateInputDto { Id = id, AltText = form.AltText, IsPublic = form.IsPublic };
         var result = await _mediaService.UpdateAsync(input, ct);
 
         if (result.IsFailure)

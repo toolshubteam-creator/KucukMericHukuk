@@ -181,10 +181,34 @@ public class MediaService : IMediaService
             return Result.Failure(new Error(ErrorCodes.Media.NotFound, "Medya bulunamadı."));
 
         media.AltText = input.AltText;
+        media.IsPublic = input.IsPublic;
         media.UpdatedAt = DateTime.UtcNow;
 
         await _uow.SaveChangesAsync(ct);
         return Result.Success();
+    }
+
+    public async Task<PagedResult<MediaFilePublicDto>> GetPublicGalleryAsync(
+        int page, int pageSize, CancellationToken ct = default)
+    {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 24;
+        if (pageSize > 100) pageSize = 100;
+
+        var paged = await _uow.MediaFiles.GetPublicPagedAsync(page, pageSize, ct);
+
+        var mapped = paged.Items.Select(m => new MediaFilePublicDto
+        {
+            Id = m.Id,
+            Url = _storage.GetPublicUrl(m.RelativePath),
+            ThumbnailUrl = _storage.GetPublicUrl(m.ThumbnailRelativePath),
+            Width = m.Width,
+            Height = m.Height,
+            AltText = m.AltText,
+            CreatedAt = m.CreatedAt,
+        }).ToList();
+
+        return new PagedResult<MediaFilePublicDto>(mapped, paged.TotalCount, paged.PageNumber, paged.PageSize);
     }
 
     public async Task<Result> DeleteAsync(int id, CancellationToken ct = default)

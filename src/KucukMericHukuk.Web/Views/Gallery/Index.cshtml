@@ -1,0 +1,73 @@
+@using KucukMericHukuk.Web.ViewModels.Common
+@model KucukMericHukuk.Web.ViewModels.Gallery.GalleryListViewModel
+@{
+    ViewData["Title"] = "Galeri";
+    ViewData["MetaDescription"] = "Küçükmeriç Hukuk Bürosu — ofis, ekip ve çalışma ortamından kareler.";
+
+    if (Model.Items.PageNumber > 1)
+    {
+        ViewData["MetaRobots"] = "noindex, follow";
+    }
+
+    ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
+    {
+        new("Ana Sayfa", "/tr-TR/"),
+        new("Galeri", null)
+    };
+}
+
+<section class="section-public">
+    <div class="container">
+        <div class="section-public__header">
+            <p class="section-public__eyebrow">Görsel Arşiv</p>
+            <h1 class="section-public__title">Galeri</h1>
+            <p class="section-public__lead">
+                Ofisimizden, etkinliklerimizden ve çalışma alanlarımızdan görseller.
+            </p>
+        </div>
+
+        @if (Model.Items.Items.Any())
+        {
+            <div class="gallery-grid">
+                @foreach (var item in Model.Items.Items)
+                {
+                    <button type="button" class="gallery-item"
+                            data-image-url="@item.Url"
+                            data-image-alt="@(item.AltText ?? string.Empty)"
+                            aria-label="@(item.AltText ?? "Galeri görseli") büyüt">
+                        <img src="@item.ThumbnailUrl" alt="@(item.AltText ?? string.Empty)" loading="lazy" />
+                    </button>
+                }
+            </div>
+
+            @if (Model.Items.TotalPages > 1)
+            {
+                <partial name="_Pagination" model="@(new PaginationViewModel
+                {
+                    PageNumber = Model.Items.PageNumber,
+                    TotalPages = Model.Items.TotalPages,
+                    Action = "Index",
+                    Controller = "Gallery"
+                })" />
+            }
+        }
+        else
+        {
+            <p class="text-muted text-center">Henüz galeri içeriği eklenmemiş.</p>
+        }
+    </div>
+</section>
+
+@if (Model.Items.Items.Any())
+{
+    <div id="gallery-lightbox" class="gallery-lightbox" role="dialog" aria-modal="true" aria-label="Galeri büyüt görüntüleme" hidden>
+        <button type="button" class="gallery-lightbox__close" aria-label="Kapat">&times;</button>
+        <img class="gallery-lightbox__image" src="" alt="" />
+    </div>
+
+    @section Scripts {
+        <script src="~/js/site/gallery.js" asp-append-version="true"></script>
+    }
+}
+
+<partial name="_CtaSection" />

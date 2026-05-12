@@ -33,4 +33,18 @@ public class MediaFileRepository : GenericRepository<MediaFile>, IMediaFileRepos
 
         return await query.AsNoTracking().ToPagedListAsync(page, pageSize, ct);
     }
+
+    public Task<PagedResult<MediaFile>> GetPublicPagedAsync(
+        int page, int pageSize, CancellationToken ct = default)
+    {
+        // IsPublic=true + image content-type savunma katmanı (upload pipeline zaten webp'ye çeviriyor,
+        // ama gelecekte ContentType genişlerse non-image dosyalar galeriye sızmasın)
+        var query = _dbSet
+            .Where(m => m.IsPublic && m.ContentType.StartsWith("image/"))
+            .OrderByDescending(m => m.CreatedAt)
+            .ThenByDescending(m => m.Id)
+            .AsNoTracking();
+
+        return query.ToPagedListAsync(page, pageSize, ct);
+    }
 }

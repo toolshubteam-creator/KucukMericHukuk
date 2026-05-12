@@ -10,6 +10,7 @@ public class MediaFileListDto
     public int Width { get; set; }
     public int Height { get; set; }
     public string? AltText { get; set; }
+    public bool IsPublic { get; set; }
     public DateTime CreatedAt { get; set; }
     public bool IsDeleted { get; set; }
 }
