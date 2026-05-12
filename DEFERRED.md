@@ -248,14 +248,6 @@
 
 ## Faz 6 → Yayına Alma
 
-- **Kullanıcı yönetimi modülü (admin CRUD)** (Faz 6)
-  - Spec madde 5.1'de listelenmiş ama Faz 2'de yapılmamış (Faz 2: Page/Tag/Service/Category/Attorney CRUD, AspNetUsers yok)
-  - Faz 6.1 manuel teyitinde fark edildi: Editor rolü 403 testi UI üzerinden yapılamadı
-  - Kapsam: Admin Area'da Users controller — Index (liste), Create, Edit (rol değiştirme + şifre reset), Delete (soft, AspNetIdentity)
-  - DbInitializer seed: SuperAdmin yok kararı (Faz 5 kararı), sadece Admin + Editor + Author rolleri yönetilir
-  - Rol atama: bir user'a tek rol (mevcut seed pattern); multi-role gerekirse genişletilir
-  - Tetik: Faz 6 alt-adımı (önerilen sıra: 6.2'den sonra, içerik modülleri öncesi — yetki testlerinin kalıcı UI üzerinden yapılabilmesi için)
-
 - **Müşteri iletişim bilgileri** (Faz 0 → SiteInfo doldurma)
   - Faz 6.1'de SiteSettings entity eklendi — yapısal hazır, admin /admin/site-settings sayfasından düzenleyebilir
   - Müşteri Telephone, Email, StreetAddress, PostalCode, Latitude/Longitude değerlerini admin panelinden girer
@@ -290,10 +282,6 @@
 
 - **LocalDB → SQL Server** geçişi
   - Connection string env var
-
-- **Lockout reset UI**
-  - Şu an manuel SQL gerekli (LockoutEnd=NULL, AccessFailedCount=0)
-  - Faz 2.10 kullanıcı yönetimi modülünde olabilir — karar gerek
 
 ---
 
