@@ -1,0 +1,80 @@
+@using KucukMericHukuk.Web.ViewModels.Common
+@model KucukMericHukuk.Web.ViewModels.Testimonial.TestimonialListViewModel
+@{
+    ViewData["Title"] = "Müvekkil Yorumları";
+    ViewData["MetaDescription"] = "Küçükmeriç Hukuk Bürosu — müvekkillerimizden gelen anonim deneyim paylaşımları ve değerlendirmeler.";
+
+    if (Model.Testimonials.PageNumber > 1)
+    {
+        ViewData["MetaRobots"] = "noindex, follow";
+    }
+
+    ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
+    {
+        new("Ana Sayfa", "/tr-TR/"),
+        new("Müvekkil Yorumları", null)
+    };
+}
+
+<section class="section-public">
+    <div class="container container-narrow">
+        <div class="section-public__header">
+            <p class="section-public__eyebrow">Müvekkil Deneyimleri</p>
+            <h1 class="section-public__title">Müvekkil yorumları</h1>
+            <p class="section-public__lead">
+                Hukuki süreçlerimizde birlikte çalıştığımız müvekkillerimizden gelen anonim deneyim paylaşımları.
+                Türkiye Barolar Birliği reklam yasağı uyumu için kişisel detaylar ifşa edilmemektedir.
+            </p>
+        </div>
+
+        @if (Model.Testimonials.Items.Any())
+        {
+            <div class="row g-4 testimonial-grid">
+                @foreach (var item in Model.Testimonials.Items)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <article class="testimonial-card">
+                            <div class="testimonial-card__rating" aria-label="@(item.Rating ?? 0) yıldız">
+                                @if (item.Rating.HasValue)
+                                {
+                                    @for (var i = 1; i <= 5; i++)
+                                    {
+                                        <span class="@(i <= item.Rating.Value ? "is-filled" : "")">★</span>
+                                    }
+                                }
+                            </div>
+                            <blockquote class="testimonial-card__quote">
+                                @item.Content
+                            </blockquote>
+                            <footer class="testimonial-card__footer">
+                                <span class="testimonial-card__initials" aria-hidden="true">
+                                    @(string.IsNullOrWhiteSpace(item.AuthorInitials) ? "?" : item.AuthorInitials)
+                                </span>
+                                <span class="testimonial-card__role">
+                                    @(string.IsNullOrWhiteSpace(item.AuthorRole) ? "Müvekkil" : item.AuthorRole)
+                                </span>
+                            </footer>
+                        </article>
+                    </div>
+                }
+            </div>
+
+            @if (Model.Testimonials.TotalPages > 1)
+            {
+                <partial name="_Pagination" model="@(new PaginationViewModel
+                {
+                    PageNumber = Model.Testimonials.PageNumber,
+                    TotalPages = Model.Testimonials.TotalPages,
+                    Action = "Index",
+                    Controller = "Testimonials"
+                })" />
+            }
+        }
+        else
+        {
+            <p class="text-muted text-center">Henüz yayında müvekkil yorumu bulunmamaktadır.</p>
+        }
+    </div>
+</section>
+
+<partial name="_CtaSection" />

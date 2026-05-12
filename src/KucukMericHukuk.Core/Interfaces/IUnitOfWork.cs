@@ -14,6 +14,7 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
     IFaqRepository Faqs { get; }
     IContactMessageRepository ContactMessages { get; }
     ISiteSettingRepository SiteSettings { get; }
+    ITestimonialRepository Testimonials { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 

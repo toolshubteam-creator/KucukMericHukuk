@@ -1,0 +1,53 @@
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Testimonials.TestimonialFormViewModel
+
+<div class="card mt-3">
+    <div class="card-body">
+        <div class="alert alert-info" role="alert">
+            <strong>TBB Reklam Yasağı:</strong> İnisyal/rumuz kullanın (örn. "M.A."). Tam ad, dava numarası,
+            mahkeme veya firma ifşası YASAKTIR. Yorum içeriği jenerik deneyim ifadesi olmalı.
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label asp-for="AuthorInitials" class="form-label"></label>
+                <input asp-for="AuthorInitials" class="form-control" maxlength="10" placeholder="M.A." />
+                <span asp-validation-for="AuthorInitials" class="invalid-feedback d-block"></span>
+                <small class="form-hint">Maks. 10 karakter, sadece inisyal.</small>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="AuthorRole" class="form-label"></label>
+                <input asp-for="AuthorRole" class="form-control" maxlength="100" placeholder="Müvekkil" />
+                <span asp-validation-for="AuthorRole" class="invalid-feedback d-block"></span>
+                <small class="form-hint">Nötr rol — "Müvekkil" önerilir.</small>
+            </div>
+            <div class="col-md-2">
+                <label asp-for="Rating" class="form-label"></label>
+                <input asp-for="Rating" type="number" min="1" max="5" class="form-control" />
+                <span asp-validation-for="Rating" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="col-md-3">
+                <label asp-for="DisplayOrder" class="form-label"></label>
+                <input asp-for="DisplayOrder" type="number" min="0" class="form-control" />
+                <span asp-validation-for="DisplayOrder" class="invalid-feedback d-block"></span>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-2">
+            <div class="col-md-6">
+                <label class="form-check form-switch">
+                    <input asp-for="IsActive" class="form-check-input" />
+                    <span class="form-check-label">Aktif (yayında)</span>
+                </label>
+            </div>
+            <div class="col-md-6">
+                <label class="form-check form-switch">
+                    <input asp-for="IsFeatured" class="form-check-input" />
+                    <span class="form-check-label">Ana Sayfada Öne Çıkar</span>
+                </label>
+            </div>
+        </div>
+
+        <h4 class="mt-4">Yorum İçeriği (Çeviriler)</h4>
+        <partial name="_TestimonialLanguageTabs" model="Model" />
+    </div>
+</div>

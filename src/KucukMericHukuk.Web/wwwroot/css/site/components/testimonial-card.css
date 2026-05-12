@@ -1,0 +1,95 @@
+/* ============================================================
+   Testimonial Card — Faz 6.4
+   TBB reklam yasağı uyumlu: inisyal + nötr rol, kişisel detay yok.
+   Token-bazlı (site.css :root). Bootstrap grid ile birlikte kullanılır.
+   ============================================================ */
+
+.testimonial-grid {
+    margin-top: var(--space-4);
+}
+
+.testimonial-card {
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(15, 42, 35, 0.08);
+}
+
+.testimonial-card::before {
+    content: '\201C'; /* opening curly quote */
+    position: absolute;
+    top: 8px;
+    right: 16px;
+    font-family: var(--font-display);
+    font-size: 4rem;
+    line-height: 1;
+    color: var(--color-accent);
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+.testimonial-card__rating {
+    color: var(--color-border);
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    margin-bottom: var(--space-2);
+    line-height: 1;
+}
+
+.testimonial-card__rating .is-filled {
+    color: var(--color-accent);
+}
+
+.testimonial-card__quote {
+    font-style: italic;
+    color: var(--color-text);
+    font-size: 0.98rem;
+    line-height: 1.6;
+    margin: 0 0 var(--space-3);
+    flex: 1 1 auto;
+}
+
+.testimonial-card__footer {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-border);
+}
+
+.testimonial-card__initials {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-accent-light);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: 0.5px;
+}
+
+.testimonial-card__role {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+@media (max-width: 576px) {
+    .testimonial-card { padding: var(--space-2); }
+    .testimonial-card__initials { width: 40px; height: 40px; font-size: 0.95rem; }
+}

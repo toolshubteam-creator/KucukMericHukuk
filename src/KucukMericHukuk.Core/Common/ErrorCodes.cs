@@ -73,6 +73,12 @@ public static class ErrorCodes
         public const string TranslationRequired = "Faq.TranslationRequired";
     }
 
+    public static class Testimonial
+    {
+        public const string NotFound = "Testimonial.NotFound";
+        public const string TranslationRequired = "Testimonial.TranslationRequired";
+    }
+
     public static class ContactMessage
     {
         public const string NotFound = "ContactMessage.NotFound";
