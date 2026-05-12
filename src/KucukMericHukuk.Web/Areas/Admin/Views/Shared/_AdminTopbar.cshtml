@@ -16,15 +16,21 @@
                     : User.Identity?.Name ?? "Kullanıcı";
 
                 <div class="nav-item dropdown">
-                    <a href="#" class="nav-link d-flex lh-1 text-reset p-0 px-2" data-bs-toggle="dropdown" aria-label="Kullanıcı menüsü">
+                    @* Faz 6.8-fix3: <a href="#"> -> <button type="button">
+                       Bootstrap docs official pattern (docs/5.3/components/dropdowns/#single-button).
+                       <a href="#"> child element bubble + hash navigation kombinasyonu bazı browser'larda
+                       dropdown'u açmadan sayfa scroll yapıyor. <button> ile bu davranış yok. *@
+                    <button type="button"
+                            class="nav-link d-flex lh-1 text-reset p-0 px-2 border-0 bg-transparent"
+                            data-bs-toggle="dropdown" aria-expanded="false" aria-label="Kullanıcı menüsü">
                         <span class="avatar avatar-sm">
                             <i class="ti ti-user"></i>
                         </span>
-                        <div class="d-none d-xl-block ps-2">
+                        <div class="d-none d-xl-block ps-2 text-start">
                             <div>@displayName</div>
                             <div class="mt-1 small text-secondary">Yönetici</div>
                         </div>
-                    </a>
+                    </button>
                     <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                         <a href="#" class="dropdown-item">
                             <i class="ti ti-user-circle me-2"></i>Profilim
