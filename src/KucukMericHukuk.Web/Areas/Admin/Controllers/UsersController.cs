@@ -100,6 +100,10 @@ public class UsersController : Controller
         ViewData["Title"] = "Yeni Kullanıcı";
         form.AvailableRoles = await _service.GetAvailableRolesAsync(ct);
 
+        // ModelState validation (ConfirmPassword [Compare] + diğer DataAnnotations)
+        if (!ModelState.IsValid)
+            return View(form);
+
         var input = new UserCreateInputDto
         {
             UserName = form.UserName,
@@ -209,6 +213,10 @@ public class UsersController : Controller
         ViewData["Title"] = "Şifre Sıfırla";
 
         if (form.UserId != id) return BadRequest();
+
+        // ModelState validation (ConfirmNewPassword [Compare])
+        if (!ModelState.IsValid)
+            return View(form);
 
         var input = new ResetPasswordInputDto
         {

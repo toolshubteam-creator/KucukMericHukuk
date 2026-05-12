@@ -31,6 +31,11 @@ public class UserCreateFormViewModel
     [DataType(DataType.Password)]
     public string Password { get; set; } = string.Empty;
 
+    [Display(Name = "Şifre (Tekrar)")]
+    [DataType(DataType.Password)]
+    [Compare(nameof(Password), ErrorMessage = "Şifreler eşleşmiyor.")]
+    public string ConfirmPassword { get; set; } = string.Empty;
+
     [Display(Name = "Rol")]
     public string Role { get; set; } = string.Empty;
 
@@ -68,4 +73,9 @@ public class ResetPasswordFormViewModel
     [Display(Name = "Yeni Şifre")]
     [DataType(DataType.Password)]
     public string NewPassword { get; set; } = string.Empty;
+
+    [Display(Name = "Yeni Şifre (Tekrar)")]
+    [DataType(DataType.Password)]
+    [Compare(nameof(NewPassword), ErrorMessage = "Şifreler eşleşmiyor.")]
+    public string ConfirmNewPassword { get; set; } = string.Empty;
 }

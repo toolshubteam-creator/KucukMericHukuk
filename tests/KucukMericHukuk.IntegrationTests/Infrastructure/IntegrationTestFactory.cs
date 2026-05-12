@@ -58,9 +58,13 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>
         UserManager<ApplicationUser> userManager,
         RoleManager<ApplicationRole> roleManager)
     {
-        if (!await roleManager.RoleExistsAsync(AdminRoleName))
+        // Production seed ile uyumlu: 3 sabit rol (Faz 6.8)
+        foreach (var roleName in new[] { AdminRoleName, "Editor", "Author" })
         {
-            await roleManager.CreateAsync(new ApplicationRole { Name = AdminRoleName });
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                await roleManager.CreateAsync(new ApplicationRole { Name = roleName });
+            }
         }
 
         if (await userManager.FindByEmailAsync(AdminEmail) is null)
