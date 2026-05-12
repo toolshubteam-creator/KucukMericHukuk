@@ -12,7 +12,7 @@ namespace KucukMericHukuk.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Route("admin/faqs")]
-[Authorize(Roles = "Admin,Editor")]
+[Authorize(Roles = "Admin")]
 public class FaqsController : Controller
 {
     private readonly IFaqService _faqService;

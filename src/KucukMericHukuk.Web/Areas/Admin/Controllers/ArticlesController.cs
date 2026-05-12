@@ -14,7 +14,7 @@ namespace KucukMericHukuk.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Route("admin/articles")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Editor")]
 public class ArticlesController : Controller
 {
     private readonly IArticleService _articleService;
@@ -49,6 +49,7 @@ public class ArticlesController : Controller
             Page = query.Page,
             PageSize = query.PageSize,
             IncludeDeleted = query.IncludeDeleted,
+            AuthorIdFilter = User.IsInRole("Admin") ? null : User.GetUserIdOrNull(),
         };
 
         var categoryLookups = await GetCategoryLookupsAsync(ct);
@@ -143,6 +144,9 @@ public class ArticlesController : Controller
     {
         ViewData["Title"] = "Makale Düzenle";
 
+        var guard = await EnsureCanEditAsync(id, ct);
+        if (guard is not null) return guard;
+
         var result = await _articleService.GetByIdAsync(id, ct);
         if (result.IsFailure)
         {
@@ -192,6 +196,9 @@ public class ArticlesController : Controller
 
         if (form.Id != id) return BadRequest();
 
+        var guard = await EnsureCanEditAsync(id, ct);
+        if (guard is not null) return guard;
+
         if (!ModelState.IsValid)
         {
             await PopulateLookupsAsync(form, ct);
@@ -200,7 +207,7 @@ public class ArticlesController : Controller
 
         var input = form.Adapt<ArticleInputDto>();
         input.Id = id;
-        input.AuthorId = form.AuthorId;
+        input.AuthorId = User.IsInRole("Admin") ? form.AuthorId : User.GetUserIdOrNull();
 
         var result = await _articleService.UpdateAsync(input, ct);
         if (result.IsFailure)
@@ -218,6 +225,9 @@ public class ArticlesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
+        var guard = await EnsureCanEditAsync(id, ct);
+        if (guard is not null) return guard;
+
         var result = await _articleService.DeleteAsync(id, ct);
         if (result.IsFailure)
         {
@@ -236,6 +246,9 @@ public class ArticlesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Restore(int id, CancellationToken ct)
     {
+        var guard = await EnsureCanEditAsync(id, ct);
+        if (guard is not null) return guard;
+
         var result = await _articleService.RestoreAsync(id, ct);
         if (result.IsFailure)
         {
@@ -254,6 +267,9 @@ public class ArticlesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> HardDelete(int id, CancellationToken ct)
     {
+        var guard = await EnsureCanEditAsync(id, ct);
+        if (guard is not null) return guard;
+
         var result = await _articleService.HardDeleteAsync(id, ct);
         if (result.IsFailure)
         {
@@ -266,6 +282,20 @@ public class ArticlesController : Controller
 
         TempData["Success"] = "Makale kalıcı olarak silindi.";
         return RedirectToAction(nameof(Index));
+    }
+
+    private async Task<IActionResult?> EnsureCanEditAsync(int articleId, CancellationToken ct)
+    {
+        if (User.IsInRole("Admin")) return null;
+
+        var article = await _uow.Articles.GetByIdIncludingDeletedAsync(articleId, ct);
+        if (article is null) return NotFound();
+
+        var currentUserId = User.GetUserIdOrNull();
+        if (currentUserId is null || article.AuthorId != currentUserId)
+            return Forbid();
+
+        return null;
     }
 
     private async Task<IReadOnlyList<LookupDto>> GetCategoryLookupsAsync(CancellationToken ct)

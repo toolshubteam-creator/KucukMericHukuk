@@ -12,7 +12,7 @@ namespace KucukMericHukuk.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Route("admin/pages")]
-[Authorize(Roles = "Admin,Editor")]
+[Authorize(Roles = "Admin")]
 public class PagesController : Controller
 {
     private readonly IPageService _pageService;

@@ -1,6 +1,6 @@
 @*
     Sidebar. Aktif state controller-bazlı (Helpers/SidebarHelpers.IsActiveController).
-    Role-based filter ihtiyacı doğdukça ViewComponent'e refactor edilebilir.
+    Faz 6.10: Role-based visibility — Editor sadece Dashboard + Articles + Profilim + Çıkış görür.
 *@
 <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark">
     <div class="container-fluid">
@@ -23,30 +23,6 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @Html.IsActiveController("Pages")" asp-action="Index" asp-controller="Pages" asp-area="Admin">
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <i class="ti ti-file-text"></i>
-                        </span>
-                        <span class="nav-link-title">Sayfalar</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link @Html.IsActiveController("Services")" asp-action="Index" asp-controller="Services" asp-area="Admin">
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <i class="ti ti-briefcase"></i>
-                        </span>
-                        <span class="nav-link-title">Hizmetler</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link @Html.IsActiveController("Attorneys")" asp-action="Index" asp-controller="Attorneys" asp-area="Admin">
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <i class="ti ti-users"></i>
-                        </span>
-                        <span class="nav-link-title">Avukatlarımız</span>
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link @Html.IsActiveController("Articles")" asp-action="Index" asp-controller="Articles" asp-area="Admin">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
                             <i class="ti ti-article"></i>
@@ -54,72 +30,99 @@
                         <span class="nav-link-title">Makaleler</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link @Html.IsActiveController("Categories")" asp-action="Index" asp-controller="Categories" asp-area="Admin">
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <i class="ti ti-category"></i>
-                        </span>
-                        <span class="nav-link-title">Kategoriler</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link @Html.IsActiveController("Tags")" asp-action="Index" asp-controller="Tags" asp-area="Admin">
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <i class="ti ti-tag"></i>
-                        </span>
-                        <span class="nav-link-title">Etiketler</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link @Html.IsActiveController("Medias")" asp-action="Index" asp-controller="Medias" asp-area="Admin">
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <i class="ti ti-photo"></i>
-                        </span>
-                        <span class="nav-link-title">Medya</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link @Html.IsActiveController("Faqs")" asp-action="Index" asp-controller="Faqs" asp-area="Admin">
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <i class="ti ti-message-question"></i>
-                        </span>
-                        <span class="nav-link-title">SSS</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link @Html.IsActiveController("ContactMessages")" asp-action="Index" asp-controller="ContactMessages" asp-area="Admin">
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <i class="ti ti-mail"></i>
-                        </span>
-                        <span class="nav-link-title">Mesajlar</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link @Html.IsActiveController("Testimonials")" asp-action="Index" asp-controller="Testimonials" asp-area="Admin">
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <i class="ti ti-star"></i>
-                        </span>
-                        <span class="nav-link-title">Referanslar</span>
-                    </a>
-                </li>
-                <li class="nav-item my-2 px-3"><hr class="sidebar-divider" /></li>
-                <li class="nav-item">
-                    <a class="nav-link @Html.IsActiveController("Users")" asp-action="Index" asp-controller="Users" asp-area="Admin">
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <i class="ti ti-user-shield"></i>
-                        </span>
-                        <span class="nav-link-title">Kullanıcılar</span>
-                    </a>
-                </li>
-                <li class="nav-item my-2 px-3"><hr class="sidebar-divider" /></li>
-                <li class="nav-item">
-                    <a class="nav-link @Html.IsActiveController("SiteSettings")" asp-action="Index" asp-controller="SiteSettings" asp-area="Admin">
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <i class="ti ti-settings"></i>
-                        </span>
-                        <span class="nav-link-title">Site Ayarları</span>
-                    </a>
-                </li>
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link @Html.IsActiveController("Pages")" asp-action="Index" asp-controller="Pages" asp-area="Admin">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-file-text"></i>
+                            </span>
+                            <span class="nav-link-title">Sayfalar</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @Html.IsActiveController("Services")" asp-action="Index" asp-controller="Services" asp-area="Admin">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-briefcase"></i>
+                            </span>
+                            <span class="nav-link-title">Hizmetler</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @Html.IsActiveController("Attorneys")" asp-action="Index" asp-controller="Attorneys" asp-area="Admin">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-users"></i>
+                            </span>
+                            <span class="nav-link-title">Avukatlarımız</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @Html.IsActiveController("Categories")" asp-action="Index" asp-controller="Categories" asp-area="Admin">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-category"></i>
+                            </span>
+                            <span class="nav-link-title">Kategoriler</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @Html.IsActiveController("Tags")" asp-action="Index" asp-controller="Tags" asp-area="Admin">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-tag"></i>
+                            </span>
+                            <span class="nav-link-title">Etiketler</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @Html.IsActiveController("Medias")" asp-action="Index" asp-controller="Medias" asp-area="Admin">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-photo"></i>
+                            </span>
+                            <span class="nav-link-title">Medya</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @Html.IsActiveController("Faqs")" asp-action="Index" asp-controller="Faqs" asp-area="Admin">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-message-question"></i>
+                            </span>
+                            <span class="nav-link-title">SSS</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @Html.IsActiveController("ContactMessages")" asp-action="Index" asp-controller="ContactMessages" asp-area="Admin">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-mail"></i>
+                            </span>
+                            <span class="nav-link-title">Mesajlar</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @Html.IsActiveController("Testimonials")" asp-action="Index" asp-controller="Testimonials" asp-area="Admin">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-star"></i>
+                            </span>
+                            <span class="nav-link-title">Referanslar</span>
+                        </a>
+                    </li>
+                    <li class="nav-item my-2 px-3"><hr class="sidebar-divider" /></li>
+                    <li class="nav-item">
+                        <a class="nav-link @Html.IsActiveController("Users")" asp-action="Index" asp-controller="Users" asp-area="Admin">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-user-shield"></i>
+                            </span>
+                            <span class="nav-link-title">Kullanıcılar</span>
+                        </a>
+                    </li>
+                    <li class="nav-item my-2 px-3"><hr class="sidebar-divider" /></li>
+                    <li class="nav-item">
+                        <a class="nav-link @Html.IsActiveController("SiteSettings")" asp-action="Index" asp-controller="SiteSettings" asp-area="Admin">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-settings"></i>
+                            </span>
+                            <span class="nav-link-title">Site Ayarları</span>
+                        </a>
+                    </li>
+                }
                 @* Faz 6.8: Profilim + Çıkış (sidebar altı — dropdown bug bypass) *@
                 <li class="nav-item my-2 px-3"><hr class="sidebar-divider" /></li>
                 <li class="nav-item">

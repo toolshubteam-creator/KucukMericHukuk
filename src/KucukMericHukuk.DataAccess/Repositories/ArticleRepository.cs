@@ -106,6 +106,7 @@ public class ArticleRepository : GenericRepository<Article>, IArticleRepository
         int page,
         int pageSize,
         bool includeDeleted,
+        int? authorIdFilter,
         CancellationToken ct = default)
     {
         var query = includeDeleted
@@ -123,6 +124,10 @@ public class ArticleRepository : GenericRepository<Article>, IArticleRepository
 
         if (categoryId.HasValue)
             query = query.Where(a => a.CategoryId == categoryId.Value);
+
+        // Faz 6.10: Editor ownership filter (Admin için null → tümü)
+        if (authorIdFilter.HasValue)
+            query = query.Where(a => a.AuthorId == authorIdFilter.Value);
 
         if (!string.IsNullOrWhiteSpace(keyword))
         {

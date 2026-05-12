@@ -17,6 +17,10 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>
     public const string AdminPassword = "Test!Pass123.";
     public const string AdminRoleName = "Admin";
 
+    public const string EditorEmail = "editor@test.local";
+    public const string EditorPassword = "Test!Pass123.";
+    public const string EditorRoleName = "Editor";
+
     private SqliteConnection? _connection;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -81,6 +85,23 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(user, AdminRoleName);
+            }
+        }
+
+        if (await userManager.FindByEmailAsync(EditorEmail) is null)
+        {
+            var user = new ApplicationUser
+            {
+                UserName = EditorEmail,
+                Email = EditorEmail,
+                EmailConfirmed = true,
+                FullName = "Test Editor"
+            };
+
+            var result = await userManager.CreateAsync(user, EditorPassword);
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, EditorRoleName);
             }
         }
     }

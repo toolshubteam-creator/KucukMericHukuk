@@ -25,6 +25,7 @@ public interface IArticleRepository : IGenericRepository<Article>
         int page,
         int pageSize,
         bool includeDeleted,
+        int? authorIdFilter,
         CancellationToken ct = default);
 
     Task<Article?> GetByIdForAdminAsync(int id, CancellationToken ct = default);

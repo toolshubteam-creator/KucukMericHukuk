@@ -69,6 +69,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 // Rate limiting (Faz 5.7) — 3 named policy + global IP-bazlı limiter
+// Test ortamında eşikler büyütülür (tek IP'den çoklu test → limit aşımı yaşanmasın).
+var rateLimitMultiplier = builder.Environment.IsEnvironment("Testing") ? 1000 : 1;
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -90,7 +92,7 @@ builder.Services.AddRateLimiter(options =>
             partitionKey: GetClientIp(httpContext),
             factory: _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 5,
+                PermitLimit = 5 * rateLimitMultiplier,
                 Window = TimeSpan.FromMinutes(1),
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                 QueueLimit = 0
@@ -101,7 +103,7 @@ builder.Services.AddRateLimiter(options =>
             partitionKey: GetClientIp(httpContext),
             factory: _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 5,
+                PermitLimit = 5 * rateLimitMultiplier,
                 Window = TimeSpan.FromMinutes(1),
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                 QueueLimit = 0
@@ -112,7 +114,7 @@ builder.Services.AddRateLimiter(options =>
             partitionKey: GetClientIp(httpContext),
             factory: _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 200,
+                PermitLimit = 200 * rateLimitMultiplier,
                 Window = TimeSpan.FromMinutes(1),
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                 QueueLimit = 0

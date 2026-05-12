@@ -530,5 +530,84 @@ public class ArticleServiceTests : IDisposable
         exists.Should().BeFalse();
     }
 
+    // -------------------- AUTHOR FILTER (Faz 6.10) --------------------
+
+    [Fact]
+    public async Task GetPagedAsync_AdminNoAuthorFilter_ShouldReturnAllArticles()
+    {
+        await using var context = _factory.CreateContext();
+        var editorId = SeedUser(context, "editor");
+        var otherId = SeedUser(context, "other");
+        var sut = CreateSut(context);
+
+        await sut.CreateAsync(BuildValidInput(title: "Editor Makalesi 1", authorId: editorId));
+        await sut.CreateAsync(BuildValidInput(title: "Editor Makalesi 2", authorId: editorId));
+        await sut.CreateAsync(BuildValidInput(title: "Diger Makale", authorId: otherId));
+
+        var query = new ArticleQueryDto
+        {
+            LanguageCode = LanguageCodes.Turkish,
+            Page = 1,
+            PageSize = 50,
+            AuthorIdFilter = null,
+        };
+
+        var result = await sut.GetPagedAsync(query);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.TotalCount.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task GetPagedAsync_EditorAuthorFilter_ShouldReturnOnlyOwnArticles()
+    {
+        await using var context = _factory.CreateContext();
+        var editorId = SeedUser(context, "editor");
+        var otherId = SeedUser(context, "other");
+        var sut = CreateSut(context);
+
+        await sut.CreateAsync(BuildValidInput(title: "Editor Makalesi 1", authorId: editorId));
+        await sut.CreateAsync(BuildValidInput(title: "Editor Makalesi 2", authorId: editorId));
+        await sut.CreateAsync(BuildValidInput(title: "Diger Makale", authorId: otherId));
+
+        var query = new ArticleQueryDto
+        {
+            LanguageCode = LanguageCodes.Turkish,
+            Page = 1,
+            PageSize = 50,
+            AuthorIdFilter = editorId,
+        };
+
+        var result = await sut.GetPagedAsync(query);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.TotalCount.Should().Be(2);
+        result.Value.Items.Should().OnlyContain(a => a.AuthorId == editorId);
+    }
+
+    [Fact]
+    public async Task GetPagedAsync_AuthorFilterMatchingNobody_ShouldReturnEmpty()
+    {
+        await using var context = _factory.CreateContext();
+        var editorId = SeedUser(context, "editor");
+        var sut = CreateSut(context);
+
+        await sut.CreateAsync(BuildValidInput(title: "Editor Makalesi", authorId: editorId));
+
+        var query = new ArticleQueryDto
+        {
+            LanguageCode = LanguageCodes.Turkish,
+            Page = 1,
+            PageSize = 50,
+            AuthorIdFilter = 999_999,
+        };
+
+        var result = await sut.GetPagedAsync(query);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.TotalCount.Should().Be(0);
+        result.Value.Items.Should().BeEmpty();
+    }
+
     public void Dispose() => _factory.Dispose();
 }

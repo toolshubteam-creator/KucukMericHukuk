@@ -15,7 +15,7 @@ namespace KucukMericHukuk.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Route("admin/categories")]
-[Authorize(Roles = "Admin,Editor")]
+[Authorize(Roles = "Admin")]
 public class CategoriesController : Controller
 {
     private readonly ICategoryService _categoryService;
