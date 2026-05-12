@@ -13,17 +13,20 @@ public class HomeController : Controller
     private readonly IServiceService _serviceService;
     private readonly IAttorneyService _attorneyService;
     private readonly IArticleService _articleService;
+    private readonly ITestimonialService _testimonialService;
     private readonly IStringLocalizer<SharedResource> _localizer;
 
     public HomeController(
         IServiceService serviceService,
         IAttorneyService attorneyService,
         IArticleService articleService,
+        ITestimonialService testimonialService,
         IStringLocalizer<SharedResource> localizer)
     {
         _serviceService = serviceService;
         _attorneyService = attorneyService;
         _articleService = articleService;
+        _testimonialService = testimonialService;
         _localizer = localizer;
     }
 
@@ -34,12 +37,14 @@ public class HomeController : Controller
         var services = await _serviceService.GetActiveOrderedAsync(lang, take: 3, ct);
         var attorneys = await _attorneyService.GetActiveOrderedAsync(lang, take: 3, ct);
         var articles = await _articleService.GetFeaturedOrRecentAsync(lang, count: 3, ct);
+        var testimonials = await _testimonialService.GetFeaturedOrderedAsync(lang, maxCount: 3, ct);
 
         var vm = new HomeIndexViewModel
         {
             FeaturedServices = services,
             FeaturedAttorneys = attorneys,
-            RecentArticles = articles
+            RecentArticles = articles,
+            FeaturedTestimonials = testimonials
         };
 
         ViewData["Title"] = _localizer["HomeTitle"];

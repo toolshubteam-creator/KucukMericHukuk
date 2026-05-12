@@ -1,0 +1,62 @@
+@* Faz 6.4a: Ana Sayfa featured testimonial section.
+   IsFeatured=true olan testimonial'lar (max 3, DisplayOrder ASC).
+   Mevcut testimonial-card.css class'larını reuse eder (görsel tutarlılık /Referanslar ile). *@
+@model IReadOnlyList<KucukMericHukuk.Core.DTOs.Testimonial.TestimonialListDto>
+
+@{
+    if (Model is null || Model.Count == 0)
+    {
+        return;
+    }
+
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+
+<section class="section-public" data-fade-up aria-labelledby="home-testimonials-heading">
+    <div class="container">
+        <div class="section-public__header">
+            <p class="section-public__eyebrow">Müvekkil Yorumları</p>
+            <h2 id="home-testimonials-heading" class="section-public__title">Müvekkillerimizin değerlendirmeleri</h2>
+            <p class="section-public__lead">
+                Birlikte çalıştığımız müvekkillerimizin anonim deneyim paylaşımları.
+            </p>
+        </div>
+
+        <div class="row g-4 testimonial-grid justify-content-center">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <article class="testimonial-card">
+                        <div class="testimonial-card__rating" aria-label="@(item.Rating ?? 0) yıldız">
+                            @if (item.Rating.HasValue)
+                            {
+                                @for (var i = 1; i <= 5; i++)
+                                {
+                                    <span class="@(i <= item.Rating.Value ? "is-filled" : "")">★</span>
+                                }
+                            }
+                        </div>
+                        <blockquote class="testimonial-card__quote">
+                            @item.Content
+                        </blockquote>
+                        <footer class="testimonial-card__footer">
+                            <span class="testimonial-card__initials" aria-hidden="true">
+                                @(string.IsNullOrWhiteSpace(item.AuthorInitials) ? "?" : item.AuthorInitials)
+                            </span>
+                            <span class="testimonial-card__role">
+                                @(string.IsNullOrWhiteSpace(item.AuthorRole) ? "Müvekkil" : item.AuthorRole)
+                            </span>
+                        </footer>
+                    </article>
+                </div>
+            }
+        </div>
+
+        <div class="text-center mt-4">
+            <a asp-controller="Testimonials" asp-action="Index" asp-route-culture="@culture"
+               class="btn btn-accent">
+                Tüm yorumları gör
+            </a>
+        </div>
+    </div>
+</section>
