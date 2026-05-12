@@ -291,11 +291,6 @@
   - Rol atama: bir user'a tek rol (mevcut seed pattern); multi-role gerekirse genişletilir
   - Tetik: Faz 6 alt-adımı (önerilen sıra: 6.2'den sonra, içerik modülleri öncesi — yetki testlerinin kalıcı UI üzerinden yapılabilmesi için)
 
-- **MetaTagsHelpers birim test** (Faz 5.10 / Faz 6)
-  - Suffix mantığı (ana sayfa istisnası), OG image absolute URL, canonical override, robots default
-  - Şu an view-level entegrasyonla manuel doğrulanıyor; CI safe-net için unit test eklenebilir
-  - Tetik: regresyon yaşanırsa veya Faz 5 sonu cleanup
-
 - **Müşteri iletişim bilgileri** (Faz 0 → SiteInfo doldurma)
   - Faz 6.1'de SiteSettings entity eklendi — yapısal hazır, admin /admin/site-settings sayfasından düzenleyebilir
   - Müşteri Telephone, Email, StreetAddress, PostalCode, Latitude/Longitude değerlerini admin panelinden girer
