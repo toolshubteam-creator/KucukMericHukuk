@@ -56,3 +56,22 @@
 }
 
 /* (Modül-özel stiller components/ altına ileride eklenecek) */
+
+/* SortableJS drag-drop — Faq Index (Faz 6.6b) */
+.faq-drag-handle {
+    cursor: grab;
+    color: var(--color-text-muted);
+    opacity: 0.5;
+    text-align: center;
+    user-select: none;
+    transition: opacity 0.15s ease, color 0.15s ease;
+}
+.faq-drag-handle:hover { opacity: 1; color: var(--color-accent-dark); }
+.faq-drag-handle:active { cursor: grabbing; }
+.faq-sortable-ghost {
+    opacity: 0.4;
+    background: var(--color-bg-alt);
+}
+.faq-sortable-chosen {
+    background: var(--color-bg);
+}

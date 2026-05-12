@@ -71,6 +71,7 @@ public static class ErrorCodes
     {
         public const string NotFound = "Faq.NotFound";
         public const string TranslationRequired = "Faq.TranslationRequired";
+        public const string ReorderInvalid = "Faq.ReorderInvalid";
     }
 
     public static class Testimonial

@@ -177,4 +177,41 @@ public class FaqService : IFaqService
         await _uow.SaveChangesAsync(ct);
         return Result.Success();
     }
+
+    public async Task<Result> ReorderAsync(
+        IReadOnlyList<FaqReorderItemDto> items, CancellationToken ct = default)
+    {
+        if (items is null || items.Count == 0)
+        {
+            return Result.Failure(new Error(
+                ErrorCodes.Faq.ReorderInvalid, "Sıralama listesi boş olamaz."));
+        }
+
+        var allFaqs = await _uow.Faqs.GetAllForReorderAsync(ct);
+
+        var inputIds = items.Select(x => x.Id).ToHashSet();
+        var dbIds = allFaqs.Select(x => x.Id).ToHashSet();
+
+        // Concurrent silme/ekleme korunması: input ID'ler mevcut DB ID'leriyle birebir eşleşmeli
+        if (!inputIds.SetEquals(dbIds))
+        {
+            return Result.Failure(new Error(
+                ErrorCodes.Faq.ReorderInvalid,
+                "Sıralama listesi mevcut SSS'lerle eşleşmiyor. Sayfayı yenileyip tekrar deneyin."));
+        }
+
+        var now = DateTime.UtcNow;
+        foreach (var faq in allFaqs)
+        {
+            var item = items.First(x => x.Id == faq.Id);
+            if (faq.DisplayOrder != item.DisplayOrder)
+            {
+                faq.DisplayOrder = item.DisplayOrder;
+                faq.UpdatedAt = now;
+            }
+        }
+
+        await _uow.SaveChangesAsync(ct);
+        return Result.Success();
+    }
 }

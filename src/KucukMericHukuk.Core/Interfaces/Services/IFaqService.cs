@@ -25,4 +25,9 @@ public interface IFaqService
     Task<Result> RestoreAsync(int id, CancellationToken ct = default);
 
     Task<Result> HardDeleteAsync(int id, CancellationToken ct = default);
+
+    /// <summary>
+    /// Toplu DisplayOrder güncellemesi — drag-drop UI sonrası. Input ID set'i mevcut Faq ID'leriyle birebir eşleşmeli.
+    /// </summary>
+    Task<Result> ReorderAsync(IReadOnlyList<FaqReorderItemDto> items, CancellationToken ct = default);
 }
