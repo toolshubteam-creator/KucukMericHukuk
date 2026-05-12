@@ -239,11 +239,6 @@
   - Şart: Domain HTTPS-only, includeSubDomains, max-age >= 1 yıl, hstspreload.org'a kayıt
   - Tetik: Müşteri canlıya alma sonrası
 
-- **Faq DisplayOrder drag-drop UI** (Faz 6+ / UX)
-  - Faz 5.8'de manuel DisplayOrder number input
-  - SortableJS ile drag-drop pattern eklenebilir (admin Index'te), tek POST ile batch update endpoint
-  - Tetik: Müşteri çok sayıda SSS eklerse, sıralama elle yönetilemez hale gelirse
-
 - **ContactMessage in-app reply** (Faz 6 / müşteri talebi)
   - Faz 5.9'da "mailto:" linkiyle dış mail client (Outlook/Gmail) açılıyor
   - In-app reply: Reply view + IEmailSender ile cevap gönder + ContactMessageReply entity (history)
