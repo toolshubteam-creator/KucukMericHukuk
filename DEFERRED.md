@@ -289,6 +289,14 @@
   - Test coverage: Şu an sadece `MediaAdminEditTests` pattern (HTML render input count + DB end-to-end). Diğer admin formlar için bu pattern eksik → admin Edit POST + DB doğrulama integration testleri
   - Tetik: Faz 6 sonu cleanup turu (yayın öncesi), veya yeni bug raporu gelirse erken
 
+- **CSP connect-src + BrowserLink dev-time gürültü temizliği** (Faz 6 sonu / cleanup turu)
+  - Faz 6.6b'de tespit edildi: browser console'da 4 CSP ihlali
+  - Kaynaklar: `aspnetcore-browser-refresh.js` (dev-only WebSocket), `cdn.jsdelivr.net` script source map fetch'leri
+  - Etki: Fonksiyonel sorun YOK, drag-drop CSP-uyumlu çalışıyor (same-origin POST). Source map fetch'leri ve BrowserLink WebSocket bloklanıyor — sadece dev-time gürültü
+  - Çözüm: `SecurityHeadersMiddleware`'de `connect-src` direktifi explicit eklenir, dev environment'ta `ws://localhost:*` whitelist, source map için `cdn.jsdelivr.net` allowlist
+  - Mevcut DEFERRED'da "CSP nonce-based hardening (Faz 6+)" maddesi var — bu iki konu birlikte ele alınmalı (cleanup turu)
+  - Tetik: Faz 6 sonu cleanup veya production CSP audit
+
 
 
 - **Production seed credentials**
