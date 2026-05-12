@@ -75,3 +75,11 @@
 .faq-sortable-chosen {
     background: var(--color-bg);
 }
+
+/* Sidebar separator — Faz 6.8 (Tabler nav-item-separator render etmiyor, manuel HR) */
+.sidebar-divider {
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    margin: 0;
+    opacity: 1;
+}

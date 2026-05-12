@@ -102,15 +102,16 @@
                         <span class="nav-link-title">Referanslar</span>
                     </a>
                 </li>
-                <li class="nav-item nav-item-separator"></li>
+                <li class="nav-item my-2 px-3"><hr class="sidebar-divider" /></li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">
+                    <a class="nav-link @Html.IsActiveController("Users")" asp-action="Index" asp-controller="Users" asp-area="Admin">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
                             <i class="ti ti-user-shield"></i>
                         </span>
                         <span class="nav-link-title">Kullanıcılar</span>
                     </a>
                 </li>
+                <li class="nav-item my-2 px-3"><hr class="sidebar-divider" /></li>
                 <li class="nav-item">
                     <a class="nav-link @Html.IsActiveController("SiteSettings")" asp-action="Index" asp-controller="SiteSettings" asp-area="Admin">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -118,6 +119,27 @@
                         </span>
                         <span class="nav-link-title">Site Ayarları</span>
                     </a>
+                </li>
+                @* Faz 6.8: Profilim + Çıkış (sidebar altı — dropdown bug bypass) *@
+                <li class="nav-item my-2 px-3"><hr class="sidebar-divider" /></li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" title="Profil sayfası yakında">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                            <i class="ti ti-user-circle"></i>
+                        </span>
+                        <span class="nav-link-title">Profilim</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <form asp-area="Admin" asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="nav-link border-0 bg-transparent w-100 text-start">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-logout"></i>
+                            </span>
+                            <span class="nav-link-title">Çıkış Yap</span>
+                        </button>
+                    </form>
                 </li>
             </ul>
         </div>

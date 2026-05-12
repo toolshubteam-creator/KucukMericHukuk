@@ -39,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<IContactMessageService, ContactMessageService>();
         services.AddScoped<ISiteSettingsService, SiteSettingsService>();
         services.AddScoped<ITestimonialService, TestimonialService>();
+        services.AddScoped<IUserManagementService, UserManagementService>();
 
         // SiteSettingsService memory cache kullanır (5dk TTL, update sonrası InvalidateCache).
         services.AddMemoryCache();

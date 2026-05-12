@@ -1,0 +1,184 @@
+@using KucukMericHukuk.Web.Areas.Admin.ViewModels.Shared
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Users.UserListViewModel
+@{
+    ViewData["Title"] = "Kullanıcılar";
+    var currentUserId = ViewBag.CurrentUserId as int? ?? 0;
+
+    var paginationVm = new PaginationViewModel
+    {
+        PageNumber = Model.PageNumber,
+        TotalPages = Model.TotalPages,
+        HasPrevious = Model.HasPrevious,
+        HasNext = Model.HasNext,
+        GetPageUrl = pageNum => Url.Action("Index", "Users", new
+        {
+            area = "Admin",
+            keyword = Model.Query.Keyword,
+            role = Model.Query.Role,
+            isActive = Model.Query.IsActive,
+            page = pageNum,
+            pageSize = Model.Query.PageSize,
+        }) ?? "#"
+    };
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">Kullanıcılar</h2>
+            <div class="text-secondary">Toplam @Model.TotalCount kullanıcı</div>
+        </div>
+        <div class="col-auto">
+            <a asp-action="Create" asp-controller="Users" asp-area="Admin" class="btn btn-primary">
+                <i class="ti ti-plus me-1"></i> Yeni Kullanıcı
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string okMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@okMsg</div>
+}
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+
+<div class="card mt-3">
+    <div class="card-body border-bottom">
+        <form asp-action="Index" asp-controller="Users" asp-area="Admin" method="get">
+            <div class="row g-2">
+                <div class="col-md">
+                    <input type="search" name="keyword" value="@Model.Query.Keyword"
+                           class="form-control" placeholder="Kullanıcı adı, e-posta veya ad ara..." />
+                </div>
+                <div class="col-md-auto">
+                    <select name="role" class="form-select">
+                        <option value="">Tüm roller</option>
+                        @foreach (var role in Model.AvailableRoles)
+                        {
+                            if (Model.Query.Role == role)
+                            {
+                                <option value="@role" selected>@role</option>
+                            }
+                            else
+                            {
+                                <option value="@role">@role</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <select name="isActive" class="form-select">
+                        <option value="">Hepsi</option>
+                        @if (Model.Query.IsActive == true)
+                        {
+                            <option value="true" selected>Aktif</option>
+                            <option value="false">Pasif</option>
+                        }
+                        else if (Model.Query.IsActive == false)
+                        {
+                            <option value="true">Aktif</option>
+                            <option value="false" selected>Pasif</option>
+                        }
+                        else
+                        {
+                            <option value="true">Aktif</option>
+                            <option value="false">Pasif</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="ti ti-search me-1"></i> Ara
+                    </button>
+                    <a asp-action="Index" asp-controller="Users" asp-area="Admin"
+                       class="btn btn-outline-secondary">Temizle</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">Kullanıcı bulunamadı</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter">
+                <thead>
+                    <tr>
+                        <th>Kullanıcı</th>
+                        <th>E-posta</th>
+                        <th style="width:120px">Rol</th>
+                        <th style="width:140px">Durum</th>
+                        <th class="w-1">Eylemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in Model.Items)
+                    {
+                        var isSelf = u.Id == currentUserId;
+                        <tr>
+                            <td>
+                                <div>@u.UserName @(isSelf ? "(siz)" : "")</div>
+                                @if (!string.IsNullOrEmpty(u.FullName))
+                                {
+                                    <small class="text-secondary">@u.FullName</small>
+                                }
+                            </td>
+                            <td>@u.Email</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(u.Role))
+                                {
+                                    <span class="badge bg-blue-lt">@u.Role</span>
+                                }
+                                else
+                                {
+                                    <span class="text-secondary">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!u.IsActive)
+                                {
+                                    <span class="badge bg-danger-lt">Pasif</span>
+                                }
+                                else if (u.IsLockedOut)
+                                {
+                                    <span class="badge bg-warning-lt">Kilitli</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success-lt">Aktif</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-controller="Users" asp-area="Admin"
+                                   asp-route-id="@u.Id" class="btn btn-sm btn-outline-secondary"
+                                   title="Detay"><i class="ti ti-eye"></i></a>
+                                <a asp-action="Edit" asp-controller="Users" asp-area="Admin"
+                                   asp-route-id="@u.Id" class="btn btn-sm btn-outline-primary"
+                                   title="Düzenle"><i class="ti ti-edit"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                <strong>@((Model.PageNumber - 1) * Model.PageSize + 1)</strong> -
+                <strong>@Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)</strong>
+                arası, toplam <strong>@Model.TotalCount</strong> kayıt
+            </p>
+            <div class="ms-auto">
+                <partial name="_Pagination" model="paginationVm" />
+            </div>
+        </div>
+    }
+</div>

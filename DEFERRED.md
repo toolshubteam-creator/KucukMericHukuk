@@ -248,14 +248,6 @@
 
 ## Faz 6 → Yayına Alma
 
-- **Kullanıcı yönetimi modülü (admin CRUD)** (Faz 6)
-  - Spec madde 5.1'de listelenmiş ama Faz 2'de yapılmamış (Faz 2: Page/Tag/Service/Category/Attorney CRUD, AspNetUsers yok)
-  - Faz 6.1 manuel teyitinde fark edildi: Editor rolü 403 testi UI üzerinden yapılamadı
-  - Kapsam: Admin Area'da Users controller — Index (liste), Create, Edit (rol değiştirme + şifre reset), Delete (soft, AspNetIdentity)
-  - DbInitializer seed: SuperAdmin yok kararı (Faz 5 kararı), sadece Admin + Editor + Author rolleri yönetilir
-  - Rol atama: bir user'a tek rol (mevcut seed pattern); multi-role gerekirse genişletilir
-  - Tetik: Faz 6 alt-adımı (önerilen sıra: 6.2'den sonra, içerik modülleri öncesi — yetki testlerinin kalıcı UI üzerinden yapılabilmesi için)
-
 - **Müşteri iletişim bilgileri** (Faz 0 → SiteInfo doldurma)
   - Faz 6.1'de SiteSettings entity eklendi — yapısal hazır, admin /admin/site-settings sayfasından düzenleyebilir
   - Müşteri Telephone, Email, StreetAddress, PostalCode, Latitude/Longitude değerlerini admin panelinden girer
@@ -274,13 +266,23 @@
   - Test coverage: Şu an sadece `MediaAdminEditTests` pattern (HTML render input count + DB end-to-end). Diğer admin formlar için bu pattern eksik → admin Edit POST + DB doğrulama integration testleri
   - Tetik: Faz 6 sonu cleanup turu (yayın öncesi), veya yeni bug raporu gelirse erken
 
-- **CSP connect-src + BrowserLink dev-time gürültü temizliği** (Faz 6 sonu / cleanup turu)
-  - Faz 6.6b'de tespit edildi: browser console'da 4 CSP ihlali
-  - Kaynaklar: `aspnetcore-browser-refresh.js` (dev-only WebSocket), `cdn.jsdelivr.net` script source map fetch'leri
-  - Etki: Fonksiyonel sorun YOK, drag-drop CSP-uyumlu çalışıyor (same-origin POST). Source map fetch'leri ve BrowserLink WebSocket bloklanıyor — sadece dev-time gürültü
-  - Çözüm: `SecurityHeadersMiddleware`'de `connect-src` direktifi explicit eklenir, dev environment'ta `ws://localhost:*` whitelist, source map için `cdn.jsdelivr.net` allowlist
-  - Mevcut DEFERRED'da "CSP nonce-based hardening (Faz 6+)" maddesi var — bu iki konu birlikte ele alınmalı (cleanup turu)
-  - Tetik: Faz 6 sonu cleanup veya production CSP audit
+- **Admin topbar dropdown click bug** (Faz 6+ / UI cleanup)
+  - Faz 6.8 manuel teyit sırasında tespit edildi: sağ üst kullanıcı avatarına tıklamada dropdown açılmıyor
+  - Veri toplandı: Bootstrap yüklü, instance kayıtlı, manuel `dd.show()` çalışıyor, ama doğal click event element'e ulaşmıyor (document capture listener bile yakalamıyor)
+  - Denenen fix'ler: CSP `connect-src` genişletme (Bootstrap source map fetch için), `<a href="#">` → `<button type="button">` migration — ikisi de çözmedi
+  - Kök sebep belirsiz: muhtemelen Tabler theme + Bootstrap entegrasyon detayı, browser-level event capture problemi, veya başka subtle bir konflikt
+  - Geçici çözüm: Sidebar'a Profilim + Çıkış Yap item'ları eklendi (`_AdminSidebar.cshtml`, dropdown bypass) — kullanıcı pratik olarak logout'a erişebilir
+  - Tetik: Faz 7 / UI cleanup turu veya başka bir admin sayfasında benzer dropdown gerektiğinde
+
+- **Editor rolü sidebar item erişim haritası netleştirme** (Faz 6+ / UX)
+  - Faz 6.8 manuel teyit Madde 3'te tespit edildi: Editor login olunca hiçbir sidebar item'a giremiyor
+  - Spec madde 6.1: Editor "yalnızca kendi makalelerini yazma, düzenleme — diğer panellere erişim yok"
+  - Beklenen: Articles erişimi VAR, diğer modüller 403 veya sidebar'dan gizli
+  - Mevcut: Editor sidebar'da hangi item'ları görüyor + tıkladığında hangileri 403 — kesin durum belirsiz, Madde 3 raporda "hiç giremiyor" denildi
+  - İlgili DEFERRED: "Article: Editor/Author rol bazlı yetkilendirme" (Faz 3'ten beri)
+  - Çözüm yaklaşımı: Sidebar item'larında `@if (User.IsInRole("Admin") || User.IsInRole("Editor"))` koşullu render + Articles controller `Editor` rolüne `[Authorize(Roles = "Admin,Editor")]`
+  - Tetik: Article AuthorId yetkilendirme implementation (DEFERRED'da Faz 3'ten beri) ile birlikte ele al
+
 
 
 
@@ -290,10 +292,6 @@
 
 - **LocalDB → SQL Server** geçişi
   - Connection string env var
-
-- **Lockout reset UI**
-  - Şu an manuel SQL gerekli (LockoutEnd=NULL, AccessFailedCount=0)
-  - Faz 2.10 kullanıcı yönetimi modülünde olabilir — karar gerek
 
 ---
 

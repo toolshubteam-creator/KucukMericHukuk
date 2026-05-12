@@ -59,6 +59,15 @@ public class AccountController : Controller
             return View(model);
         }
 
+        // Faz 6.8: Devre dışı bırakılmış kullanıcı login yapamaz
+        if (!user.IsActive)
+        {
+            _logger.LogWarning("Devre dışı kullanıcı login denemesi: {Email}", model.Email);
+            ModelState.AddModelError(string.Empty,
+                "Hesabınız devre dışı bırakılmıştır. Yönetici ile iletişime geçin.");
+            return View(model);
+        }
+
         var result = await _signInManager.PasswordSignInAsync(
             user,
             model.Password,
