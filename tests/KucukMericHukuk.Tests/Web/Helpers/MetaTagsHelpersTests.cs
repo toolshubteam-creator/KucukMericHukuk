@@ -1,0 +1,245 @@
+using System.Text.Encodings.Web;
+using FluentAssertions;
+using KucukMericHukuk.Core.Common;
+using KucukMericHukuk.Tests.Infrastructure;
+using KucukMericHukuk.Web.Helpers;
+using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Moq;
+
+namespace KucukMericHukuk.Tests.Web.Helpers;
+
+public class MetaTagsHelpersTests
+{
+    private readonly SiteInfoOptions _defaultSiteInfo = new()
+    {
+        Name = "Test Hukuk",
+        Tagline = "Test Slogan",
+        Description = "Test description fallback",
+        BaseUrl = "https://example.com",
+        DefaultOgImage = "/img/og-default.png",
+        Locale = "tr_TR",
+        TwitterHandle = "@testhukuk"
+    };
+
+    /// <summary>
+    /// IHtmlHelper mock + ViewData + ViewContext + DI scoped IOptionsSnapshot kurulumu.
+    /// Helper iki property kullanır: htmlHelper.ViewData, htmlHelper.ViewContext.HttpContext.
+    /// </summary>
+    private Mock<IHtmlHelper> CreateHelperMock(
+        out ViewDataDictionary viewData,
+        string requestPath = "/tr-TR/Test",
+        SiteInfoOptions? customSiteInfo = null)
+    {
+        var siteInfo = customSiteInfo ?? _defaultSiteInfo;
+
+        var services = new ServiceCollection();
+        services.AddSingleton<IOptionsSnapshot<SiteInfoOptions>>(
+            new OptionsSnapshotStub<SiteInfoOptions>(siteInfo));
+        var sp = services.BuildServiceProvider();
+
+        var httpContext = new DefaultHttpContext { RequestServices = sp };
+        httpContext.Request.Path = requestPath;
+
+        viewData = new ViewDataDictionary<object>(
+            new EmptyModelMetadataProvider(),
+            new ModelStateDictionary());
+
+        var viewContext = new ViewContext
+        {
+            HttpContext = httpContext,
+            ViewData = viewData
+        };
+
+        var htmlHelper = new Mock<IHtmlHelper>();
+        htmlHelper.Setup(h => h.ViewData).Returns(viewData);
+        htmlHelper.Setup(h => h.ViewContext).Returns(viewContext);
+        return htmlHelper;
+    }
+
+    private static string Render(IHtmlContent content)
+    {
+        using var writer = new StringWriter();
+        content.WriteTo(writer, HtmlEncoder.Default);
+        return writer.ToString();
+    }
+
+    // ─────────────────────── MetaTags() — Title ───────────────────────
+
+    [Fact]
+    public void MetaTags_HomePageNoTagline_TitleIsSiteNameOnly()
+    {
+        var siteInfo = new SiteInfoOptions
+        {
+            Name = "Test Hukuk",
+            Tagline = "",
+            BaseUrl = "https://example.com",
+            DefaultOgImage = "/img/og.png"
+        };
+        var helper = CreateHelperMock(out var _, customSiteInfo: siteInfo);
+
+        var html = Render(helper.Object.MetaTags());
+
+        html.Should().Contain("<title>Test Hukuk</title>");
+        html.Should().NotContain("|");
+    }
+
+    [Fact]
+    public void MetaTags_HomePageWithTagline_TitleIsNameDashTagline()
+    {
+        var helper = CreateHelperMock(out var _);
+
+        var html = Render(helper.Object.MetaTags());
+
+        // ASCII-safe substring (— em-dash HTML-encoded olur)
+        html.Should().Contain("<title>Test Hukuk");
+        html.Should().Contain("Test Slogan</title>");
+    }
+
+    [Fact]
+    public void MetaTags_NormalPage_TitleIsPipeFormat()
+    {
+        var helper = CreateHelperMock(out var viewData);
+        viewData["Title"] = "Hizmetler";
+
+        var html = Render(helper.Object.MetaTags());
+
+        html.Should().Contain("<title>Hizmetler | Test Hukuk</title>");
+    }
+
+    // ─────────────────────── MetaTags() — OG image ───────────────────────
+
+    [Fact]
+    public void MetaTags_OgImageRelative_PrependsBaseUrl()
+    {
+        var helper = CreateHelperMock(out var _);
+        // ViewData["OgImage"] yok → DefaultOgImage "/img/og-default.png" kullanılır,
+        // "http" ile başlamadığı için BaseUrl prepend olur.
+
+        var html = Render(helper.Object.MetaTags());
+
+        html.Should().Contain("og:image\" content=\"https://example.com/img/og-default.png\"");
+    }
+
+    [Fact]
+    public void MetaTags_OgImageAbsoluteUrl_LeavesUnchanged()
+    {
+        var helper = CreateHelperMock(out var viewData);
+        viewData["OgImage"] = "https://cdn.example.com/custom.jpg";
+
+        var html = Render(helper.Object.MetaTags());
+
+        html.Should().Contain("og:image\" content=\"https://cdn.example.com/custom.jpg\"");
+        html.Should().NotContain("https://example.comhttps://"); // double-prepend olmamalı
+    }
+
+    // ─────────────────────── MetaTags() — Canonical ───────────────────────
+
+    [Fact]
+    public void MetaTags_CanonicalOverride_UsesViewDataValue()
+    {
+        var helper = CreateHelperMock(out var viewData);
+        viewData["CanonicalUrl"] = "https://example.com/custom-canonical";
+
+        var html = Render(helper.Object.MetaTags());
+
+        html.Should().Contain("rel=\"canonical\" href=\"https://example.com/custom-canonical\"");
+        html.Should().Contain("og:url\" content=\"https://example.com/custom-canonical\"");
+    }
+
+    [Fact]
+    public void MetaTags_NoCanonicalOverride_UsesBaseUrlPlusPath()
+    {
+        var helper = CreateHelperMock(out var _, requestPath: "/tr-TR/Articles/test");
+
+        var html = Render(helper.Object.MetaTags());
+
+        html.Should().Contain("rel=\"canonical\" href=\"https://example.com/tr-TR/Articles/test\"");
+    }
+
+    // ─────────────────────── MetaTags() — Description ───────────────────────
+
+    [Fact]
+    public void MetaTags_NoMetaDescription_FallsBackToSiteInfoDescription()
+    {
+        var helper = CreateHelperMock(out var _);
+
+        var html = Render(helper.Object.MetaTags());
+
+        html.Should().Contain("name=\"description\" content=\"Test description fallback\"");
+        html.Should().Contain("og:description\" content=\"Test description fallback\"");
+    }
+
+    [Fact]
+    public void MetaTags_ViewDataMetaDescription_OverridesSiteInfoDescription()
+    {
+        var helper = CreateHelperMock(out var viewData);
+        viewData["MetaDescription"] = "Sayfa ozel aciklama";
+
+        var html = Render(helper.Object.MetaTags());
+
+        html.Should().Contain("name=\"description\" content=\"Sayfa ozel aciklama\"");
+        html.Should().NotContain("Test description fallback");
+    }
+
+    // ─────────────────────── MetaTags() — Robots ───────────────────────
+
+    [Fact]
+    public void MetaTags_NoRobotsOverride_DefaultsToIndexFollow()
+    {
+        var helper = CreateHelperMock(out var _);
+
+        var html = Render(helper.Object.MetaTags());
+
+        html.Should().Contain("name=\"robots\" content=\"index, follow\"");
+    }
+
+    [Fact]
+    public void MetaTags_RobotsOverride_UsesViewDataValue()
+    {
+        var helper = CreateHelperMock(out var viewData);
+        viewData["MetaRobots"] = "noindex, nofollow";
+
+        var html = Render(helper.Object.MetaTags());
+
+        html.Should().Contain("name=\"robots\" content=\"noindex, nofollow\"");
+        html.Should().NotContain("\"index, follow\"");
+    }
+
+    // ─────────────────────── CanonicalForArticles() ───────────────────────
+
+    [Fact]
+    public void CanonicalForArticles_NoFilters_ReturnsBasePath()
+    {
+        var helper = CreateHelperMock(out var _, requestPath: "/tr-TR/Articles");
+
+        var canonical = helper.Object.CanonicalForArticles(null, 1);
+
+        canonical.Should().Be("https://example.com/tr-TR/Articles");
+    }
+
+    [Fact]
+    public void CanonicalForArticles_WithCategoryAndPage_AppendsBothQueryParams()
+    {
+        var helper = CreateHelperMock(out var _, requestPath: "/tr-TR/Articles");
+
+        var canonical = helper.Object.CanonicalForArticles("ceza-hukuku", 3);
+
+        canonical.Should().Be("https://example.com/tr-TR/Articles?category=ceza-hukuku&page=3");
+    }
+
+    [Fact]
+    public void CanonicalForArticles_PageOne_DoesNotAppendPageQuery()
+    {
+        var helper = CreateHelperMock(out var _, requestPath: "/tr-TR/Articles");
+
+        var canonical = helper.Object.CanonicalForArticles("aile-hukuku", 1);
+
+        canonical.Should().Be("https://example.com/tr-TR/Articles?category=aile-hukuku");
+    }
+}
