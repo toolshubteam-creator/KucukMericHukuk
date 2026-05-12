@@ -17,19 +17,22 @@ public class SitemapService : ISitemapService
     private readonly IServiceRepository _services;
     private readonly IAttorneyRepository _attorneys;
     private readonly IPageRepository _pages;
+    private readonly ISiteSettingsService _siteSettings;
 
     public SitemapService(
         IOptionsSnapshot<SiteInfoOptions> siteInfo,
         IArticleRepository articles,
         IServiceRepository services,
         IAttorneyRepository attorneys,
-        IPageRepository pages)
+        IPageRepository pages,
+        ISiteSettingsService siteSettings)
     {
         _siteInfo = siteInfo.Value;
         _articles = articles;
         _services = services;
         _attorneys = attorneys;
         _pages = pages;
+        _siteSettings = siteSettings;
     }
 
     private string BaseUrl => _siteInfo.BaseUrl.TrimEnd('/');
@@ -104,7 +107,20 @@ public class SitemapService : ISitemapService
         return sw.ToString();
     }
 
-    public string BuildRobotsTxt()
+    public async Task<string> BuildRobotsTxtAsync(CancellationToken ct = default)
+    {
+        // Admin override: SiteSettings.Seo.RobotsTxt boş değilse onu döndür.
+        // Boş/null/whitespace ise hardcoded fallback (regresyon koruması — admin yanlışlıkla boşaltırsa site robots.txt'siz kalmasın).
+        var dbValue = await _siteSettings.GetValueAsync(SiteSettingKeys.RobotsTxt, ct);
+        if (dbValue.IsSuccess && !string.IsNullOrWhiteSpace(dbValue.Value))
+        {
+            return dbValue.Value;
+        }
+
+        return BuildDefaultRobotsTxt();
+    }
+
+    private string BuildDefaultRobotsTxt()
     {
         var sb = new StringBuilder();
         sb.AppendLine("User-agent: *");

@@ -91,12 +91,6 @@
   - Bootstrap/Lucide/Quill sürümü güncellenirken hash güncellenmeyi unutursa production'da kırılma riski → CI bunu yakalar
   - Tetik: Faz 6 CI/CD kurulumu
 
-- **robots.txt admin yönetimi** (Faz 6 / SiteSettings entity)
-  - Faz 5.3'te robots.txt SitemapService.BuildRobotsTxt() ile hardcoded
-  - Spec mad. 5.1: "robots.txt içeriği admin panelinden düzenlenebilir"
-  - Faz 6'da SiteSettings entity geldiğinde DB'den okunur (key: "robots.txt"); Service tek satır değişir
-  - Tetik: Faz 6 yayın hazırlığı veya müşteri talebi
-
 - **Sitemap caching** (Faz 6 / performans)
   - Faz 5.3'te request-time generation (DB hit her istekte: 4 query)
   - Crawler trafiği yüksekleşirse 1h MemoryCache eklenir

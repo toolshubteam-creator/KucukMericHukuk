@@ -4,6 +4,7 @@ using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Enums;
 using KucukMericHukuk.Core.Interfaces.Repositories;
+using KucukMericHukuk.Core.Interfaces.Services;
 using KucukMericHukuk.Infrastructure.Seo;
 using KucukMericHukuk.Tests.Infrastructure;
 using Moq;
@@ -22,10 +23,12 @@ public class SitemapServiceTests
     private readonly Mock<IServiceRepository> _services = new();
     private readonly Mock<IAttorneyRepository> _attorneys = new();
     private readonly Mock<IPageRepository> _pages = new();
+    private readonly Mock<ISiteSettingsService> _siteSettings = new();
 
     private SitemapService Sut() => new(
         new OptionsSnapshotStub<SiteInfoOptions>(_siteInfo),
-        _articles.Object, _services.Object, _attorneys.Object, _pages.Object);
+        _articles.Object, _services.Object, _attorneys.Object, _pages.Object,
+        _siteSettings.Object);
 
     private void SetupAllEmpty()
     {
@@ -37,6 +40,12 @@ public class SitemapServiceTests
             .ReturnsAsync(new List<Attorney>());
         _pages.Setup(r => r.GetAllActiveForSitemapAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Page>());
+    }
+
+    private void SetupRobotsTxtDbValue(Result<string?> result)
+    {
+        _siteSettings.Setup(s => s.GetValueAsync(SiteSettingKeys.RobotsTxt, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(result);
     }
 
     [Fact]
@@ -114,9 +123,66 @@ public class SitemapServiceTests
     }
 
     [Fact]
-    public void BuildRobotsTxt_includes_admin_disallow_and_sitemap_reference()
+    public async Task BuildRobotsTxtAsync_DbValueExists_ReturnsDbValue()
     {
-        var robots = Sut().BuildRobotsTxt();
+        const string customRobots = "User-agent: *\nDisallow: /private/\n";
+        SetupRobotsTxtDbValue(Result.Success<string?>(customRobots));
+
+        var robots = await Sut().BuildRobotsTxtAsync();
+
+        robots.Should().Be(customRobots);
+        // Hardcoded fallback satırları çıkmamalı (custom değer admin tarafından override edildi)
+        robots.Should().NotContain("Disallow: /admin/");
+        robots.Should().NotContain("Sitemap: https://example.com/sitemap.xml");
+    }
+
+    [Fact]
+    public async Task BuildRobotsTxtAsync_DbValueNull_ReturnsHardcodedDefault()
+    {
+        SetupRobotsTxtDbValue(Result.Success<string?>(null));
+
+        var robots = await Sut().BuildRobotsTxtAsync();
+
+        robots.Should().Contain("User-agent: *");
+        robots.Should().Contain("Disallow: /admin/");
+        robots.Should().Contain("Disallow: /Identity/");
+        robots.Should().Contain("Disallow: /Contact/ThankYou");
+        robots.Should().Contain("Disallow: /Error/");
+        robots.Should().Contain("Sitemap: https://example.com/sitemap.xml");
+    }
+
+    [Fact]
+    public async Task BuildRobotsTxtAsync_DbValueEmpty_ReturnsHardcodedDefault()
+    {
+        SetupRobotsTxtDbValue(Result.Success<string?>(""));
+
+        var robots = await Sut().BuildRobotsTxtAsync();
+
+        robots.Should().Contain("User-agent: *");
+        robots.Should().Contain("Disallow: /admin/");
+        robots.Should().Contain("Sitemap: https://example.com/sitemap.xml");
+    }
+
+    [Fact]
+    public async Task BuildRobotsTxtAsync_DbValueWhitespace_ReturnsHardcodedDefault()
+    {
+        SetupRobotsTxtDbValue(Result.Success<string?>("   \n  \t  "));
+
+        var robots = await Sut().BuildRobotsTxtAsync();
+
+        robots.Should().Contain("User-agent: *");
+        robots.Should().Contain("Disallow: /admin/");
+        robots.Should().Contain("Sitemap: https://example.com/sitemap.xml");
+    }
+
+    [Fact]
+    public async Task BuildRobotsTxtAsync_DbKeyNotFound_ReturnsHardcodedDefault()
+    {
+        // SiteSettings.GetValueAsync key bulamazsa Result.Failure döner — fallback çalışmalı
+        SetupRobotsTxtDbValue(Result.Failure<string?>(new Error(ErrorCodes.SiteSetting.NotFound, "Ayar bulunamadı")));
+
+        var robots = await Sut().BuildRobotsTxtAsync();
+
         robots.Should().Contain("User-agent: *");
         robots.Should().Contain("Disallow: /admin/");
         robots.Should().Contain("Disallow: /Identity/");

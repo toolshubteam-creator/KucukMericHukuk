@@ -92,6 +92,13 @@
                                                    @(isChecked ? "checked" : "") />
                                         </div>
                                     }
+                                    else if (setting.DataType == "text")
+                                    {
+                                        <textarea id="@inputId" name="Values[@setting.Key]"
+                                                  class="form-control" rows="12"
+                                                  style="font-family: var(--tblr-font-monospace, monospace); font-size: 13px;"
+                                                  maxlength="4000">@setting.Value</textarea>
+                                    }
                                     else if (setting.Key == "Description" || setting.Key == "OpeningHoursDescription")
                                     {
                                         <textarea id="@inputId" name="Values[@setting.Key]"

@@ -167,6 +167,7 @@ public class DbInitializer : IDbInitializer
             // Seo group
             (SiteSettingKeys.DefaultOgImage, SiteSettingKeys.Groups.Seo, SiteSettingKeys.DataTypes.String, "Sayfa özel görsel yoksa kullanılacak OG image yolu.", 1),
             (SiteSettingKeys.GoogleSearchConsoleVerification, SiteSettingKeys.Groups.Seo, SiteSettingKeys.DataTypes.String, "Google Search Console meta verification token.", 2),
+            (SiteSettingKeys.RobotsTxt, SiteSettingKeys.Groups.Seo, SiteSettingKeys.DataTypes.Text, "robots.txt içeriği — boş bırakılırsa varsayılan kullanılır (admin/Identity dizinleri disallow + sitemap referansı).", 3),
 
             // Integration group
             (SiteSettingKeys.GoogleAnalyticsId, SiteSettingKeys.Groups.Integration, SiteSettingKeys.DataTypes.String, "GA4 measurement ID (G-XXXXXXXXXX).", 1),
