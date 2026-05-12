@@ -266,6 +266,23 @@
   - Test coverage: Şu an sadece `MediaAdminEditTests` pattern (HTML render input count + DB end-to-end). Diğer admin formlar için bu pattern eksik → admin Edit POST + DB doğrulama integration testleri
   - Tetik: Faz 6 sonu cleanup turu (yayın öncesi), veya yeni bug raporu gelirse erken
 
+- **Admin topbar dropdown click bug** (Faz 6+ / UI cleanup)
+  - Faz 6.8 manuel teyit sırasında tespit edildi: sağ üst kullanıcı avatarına tıklamada dropdown açılmıyor
+  - Veri toplandı: Bootstrap yüklü, instance kayıtlı, manuel `dd.show()` çalışıyor, ama doğal click event element'e ulaşmıyor (document capture listener bile yakalamıyor)
+  - Denenen fix'ler: CSP `connect-src` genişletme (Bootstrap source map fetch için), `<a href="#">` → `<button type="button">` migration — ikisi de çözmedi
+  - Kök sebep belirsiz: muhtemelen Tabler theme + Bootstrap entegrasyon detayı, browser-level event capture problemi, veya başka subtle bir konflikt
+  - Geçici çözüm: Sidebar'a Profilim + Çıkış Yap item'ları eklendi (`_AdminSidebar.cshtml`, dropdown bypass) — kullanıcı pratik olarak logout'a erişebilir
+  - Tetik: Faz 7 / UI cleanup turu veya başka bir admin sayfasında benzer dropdown gerektiğinde
+
+- **Editor rolü sidebar item erişim haritası netleştirme** (Faz 6+ / UX)
+  - Faz 6.8 manuel teyit Madde 3'te tespit edildi: Editor login olunca hiçbir sidebar item'a giremiyor
+  - Spec madde 6.1: Editor "yalnızca kendi makalelerini yazma, düzenleme — diğer panellere erişim yok"
+  - Beklenen: Articles erişimi VAR, diğer modüller 403 veya sidebar'dan gizli
+  - Mevcut: Editor sidebar'da hangi item'ları görüyor + tıkladığında hangileri 403 — kesin durum belirsiz, Madde 3 raporda "hiç giremiyor" denildi
+  - İlgili DEFERRED: "Article: Editor/Author rol bazlı yetkilendirme" (Faz 3'ten beri)
+  - Çözüm yaklaşımı: Sidebar item'larında `@if (User.IsInRole("Admin") || User.IsInRole("Editor"))` koşullu render + Articles controller `Editor` rolüne `[Authorize(Roles = "Admin,Editor")]`
+  - Tetik: Article AuthorId yetkilendirme implementation (DEFERRED'da Faz 3'ten beri) ile birlikte ele al
+
 
 
 
