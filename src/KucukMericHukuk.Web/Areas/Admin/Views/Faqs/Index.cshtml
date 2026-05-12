@@ -89,24 +89,46 @@
     }
     else
     {
+        // Drag-drop sadece filtre yoksa anlamli (keyword aramada gosterilen liste eksik olur).
+        var dragDropEnabled = string.IsNullOrWhiteSpace(Model.Query.Keyword)
+                              && !Model.Query.IncludeDeleted
+                              && Model.PageNumber == 1
+                              && Model.PageSize >= Model.TotalCount;
+        @Html.AntiForgeryToken()
         <div class="table-responsive">
             <table class="table card-table table-vcenter text-nowrap">
                 <thead>
                     <tr>
+                        @if (dragDropEnabled)
+                        {
+                            <th style="width:40px"></th>
+                        }
                         <th style="width:80px">Sıra</th>
                         <th>Soru</th>
                         <th style="width:120px">Durum</th>
                         <th class="w-1">Eylemler</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="faq-sortable"
+                       data-reorder-enabled="@(dragDropEnabled ? "true" : "false")"
+                       data-reorder-url="@Url.Action("Reorder", "Faqs", new { area = "Admin" })">
                     @foreach (var item in Model.Items)
                     {
                         var firstTr = item.Translations?.FirstOrDefault(t => t.LanguageCode == Model.Query.LanguageCode)
                                    ?? item.Translations?.FirstOrDefault();
                         var question = firstTr?.Question ?? "(çeviri yok)";
 
-                        <tr>
+                        <tr data-faq-id="@item.Id">
+                            @if (dragDropEnabled && !item.IsDeleted)
+                            {
+                                <td class="faq-drag-handle" title="Sürükleyip sıralayın">
+                                    <i class="ti ti-grip-vertical"></i>
+                                </td>
+                            }
+                            else if (dragDropEnabled)
+                            {
+                                <td></td>
+                            }
                             <td>@item.DisplayOrder</td>
                             <td>@question</td>
                             <td>
@@ -186,3 +208,11 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    @* SortableJS — 1.15.6 + sha384 SRI (Faz 6.6b). Faq drag-drop reorder icin. *@
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@@1.15.6/Sortable.min.js"
+            integrity="sha384-HZZ/fukV+9G8gwTNjN7zQDG0Sp7MsZy5DDN6VfY3Be7V9dvQpEpR2jF2HlyFUUjU"
+            crossorigin="anonymous"></script>
+    <script src="~/js/admin/faq-reorder.js" asp-append-version="true"></script>
+}

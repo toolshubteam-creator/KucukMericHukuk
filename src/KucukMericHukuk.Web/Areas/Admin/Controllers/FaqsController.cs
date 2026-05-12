@@ -243,4 +243,28 @@ public class FaqsController : Controller
         TempData["Success"] = "SSS kalıcı olarak silindi.";
         return RedirectToAction(nameof(Index));
     }
+
+    /// <summary>
+    /// Drag-drop UI sonrası batch DisplayOrder güncelleme. JSON body POST + RequestVerificationToken header.
+    /// </summary>
+    [HttpPost("reorder")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Reorder(
+        [FromBody] List<FaqReorderItemDto> items,
+        CancellationToken ct)
+    {
+        var result = await _faqService.ReorderAsync(items, ct);
+
+        if (result.IsFailure)
+        {
+            _logger.LogWarning("SSS sıralama güncellenemedi: {Errors}",
+                string.Join("; ", result.Errors.Select(e => e.Message)));
+            return BadRequest(new
+            {
+                error = result.FirstError?.Message ?? "Sıralama güncellenemedi."
+            });
+        }
+
+        return Ok();
+    }
 }

@@ -60,4 +60,9 @@ public class FaqRepository : GenericRepository<Faq>, IFaqRepository
         => _dbSet.IgnoreQueryFilters()
             .Include(f => f.Translations)
             .FirstOrDefaultAsync(f => f.Id == id, ct);
+
+    public async Task<IReadOnlyList<Faq>> GetAllForReorderAsync(CancellationToken ct = default)
+    {
+        return await _dbSet.AsQueryable().ToListAsync(ct);
+    }
 }

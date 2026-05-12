@@ -15,6 +15,7 @@ $urls = [ordered]@{
     "sweetalert2"          = "https://cdn.jsdelivr.net/npm/sweetalert2@11.26.24/dist/sweetalert2.all.min.js"
     "choices-css"          = "https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css"
     "choices-js"           = "https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/scripts/choices.min.js"
+    "sortablejs"           = "https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"
 }
 
 Write-Host "═══════════════════════════════════════════════" -ForegroundColor Cyan

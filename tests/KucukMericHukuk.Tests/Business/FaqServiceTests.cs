@@ -359,5 +359,83 @@ public class FaqServiceTests : IDisposable
         tr.Answer.Should().NotContain("http://evil.com");
     }
 
+    // ───────────── Faz 6.6b: ReorderAsync (drag-drop) ─────────────
+
+    [Fact]
+    public async Task ReorderAsync_ValidItems_UpdatesDisplayOrder()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var first = await sut.CreateAsync(BuildValidInput(question: "Q1", displayOrder: 0));
+        var second = await sut.CreateAsync(BuildValidInput(question: "Q2", displayOrder: 1));
+        var third = await sut.CreateAsync(BuildValidInput(question: "Q3", displayOrder: 2));
+
+        // Tersine cevir: third 0, second 1, first 2
+        var reorderItems = new List<FaqReorderItemDto>
+        {
+            new() { Id = third.Value, DisplayOrder = 0 },
+            new() { Id = second.Value, DisplayOrder = 1 },
+            new() { Id = first.Value, DisplayOrder = 2 },
+        };
+
+        var result = await sut.ReorderAsync(reorderItems);
+
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        verify.Set<Faq>().First(f => f.Id == third.Value).DisplayOrder.Should().Be(0);
+        verify.Set<Faq>().First(f => f.Id == second.Value).DisplayOrder.Should().Be(1);
+        verify.Set<Faq>().First(f => f.Id == first.Value).DisplayOrder.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task ReorderAsync_EmptyList_ReturnsFailure()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var result = await sut.ReorderAsync(new List<FaqReorderItemDto>());
+
+        result.IsFailure.Should().BeTrue();
+        result.FirstError!.Code.Should().Be(ErrorCodes.Faq.ReorderInvalid);
+    }
+
+    [Fact]
+    public async Task ReorderAsync_IdSetMismatch_ReturnsFailure()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var faq = await sut.CreateAsync(BuildValidInput(question: "Q1"));
+
+        var reorderItems = new List<FaqReorderItemDto>
+        {
+            new() { Id = faq.Value, DisplayOrder = 0 },
+            new() { Id = 9999, DisplayOrder = 1 },
+        };
+
+        var result = await sut.ReorderAsync(reorderItems);
+
+        result.IsFailure.Should().BeTrue();
+        result.FirstError!.Code.Should().Be(ErrorCodes.Faq.ReorderInvalid);
+    }
+
+    [Fact]
+    public async Task ReorderAsync_NoChange_StillSucceeds()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var faq = await sut.CreateAsync(BuildValidInput(displayOrder: 5));
+
+        var result = await sut.ReorderAsync(new List<FaqReorderItemDto>
+        {
+            new() { Id = faq.Value, DisplayOrder = 5 }
+        });
+
+        result.IsSuccess.Should().BeTrue();
+    }
+
     public void Dispose() => _factory.Dispose();
 }

@@ -206,6 +206,13 @@ builder.Services.AddControllersWithViews(options =>
     .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
     .AddDataAnnotationsLocalization();
 
+// AntiForgery: JSON body POST'lar için header destekle (Faz 6.6b — Faq drag-drop reorder).
+// Form POST'ları etkilemez (default __RequestVerificationToken body field çalışmaya devam eder).
+builder.Services.AddAntiforgery(opts =>
+{
+    opts.HeaderName = "RequestVerificationToken";
+});
+
 var app = builder.Build();
 
 // Security headers (Faz 5.7) — EN ÜST (her response'a uygulanır)

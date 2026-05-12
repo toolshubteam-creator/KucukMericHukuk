@@ -18,4 +18,10 @@ public interface IFaqRepository : IGenericRepository<Faq>
     Task<Faq?> GetByIdWithTranslationsAsync(int id, CancellationToken ct = default);
 
     Task<Faq?> GetByIdIncludingDeletedAsync(int id, CancellationToken ct = default);
+
+    /// <summary>
+    /// Reorder için lightweight liste — translation include yok, sadece Id + DisplayOrder lazım.
+    /// Silinmiş kayıtları içermez (soft-delete filter aktif).
+    /// </summary>
+    Task<IReadOnlyList<Faq>> GetAllForReorderAsync(CancellationToken ct = default);
 }
