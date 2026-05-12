@@ -557,6 +557,47 @@ public class DbInitializer : IDbInitializer
             _logger.LogInformation("Demo seed: 6 SSS eklendi.");
         }
 
+        // Testimonial seed (TBB-safe: inisyal + nötr rol, dava/firma detayı yok)
+        if (!await _db.Set<Testimonial>().AnyAsync(ct))
+        {
+            var testimonials = new[]
+            {
+                new Testimonial
+                {
+                    AuthorInitials = "M.A.", AuthorRole = "Müvekkil", Rating = 5,
+                    DisplayOrder = 1, IsActive = true, IsFeatured = true,
+                    Translations = new List<TestimonialTranslation>
+                    {
+                        new() { LanguageCode = "tr-TR",
+                            Content = "Profesyonel yaklaşım ve detaylı bilgilendirmeyi takdir ediyorum. Sürecin her aşamasında açık iletişim kuruldu." }
+                    }
+                },
+                new Testimonial
+                {
+                    AuthorInitials = "E.Y.", AuthorRole = "Müvekkil", Rating = 5,
+                    DisplayOrder = 2, IsActive = true, IsFeatured = true,
+                    Translations = new List<TestimonialTranslation>
+                    {
+                        new() { LanguageCode = "tr-TR",
+                            Content = "Hukuki sürecimde gösterilen özen ve hızlı dönüşler için teşekkür ederim." }
+                    }
+                },
+                new Testimonial
+                {
+                    AuthorInitials = "K.D.", AuthorRole = "Müvekkil", Rating = 4,
+                    DisplayOrder = 3, IsActive = true, IsFeatured = false,
+                    Translations = new List<TestimonialTranslation>
+                    {
+                        new() { LanguageCode = "tr-TR",
+                            Content = "Uzman ve güvenilir bir hukuki danışmanlık aldığımı belirtmek isterim." }
+                    }
+                }
+            };
+            _db.Set<Testimonial>().AddRange(testimonials);
+            await _db.SaveChangesAsync(ct);
+            _logger.LogInformation("Demo seed: 3 müvekkil yorumu eklendi (TBB-safe).");
+        }
+
         var attorneys = await _db.Set<Attorney>().Include(a => a.Services).ToListAsync(ct);
         var allServices = await _db.Set<Service>().ToListAsync(ct);
         var anyChange = false;

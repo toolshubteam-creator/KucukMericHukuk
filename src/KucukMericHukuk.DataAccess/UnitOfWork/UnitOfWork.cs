@@ -21,6 +21,7 @@ public class UnitOfWork : IUnitOfWork
     private IFaqRepository? _faqs;
     private IContactMessageRepository? _contactMessages;
     private ISiteSettingRepository? _siteSettings;
+    private ITestimonialRepository? _testimonials;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -37,6 +38,7 @@ public class UnitOfWork : IUnitOfWork
     public IFaqRepository Faqs => _faqs ??= new FaqRepository(_context);
     public IContactMessageRepository ContactMessages => _contactMessages ??= new ContactMessageRepository(_context);
     public ISiteSettingRepository SiteSettings => _siteSettings ??= new SiteSettingRepository(_context);
+    public ITestimonialRepository Testimonials => _testimonials ??= new TestimonialRepository(_context);
 
     public Task<int> SaveChangesAsync(CancellationToken ct = default)
         => _context.SaveChangesAsync(ct);
