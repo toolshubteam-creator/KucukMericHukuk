@@ -31,4 +31,18 @@ public class SecurityHeadersTests : IClassFixture<IntegrationTestFactory>
         csp.Should().Contain("frame-ancestors 'none'");
         csp.Should().Contain("https://challenges.cloudflare.com");
     }
+
+    [Fact]
+    public async Task Csp_ConnectSrc_IncludesJsDelivr_ForSourceMapFetches()
+    {
+        // Faz 6.8 fix: cdn.jsdelivr.net connect-src'de olmazsa Bootstrap/Tabler script source map fetch'leri bloklanır
+        // → bazı JS özellikleri (dropdown init dahil) hatalı çalışabilir.
+        var client = _factory.CreateClient();
+        var response = await client.GetAsync("/tr-TR/");
+        var csp = response.Headers.GetValues("Content-Security-Policy").FirstOrDefault();
+
+        csp.Should().NotBeNullOrEmpty();
+        // connect-src direktifinde jsdelivr olmalı
+        csp.Should().MatchRegex(@"connect-src[^;]*https://cdn\.jsdelivr\.net");
+    }
 }
