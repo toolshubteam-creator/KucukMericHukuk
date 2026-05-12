@@ -16,15 +16,18 @@ public class FaqService : IFaqService
     private readonly IUnitOfWork _uow;
     private readonly IMapper _mapper;
     private readonly IValidator<FaqInputDto> _validator;
+    private readonly IHtmlSanitizerService _sanitizer;
 
     public FaqService(
         IUnitOfWork uow,
         IMapper mapper,
-        IValidator<FaqInputDto> validator)
+        IValidator<FaqInputDto> validator,
+        IHtmlSanitizerService sanitizer)
     {
         _uow = uow;
         _mapper = mapper;
         _validator = validator;
+        _sanitizer = sanitizer;
     }
 
     public async Task<IReadOnlyList<FaqListDto>> GetActiveOrderedAsync(
@@ -79,7 +82,7 @@ public class FaqService : IFaqService
             {
                 LanguageCode = t.LanguageCode,
                 Question = t.Question.Trim(),
-                Answer = t.Answer.Trim(),
+                Answer = _sanitizer.Sanitize((t.Answer ?? string.Empty).Trim()),
                 CreatedAt = DateTime.UtcNow,
             });
         }
@@ -122,7 +125,7 @@ public class FaqService : IFaqService
             {
                 LanguageCode = t.LanguageCode,
                 Question = t.Question.Trim(),
-                Answer = t.Answer.Trim(),
+                Answer = _sanitizer.Sanitize((t.Answer ?? string.Empty).Trim()),
                 CreatedAt = DateTime.UtcNow,
             });
         }

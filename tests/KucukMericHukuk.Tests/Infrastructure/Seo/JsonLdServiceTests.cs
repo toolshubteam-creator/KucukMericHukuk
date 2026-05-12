@@ -176,4 +176,78 @@ public class JsonLdServiceTests
         entities[0].GetProperty("name").GetString().Should().Be("Q1");
         entities[0].GetProperty("acceptedAnswer").GetProperty("text").GetString().Should().Be("A1");
     }
+
+    // ───────────── Faz 6.6a: FAQPage Answer HTML strip ─────────────
+
+    [Fact]
+    public void BuildFaqPage_HtmlAnswer_StripsTagsForSchema()
+    {
+        var faqs = new List<FaqListDto>
+        {
+            new() { Question = "Soru?", Answer = "<p>Cevap <strong>burada</strong> yer aliyor.</p>" }
+        };
+
+        var json = _sut.BuildFaqPage(faqs);
+        using var doc = JsonDocument.Parse(json);
+
+        var text = doc.RootElement.GetProperty("mainEntity")[0]
+            .GetProperty("acceptedAnswer").GetProperty("text").GetString();
+        text.Should().Be("Cevap burada yer aliyor.");
+        text.Should().NotContain("<");
+        text.Should().NotContain(">");
+    }
+
+    [Fact]
+    public void BuildFaqPage_NestedHtmlWithEntities_FullyStripsAndDecodes()
+    {
+        var faqs = new List<FaqListDto>
+        {
+            new() { Question = "Q", Answer = "<p>Onceki &amp; sonraki <em>5&nbsp;TL</em></p><p>Yeni paragraf.</p>" }
+        };
+
+        var json = _sut.BuildFaqPage(faqs);
+        using var doc = JsonDocument.Parse(json);
+
+        var text = doc.RootElement.GetProperty("mainEntity")[0]
+            .GetProperty("acceptedAnswer").GetProperty("text").GetString();
+        text.Should().Contain("Onceki & sonraki");
+        text.Should().Contain("5");
+        text.Should().Contain("TL");
+        text.Should().NotContain("<");
+        text.Should().NotContain("&amp;");
+        text.Should().NotContain("&nbsp;");
+    }
+
+    [Fact]
+    public void BuildFaqPage_EmptyAnswer_ReturnsEmptyString()
+    {
+        var faqs = new List<FaqListDto>
+        {
+            new() { Question = "Q", Answer = "" },
+            new() { Question = "Q2", Answer = null! }
+        };
+
+        var json = _sut.BuildFaqPage(faqs);
+        using var doc = JsonDocument.Parse(json);
+
+        var entities = doc.RootElement.GetProperty("mainEntity");
+        entities[0].GetProperty("acceptedAnswer").GetProperty("text").GetString().Should().Be("");
+        entities[1].GetProperty("acceptedAnswer").GetProperty("text").GetString().Should().Be("");
+    }
+
+    [Fact]
+    public void BuildFaqPage_PlainTextAnswer_PreservesAsIs()
+    {
+        var faqs = new List<FaqListDto>
+        {
+            new() { Question = "Q", Answer = "Duz metin cevap, HTML yok." }
+        };
+
+        var json = _sut.BuildFaqPage(faqs);
+        using var doc = JsonDocument.Parse(json);
+
+        var text = doc.RootElement.GetProperty("mainEntity")[0]
+            .GetProperty("acceptedAnswer").GetProperty("text").GetString();
+        text.Should().Be("Duz metin cevap, HTML yok.");
+    }
 }

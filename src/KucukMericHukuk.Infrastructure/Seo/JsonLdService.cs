@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.DTOs.Article;
 using KucukMericHukuk.Core.DTOs.Attorney;
@@ -182,7 +183,9 @@ public class JsonLdService : IJsonLdService
                 ["acceptedAnswer"] = new Dictionary<string, object?>
                 {
                     ["@type"] = "Answer",
-                    ["text"] = f.Answer
+                    // FAQPage schema plain text bekler. HTML (Quill çıktısı) strip edilir,
+                    // entity'ler decode edilir, çoklu whitespace tek boşluğa indirilir.
+                    ["text"] = StripHtml(f.Answer)
                 }
             }).ToArray()
         };
@@ -199,6 +202,21 @@ public class JsonLdService : IJsonLdService
     }
 
     private static string? NullIfEmpty(string? s) => string.IsNullOrWhiteSpace(s) ? null : s;
+
+    private static readonly Regex HtmlTagRegex = new("<[^>]+>", RegexOptions.Compiled | RegexOptions.Singleline);
+    private static readonly Regex WhitespaceRegex = new(@"\s+", RegexOptions.Compiled);
+
+    /// <summary>
+    /// HTML tag'lerini siler, entity'leri decode eder, çoklu whitespace'i tek boşluğa indirir.
+    /// JSON-LD schema (FAQPage, Article) plain text bekler.
+    /// </summary>
+    private static string StripHtml(string? html)
+    {
+        if (string.IsNullOrWhiteSpace(html)) return string.Empty;
+        var withoutTags = HtmlTagRegex.Replace(html, " ");
+        var decoded = System.Net.WebUtility.HtmlDecode(withoutTags);
+        return WhitespaceRegex.Replace(decoded, " ").Trim();
+    }
 
     private Dictionary<string, object?>? BuildPostalAddress()
     {

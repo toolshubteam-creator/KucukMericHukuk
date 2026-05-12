@@ -47,7 +47,8 @@
                         <div id="@collapseId" class="accordion-collapse collapse"
                              aria-labelledby="@headingId" data-bs-parent="#faqAccordion">
                             <div class="accordion-body faq-answer">
-                                @faq.Answer
+                                @* Service katmaninda HtmlSanitizer ile temizlenmis HTML — Html.Raw güvenli. *@
+                                @Html.Raw(faq.Answer)
                             </div>
                         </div>
                     </div>

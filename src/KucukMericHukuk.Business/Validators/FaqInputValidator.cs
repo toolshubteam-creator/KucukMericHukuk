@@ -31,6 +31,6 @@ public class FaqTranslationInputValidator : AbstractValidator<FaqTranslationInpu
 
         RuleFor(x => x.Answer)
             .NotEmpty().WithMessage("Cevap zorunludur.")
-            .MaximumLength(2000).WithMessage("Cevap en fazla 2000 karakter olabilir.");
+            .MaximumLength(8000).WithMessage("Cevap en fazla 8000 karakter olabilir (HTML formatlamasıyla birlikte).");
     }
 }
