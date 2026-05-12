@@ -39,11 +39,6 @@
   - Faz 4.7 daraltılmış scope kararıyla ertelendi, Faz 5'te de açılmadı
   - Yapılacaklar: MediaFile.IsPublic field eklemek (migration), admin tarafında "public" toggle, /Galeri public sayfası grid render
 
-- **Referanslar/Testimonial entity ve sayfası** (Faz 6)
-  - Faz 4.7 daraltılmış scope kararıyla ertelendi, Faz 5'te de açılmadı
-  - Faz 4.2'deki _PrinciplesSection partial Ana Sayfa'da TBB-safe değer kartlarını gösteriyor
-  - Faz 6'da Testimonial entity geldiğinde gerçek müvekkil yorumları (anonim, TBB-safe) eklenir
-
 - **Faz 4.10 / v0.4.1 — Bütüncül tasarım cila turu**
   - Faz 4 tüm sayfalar tamamlandıktan sonra kullanıcı tarafından genel tasarım gözden geçirme talep edildi (09.05.2026)
   - Kapsam: tasarım tutarlılığı, mikro etkileşimler, tipografi ince ayar, mobile UX
