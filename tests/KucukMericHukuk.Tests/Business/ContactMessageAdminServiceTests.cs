@@ -25,6 +25,7 @@ public class ContactMessageAdminServiceTests : IDisposable
     private readonly TestDbContextFactory _factory;
     private readonly IMapper _mapper;
     private readonly IValidator<ContactFormDto> _validator;
+    private readonly IValidator<ContactMessageReplyInputDto> _replyValidator;
     private readonly IEmailSender _emailSender;
     private readonly IOptions<EmailSettings> _emailOptions;
 
@@ -37,17 +38,19 @@ public class ContactMessageAdminServiceTests : IDisposable
         _mapper = new Mapper(config);
 
         _validator = new ContactFormValidator();
+        _replyValidator = new ContactMessageReplyInputValidator();
         _emailSender = new Mock<IEmailSender>().Object;
         _emailOptions = Options.Create(new EmailSettings { AdminNotificationEmail = null });
     }
 
-    private ContactMessageService CreateSut(AppDbContext context)
+    private ContactMessageService CreateSut(AppDbContext context, IEmailSender? emailSender = null)
     {
         var uow = new UnitOfWork(context);
         return new ContactMessageService(
             uow,
             _validator,
-            _emailSender,
+            _replyValidator,
+            emailSender ?? _emailSender,
             _emailOptions,
             NullLogger<ContactMessageService>.Instance,
             _mapper);
@@ -213,6 +216,207 @@ public class ContactMessageAdminServiceTests : IDisposable
         var msg = verify.Set<ContactMessage>().IgnoreQueryFilters().First(m => m.Id == id);
         msg.IsDeleted.Should().BeFalse();
         msg.DeletedAt.Should().BeNull();
+    }
+
+    // ───────────── Faz 6.7: Reply + Dashboard + Date filter ─────────────
+
+    private async Task<int> SeedMessageAsync(ContactMessage message)
+    {
+        await using var ctx = _factory.CreateContext();
+        ctx.Set<ContactMessage>().Add(message);
+        await ctx.SaveChangesAsync();
+        return message.Id;
+    }
+
+    [Fact]
+    public async Task ReplyAsync_ValidInput_CreatesReplyAndMarksAnswered()
+    {
+        var id = await SeedMessageAsync(BuildMessage(isRead: false, isAnswered: false));
+
+        await using var ctx = _factory.CreateContext();
+        var emailMock = new Mock<IEmailSender>();
+        var sut = CreateSut(ctx, emailMock.Object);
+
+        var input = new ContactMessageReplyInputDto
+        {
+            ContactMessageId = id,
+            Body = "Sayin Ali Veli, ilginiz icin tesekkurler."
+        };
+
+        var result = await sut.ReplyAsync(input, sentByUserId: null);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().BeGreaterThan(0);
+
+        await using var verify = _factory.CreateContext();
+        var msg = verify.Set<ContactMessage>().Include(m => m.Replies).First(m => m.Id == id);
+        msg.IsAnswered.Should().BeTrue();
+        msg.IsRead.Should().BeTrue();
+        msg.Replies.Should().HaveCount(1);
+        msg.Replies.First().Body.Should().StartWith("Sayin Ali Veli");
+        msg.Replies.First().SentByUserId.Should().BeNull();
+
+        emailMock.Verify(e => e.SendAsync(
+            "ali@test.com",
+            It.Is<string>(s => s.StartsWith("RE:")),
+            It.IsAny<string>(),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ReplyAsync_EmptyBody_ReturnsValidationFailure()
+    {
+        var id = await SeedMessageAsync(BuildMessage());
+
+        await using var ctx = _factory.CreateContext();
+        var sut = CreateSut(ctx);
+
+        var result = await sut.ReplyAsync(
+            new ContactMessageReplyInputDto { ContactMessageId = id, Body = "" },
+            sentByUserId: null);
+
+        result.IsFailure.Should().BeTrue();
+        result.Errors.Should().Contain(e => e.Code == ErrorCodes.ContactMessage.ReplyBodyRequired);
+    }
+
+    [Fact]
+    public async Task ReplyAsync_NotFound_ReturnsFailure()
+    {
+        await using var ctx = _factory.CreateContext();
+        var sut = CreateSut(ctx);
+
+        var result = await sut.ReplyAsync(
+            new ContactMessageReplyInputDto { ContactMessageId = 9999, Body = "Test yanit." },
+            sentByUserId: null);
+
+        result.IsFailure.Should().BeTrue();
+        result.FirstError!.Code.Should().Be(ErrorCodes.ContactMessage.NotFound);
+    }
+
+    [Fact]
+    public async Task ReplyAsync_EmailSenderThrows_ReplyStillPersists()
+    {
+        var id = await SeedMessageAsync(BuildMessage());
+
+        await using var ctx = _factory.CreateContext();
+        var emailMock = new Mock<IEmailSender>();
+        emailMock.Setup(e => e.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("SMTP down"));
+
+        var sut = CreateSut(ctx, emailMock.Object);
+
+        var result = await sut.ReplyAsync(
+            new ContactMessageReplyInputDto { ContactMessageId = id, Body = "Test yanit." },
+            sentByUserId: null);
+
+        // Email exception YUTULUR — reply DB'de korunur, success döner
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var msg = verify.Set<ContactMessage>().Include(m => m.Replies).First(m => m.Id == id);
+        msg.Replies.Should().HaveCount(1);
+        msg.IsAnswered.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetUnreadCountAsync_ReturnsCorrectCount()
+    {
+        await SeedMessageAsync(BuildMessage(name: "A", email: "a@x.com", isRead: false));
+        await SeedMessageAsync(BuildMessage(name: "B", email: "b@x.com", isRead: false));
+        await SeedMessageAsync(BuildMessage(name: "C", email: "c@x.com", isRead: true));
+
+        await using var ctx = _factory.CreateContext();
+        var sut = CreateSut(ctx);
+
+        var count = await sut.GetUnreadCountAsync();
+
+        count.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetRecentAsync_ReturnsMostRecentN_OrderedDesc()
+    {
+        // Older
+        await SeedMessageAsync(new ContactMessage
+        {
+            Name = "Older", Email = "older@x.com", Subject = "S1", Message = "M1",
+            CreatedAt = new DateTime(2026, 4, 1, 0, 0, 0, DateTimeKind.Utc)
+        });
+        // Newer
+        await SeedMessageAsync(new ContactMessage
+        {
+            Name = "Newer", Email = "newer@x.com", Subject = "S2", Message = "M2",
+            CreatedAt = new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Utc)
+        });
+
+        await using var ctx = _factory.CreateContext();
+        var sut = CreateSut(ctx);
+
+        var result = await sut.GetRecentAsync(5);
+
+        result.Should().HaveCount(2);
+        result[0].Name.Should().Be("Newer"); // DESC sıra
+        result[1].Name.Should().Be("Older");
+    }
+
+    [Fact]
+    public async Task GetPagedAsync_DateRangeFilter_ReturnsOnlyInRange()
+    {
+        await SeedMessageAsync(new ContactMessage
+        {
+            Name = "Before", Email = "b@x.com", Subject = "S", Message = "M",
+            CreatedAt = new DateTime(2026, 3, 15, 10, 0, 0, DateTimeKind.Utc)
+        });
+        await SeedMessageAsync(new ContactMessage
+        {
+            Name = "InRange", Email = "i@x.com", Subject = "S", Message = "M",
+            CreatedAt = new DateTime(2026, 4, 10, 10, 0, 0, DateTimeKind.Utc)
+        });
+        await SeedMessageAsync(new ContactMessage
+        {
+            Name = "After", Email = "a@x.com", Subject = "S", Message = "M",
+            CreatedAt = new DateTime(2026, 5, 15, 10, 0, 0, DateTimeKind.Utc)
+        });
+
+        await using var ctx = _factory.CreateContext();
+        var sut = CreateSut(ctx);
+
+        var query = new ContactMessageQueryDto
+        {
+            StartDate = new DateTime(2026, 4, 1),
+            EndDate = new DateTime(2026, 4, 30)
+        };
+
+        var result = await sut.GetPagedAsync(query);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Items.Should().HaveCount(1);
+        result.Value.Items[0].Name.Should().Be("InRange");
+    }
+
+    [Fact]
+    public async Task GetPagedAsync_EndDateInclusive_IncludesLastDay()
+    {
+        // EndDate 2026-04-30 → repo [start, 2026-05-01) exclusive — yani 2026-04-30 23:59 dahil
+        await SeedMessageAsync(new ContactMessage
+        {
+            Name = "LastSecond", Email = "x@x.com", Subject = "S", Message = "M",
+            CreatedAt = new DateTime(2026, 4, 30, 23, 59, 59, DateTimeKind.Utc)
+        });
+
+        await using var ctx = _factory.CreateContext();
+        var sut = CreateSut(ctx);
+
+        var query = new ContactMessageQueryDto
+        {
+            StartDate = new DateTime(2026, 4, 1),
+            EndDate = new DateTime(2026, 4, 30)
+        };
+
+        var result = await sut.GetPagedAsync(query);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Items.Should().HaveCount(1);
     }
 
     public void Dispose() => _factory.Dispose();

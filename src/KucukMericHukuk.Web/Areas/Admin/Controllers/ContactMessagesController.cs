@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.DTOs.Contact;
 using KucukMericHukuk.Core.Interfaces.Services;
@@ -129,6 +130,32 @@ public class ContactMessagesController : Controller
 
         TempData["Success"] = "Mesaj silindi (geri alınabilir).";
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost("reply/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Reply(int id, string body, CancellationToken ct)
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        int? userId = int.TryParse(userIdClaim, out var parsed) ? parsed : null;
+
+        var input = new ContactMessageReplyInputDto { ContactMessageId = id, Body = body ?? string.Empty };
+        var result = await _service.ReplyAsync(input, userId, ct);
+
+        if (result.IsFailure)
+        {
+            if (result.FirstError?.Code == ErrorCodes.ContactMessage.NotFound)
+                return NotFound();
+
+            _logger.LogWarning("Yanıt gönderilemedi: id={Id}, errors={Errors}",
+                id, string.Join("; ", result.Errors.Select(e => e.Message)));
+
+            TempData["Error"] = result.FirstError?.Message ?? "Yanıt gönderilemedi.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        TempData["Success"] = "Yanıt gönderildi.";
+        return RedirectToAction(nameof(Details), new { id });
     }
 
     [HttpPost("restore/{id:int}")]

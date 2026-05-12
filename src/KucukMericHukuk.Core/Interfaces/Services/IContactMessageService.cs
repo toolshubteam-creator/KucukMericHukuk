@@ -27,4 +27,18 @@ public interface IContactMessageService
     Task<Result> DeleteAsync(int id, CancellationToken ct = default);
 
     Task<Result> RestoreAsync(int id, CancellationToken ct = default);
+
+    // ───────────── Faz 6.7 ─────────────
+
+    /// <summary>
+    /// Admin'in mesaja yanıt göndermesi. Reply kaydı + IsAnswered=true + IsRead=true (idempotent) + email (SMTP yapılandırılmışsa).
+    /// Email gönderim hatası YUTULUR (SmtpEmailSender log only) — reply DB'de korunur.
+    /// </summary>
+    Task<Result<int>> ReplyAsync(ContactMessageReplyInputDto input, int? sentByUserId, CancellationToken ct = default);
+
+    /// <summary>Admin Dashboard widget: okunmamış mesaj sayısı.</summary>
+    Task<int> GetUnreadCountAsync(CancellationToken ct = default);
+
+    /// <summary>Admin Dashboard widget: son N mesaj (CreatedAt DESC).</summary>
+    Task<IReadOnlyList<ContactMessageListDto>> GetRecentAsync(int count, CancellationToken ct = default);
 }
