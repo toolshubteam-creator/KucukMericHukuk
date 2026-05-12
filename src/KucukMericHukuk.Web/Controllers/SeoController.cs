@@ -29,9 +29,9 @@ public class SeoController : Controller
 
     [HttpGet]
     [Route("robots.txt", Order = 0)]
-    public IActionResult Robots()
+    public async Task<IActionResult> Robots(CancellationToken ct)
     {
-        var content = _sitemapService.BuildRobotsTxt();
+        var content = await _sitemapService.BuildRobotsTxtAsync(ct);
         return Content(content, "text/plain", System.Text.Encoding.UTF8);
     }
 }

@@ -16,6 +16,7 @@ public static class SiteSettingKeys
     public static class DataTypes
     {
         public const string String = "string";
+        public const string Text = "text";
         public const string Url = "url";
         public const string Email = "email";
         public const string Decimal = "decimal";
@@ -45,6 +46,7 @@ public static class SiteSettingKeys
     // Seo group
     public const string DefaultOgImage = "DefaultOgImage";
     public const string GoogleSearchConsoleVerification = "GoogleSearchConsoleVerification";
+    public const string RobotsTxt = "RobotsTxt";
 
     // Integration group
     public const string GoogleAnalyticsId = "GoogleAnalyticsId";

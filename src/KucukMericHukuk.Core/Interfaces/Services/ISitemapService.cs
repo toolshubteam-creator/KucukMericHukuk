@@ -12,6 +12,7 @@ public interface ISitemapService
 
     /// <summary>
     /// robots.txt içeriğini üretir (sitemap referansı dahil).
+    /// Önce SiteSettings (Seo.RobotsTxt) DB değerine bakar; boş/null ise hardcoded fallback döner.
     /// </summary>
-    string BuildRobotsTxt();
+    Task<string> BuildRobotsTxtAsync(CancellationToken ct = default);
 }
