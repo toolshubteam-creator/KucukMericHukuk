@@ -239,12 +239,6 @@
   - Şart: Domain HTTPS-only, includeSubDomains, max-age >= 1 yıl, hstspreload.org'a kayıt
   - Tetik: Müşteri canlıya alma sonrası
 
-- **Faq Quill editor** (Faz 6+ / müşteri talebi)
-  - Faz 5.8'de Answer plain textarea (KISS prensibi, HTML escape default)
-  - Müşteri zengin format (link, list, kalın) ister isterse Quill entegrasyonu yapılabilir
-  - Gerek: public view'da `@Html.Raw(faq.Answer)` + HtmlSanitizer + JSON-LD FAQPage text strip (`Regex.Replace`)
-  - Tetik: Müşteri talebi veya bir SSS link/list ihtiyacı doğarsa
-
 - **Faq DisplayOrder drag-drop UI** (Faz 6+ / UX)
   - Faz 5.8'de manuel DisplayOrder number input
   - SortableJS ile drag-drop pattern eklenebilir (admin Index'te), tek POST ile batch update endpoint
