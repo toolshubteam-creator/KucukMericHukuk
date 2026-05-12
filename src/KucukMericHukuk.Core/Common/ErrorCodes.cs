@@ -92,4 +92,16 @@ public static class ErrorCodes
         public const string ValidationFailed = "SiteSetting.ValidationFailed";
         public const string GroupNotFound = "SiteSetting.GroupNotFound";
     }
+
+    public static class User
+    {
+        public const string NotFound = "User.NotFound";
+        public const string EmailAlreadyExists = "User.EmailAlreadyExists";
+        public const string UserNameAlreadyExists = "User.UserNameAlreadyExists";
+        public const string CannotDeactivateSelf = "User.CannotDeactivateSelf";
+        public const string CannotDeactivateLastAdmin = "User.CannotDeactivateLastAdmin";
+        public const string CannotChangeOwnRole = "User.CannotChangeOwnRole";
+        public const string InvalidRole = "User.InvalidRole";
+        public const string IdentityError = "User.IdentityError";
+    }
 }

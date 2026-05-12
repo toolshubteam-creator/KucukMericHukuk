@@ -1,0 +1,154 @@
+@model KucukMericHukuk.Core.DTOs.User.UserDetailDto
+@{
+    ViewData["Title"] = $"Kullanıcı: {Model.UserName}";
+    var currentUserId = ViewBag.CurrentUserId as int? ?? 0;
+    var isSelf = Model.Id == currentUserId;
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <nav aria-label="breadcrumbs">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Users" asp-area="Admin">Kullanıcılar</a></li>
+                    <li class="breadcrumb-item active">@Model.UserName</li>
+                </ol>
+            </nav>
+            <h2 class="page-title">@Model.UserName @(isSelf ? "(siz)" : "")</h2>
+        </div>
+        <div class="col-auto">
+            <a asp-action="Edit" asp-controller="Users" asp-area="Admin" asp-route-id="@Model.Id" class="btn btn-primary">
+                <i class="ti ti-edit me-1"></i> Düzenle
+            </a>
+            <a asp-action="ResetPassword" asp-controller="Users" asp-area="Admin" asp-route-id="@Model.Id" class="btn btn-outline-warning">
+                <i class="ti ti-key me-1"></i> Şifre Sıfırla
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string okMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@okMsg</div>
+}
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+
+<div class="row mt-3">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title mb-0">Kullanıcı Bilgileri</h3>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Kullanıcı Adı</dt>
+                    <dd class="col-sm-9">@Model.UserName</dd>
+
+                    <dt class="col-sm-3">E-posta</dt>
+                    <dd class="col-sm-9">@Model.Email @(Model.EmailConfirmed ? "" : "(onaylanmamış)")</dd>
+
+                    <dt class="col-sm-3">Ad Soyad</dt>
+                    <dd class="col-sm-9">@(Model.FullName ?? "-")</dd>
+
+                    <dt class="col-sm-3">Rol</dt>
+                    <dd class="col-sm-9">
+                        @if (!string.IsNullOrEmpty(Model.Role))
+                        {
+                            <span class="badge bg-blue-lt">@Model.Role</span>
+                        }
+                        else
+                        {
+                            <span class="text-secondary">-</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">Durum</dt>
+                    <dd class="col-sm-9">
+                        @if (!Model.IsActive)
+                        {
+                            <span class="badge bg-danger-lt">Pasif (login engellendi)</span>
+                        }
+                        else if (Model.IsLockedOut)
+                        {
+                            <span class="badge bg-warning-lt">Kilitli</span>
+                            <small class="text-secondary ms-2">(Kilit bitiş: @Model.LockoutEnd?.ToLocalTime().ToString("dd.MM.yyyy HH:mm"))</small>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success-lt">Aktif</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">Başarısız Giriş</dt>
+                    <dd class="col-sm-9">@Model.AccessFailedCount</dd>
+
+                    <dt class="col-sm-3">Oluşturulma</dt>
+                    <dd class="col-sm-9">@Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</dd>
+
+                    @if (Model.UpdatedAt.HasValue)
+                    {
+                        <dt class="col-sm-3">Güncellenme</dt>
+                        <dd class="col-sm-9">@Model.UpdatedAt.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title mb-0">İşlemler</h3>
+            </div>
+            <div class="card-body d-flex flex-column gap-2">
+                @if (Model.IsLockedOut)
+                {
+                    <form asp-action="Unlock" asp-controller="Users" asp-area="Admin"
+                          asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-warning w-100">
+                            <i class="ti ti-lock-open me-1"></i> Kilidi Aç
+                        </button>
+                    </form>
+                }
+
+                @if (Model.IsActive)
+                {
+                    @if (isSelf)
+                    {
+                        <button class="btn btn-outline-danger w-100" disabled
+                                title="Kendinizi devre dışı bırakamazsınız">
+                            <i class="ti ti-user-off me-1"></i> Devre Dışı Bırak
+                        </button>
+                    }
+                    else
+                    {
+                        <form asp-action="Deactivate" asp-controller="Users" asp-area="Admin"
+                              asp-route-id="@Model.Id" method="post"
+                              data-confirm="Bu kullanıcıyı devre dışı bırakmak istediğinizden emin misiniz? Login engellenecek."
+                              data-confirm-title="Kullanıcıyı Devre Dışı Bırak"
+                              data-confirm-button="Devre Dışı Bırak"
+                              data-confirm-variant="danger">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="ti ti-user-off me-1"></i> Devre Dışı Bırak
+                            </button>
+                        </form>
+                    }
+                }
+                else
+                {
+                    <form asp-action="Restore" asp-controller="Users" asp-area="Admin"
+                          asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="ti ti-user-check me-1"></i> Yeniden Etkinleştir
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

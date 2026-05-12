@@ -10,6 +10,8 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
     {
         builder.Property(u => u.FullName).HasMaxLength(150);
         builder.Property(u => u.CreatedAt).IsRequired();
+        builder.Property(u => u.IsActive).HasDefaultValue(true);
         builder.HasIndex(u => u.IsDeleted);
+        builder.HasIndex(u => u.IsActive);
     }
 }

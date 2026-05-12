@@ -9,4 +9,11 @@ public class ApplicationUser : IdentityUser<int>
     public DateTime? UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }
+
+    /// <summary>
+    /// Devre dışı bırakılmış kullanıcı. IsActive=false ise login engellenir.
+    /// IsDeleted'den farklıdır: IsDeleted "silinmiş kayıt" (uzun vadeli), IsActive "geçici askıya alma".
+    /// Faz 6.8'de eklendi.
+    /// </summary>
+    public bool IsActive { get; set; } = true;
 }

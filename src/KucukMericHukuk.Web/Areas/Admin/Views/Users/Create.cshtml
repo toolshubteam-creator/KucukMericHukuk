@@ -1,0 +1,63 @@
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Users.UserCreateFormViewModel
+@{
+    ViewData["Title"] = "Yeni Kullanıcı";
+}
+
+<div class="page-header">
+    <nav aria-label="breadcrumbs">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Users" asp-area="Admin">Kullanıcılar</a></li>
+            <li class="breadcrumb-item active">Yeni</li>
+        </ol>
+    </nav>
+    <h2 class="page-title">Yeni Kullanıcı</h2>
+</div>
+
+<form asp-action="Create" asp-controller="Users" asp-area="Admin" method="post" autocomplete="off">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="UserName" class="form-label required"></label>
+                    <input asp-for="UserName" class="form-control" maxlength="100" autocomplete="off" />
+                    <span asp-validation-for="UserName" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label required"></label>
+                    <input asp-for="Email" type="email" class="form-control" maxlength="256" autocomplete="off" />
+                    <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="FullName" class="form-label"></label>
+                    <input asp-for="FullName" class="form-control" maxlength="150" autocomplete="off" />
+                    <span asp-validation-for="FullName" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Role" class="form-label required"></label>
+                    <select asp-for="Role" class="form-select">
+                        @foreach (var role in Model.AvailableRoles)
+                        {
+                            <option value="@role">@role</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Role" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Password" class="form-label required"></label>
+                    <input asp-for="Password" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
+                    <small class="form-hint">En az 8 karakter.</small>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex">
+            <a asp-action="Index" asp-controller="Users" asp-area="Admin" class="btn btn-link">Vazgeç</a>
+            <button type="submit" class="btn btn-primary ms-auto">
+                <i class="ti ti-plus me-1"></i> Oluştur
+            </button>
+        </div>
+    </div>
+</form>
