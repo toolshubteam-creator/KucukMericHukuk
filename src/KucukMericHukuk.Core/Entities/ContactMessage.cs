@@ -12,4 +12,7 @@ public class ContactMessage : BaseEntity
     public bool IsAnswered { get; set; }
     public string? IpAddress { get; set; }
     public string? UserAgent { get; set; }
+
+    /// <summary>Admin'in mesaja gönderdiği yanıtlar (Faz 6.7).</summary>
+    public ICollection<ContactMessageReply> Replies { get; set; } = new List<ContactMessageReply>();
 }

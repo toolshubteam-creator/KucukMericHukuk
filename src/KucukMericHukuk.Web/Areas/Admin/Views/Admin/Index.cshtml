@@ -1,3 +1,4 @@
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Dashboard.DashboardViewModel
 @{
     ViewData["Title"] = "Kontrol Paneli";
 }
@@ -6,18 +7,57 @@
     <div class="row g-2 align-items-center">
         <div class="col">
             <h2 class="page-title">Kontrol Paneli</h2>
-            <div class="text-secondary">Hoş geldiniz. Modüller yakında aktif olacak.</div>
+            <div class="text-secondary">Hoş geldiniz. Yönetim paneline genel bakış.</div>
         </div>
     </div>
 </div>
 
 <div class="row row-deck row-cards mt-3">
-    <div class="col-12">
+    <div class="col-md-6 col-lg-4">
         <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">İletişim Mesajları</h3>
+                <div class="card-actions">
+                    <a asp-action="Index" asp-controller="ContactMessages" asp-area="Admin"
+                       class="btn btn-sm btn-outline-secondary">
+                        <i class="ti ti-mail me-1"></i> Tümü
+                    </a>
+                </div>
+            </div>
             <div class="card-body">
-                <p class="text-secondary mb-0">
-                    Faz 2 geliştirmesi devam ediyor. Sol menüden modüllere erişim Faz 2.5+ sonrası açılacak.
-                </p>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="me-3">
+                        <span class="bg-warning-lt text-warning avatar avatar-lg">
+                            <i class="ti ti-mail-opened"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <div class="h1 mb-0">@Model.Messages.UnreadCount</div>
+                        <div class="text-secondary">okunmamış mesaj</div>
+                    </div>
+                </div>
+
+                @if (Model.Messages.RecentMessages.Any())
+                {
+                    <h5 class="text-secondary mb-2 mt-3">Son mesajlar</h5>
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var m in Model.Messages.RecentMessages)
+                        {
+                            var rowClass = !m.IsRead ? "fw-bold" : "";
+                            <li class="mb-2 pb-2 border-bottom">
+                                <a asp-action="Details" asp-controller="ContactMessages" asp-area="Admin"
+                                   asp-route-id="@m.Id" class="text-decoration-none">
+                                    <div class="@rowClass">@m.Name <span class="text-secondary fw-normal">— @m.Subject</span></div>
+                                    <small class="text-secondary">@m.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-secondary mb-0">Henüz iletişim mesajı yok.</p>
+                }
             </div>
         </div>
     </div>

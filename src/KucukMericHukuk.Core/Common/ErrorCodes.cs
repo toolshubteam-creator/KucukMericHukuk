@@ -83,6 +83,7 @@ public static class ErrorCodes
     public static class ContactMessage
     {
         public const string NotFound = "ContactMessage.NotFound";
+        public const string ReplyBodyRequired = "ContactMessage.ReplyBodyRequired";
     }
 
     public static class SiteSetting

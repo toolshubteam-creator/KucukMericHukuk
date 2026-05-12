@@ -1,7 +1,9 @@
 @model KucukMericHukuk.Core.DTOs.Contact.ContactMessageAdminDto
+@inject Microsoft.Extensions.Options.IOptions<KucukMericHukuk.Infrastructure.Email.EmailSettings> EmailOptions
 @{
     ViewData["Title"] = $"Mesaj #{Model.Id}";
     var mailtoSubject = Uri.EscapeDataString("RE: " + Model.Subject);
+    var smtpConfigured = !string.IsNullOrWhiteSpace(EmailOptions.Value.SmtpHost);
 }
 
 <div class="page-header d-print-none">
@@ -69,8 +71,8 @@
                 <div class="mt-4 d-flex gap-2 flex-wrap">
                     @if (!Model.IsDeleted)
                     {
-                        <a href="mailto:@(Model.Email)?subject=@mailtoSubject" class="btn btn-primary">
-                            <i class="ti ti-mail-forward me-1"></i> E-posta ile Yanıtla
+                        <a href="mailto:@(Model.Email)?subject=@mailtoSubject" class="btn btn-outline-primary">
+                            <i class="ti ti-external-link me-1"></i> Dış E-posta İstemcisi
                         </a>
                         <form asp-action="ToggleAnswered" asp-controller="ContactMessages" asp-area="Admin"
                               asp-route-id="@Model.Id" method="post" class="d-inline">
@@ -112,6 +114,61 @@
                 </div>
             </div>
         </div>
+
+        @if (!Model.IsDeleted)
+        {
+            @* Faz 6.7: In-app reply formu *@
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Yanıt Yaz</h3>
+                </div>
+                <div class="card-body">
+                    @if (!smtpConfigured)
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <strong>SMTP yapılandırılmamış:</strong> Yanıt kaydedilir ancak müvekkile e-posta gönderilmez.
+                            <code>EmailSettings:SmtpHost</code> appsettings veya environment variable ile tanımlayın.
+                        </div>
+                    }
+                    <form asp-action="Reply" asp-controller="ContactMessages" asp-area="Admin"
+                          asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label for="reply-body" class="form-label">Yanıt metni</label>
+                            <textarea id="reply-body" name="body" class="form-control" rows="6"
+                                      maxlength="4000" required
+                                      placeholder="Müvekkile gidecek yanıt metnini yazın..."></textarea>
+                            <small class="text-secondary">Düz metin. Müvekkilin e-posta adresine gönderilir, IsAnswered=true olarak işaretlenir.</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ti ti-send me-1"></i> Yanıt Gönder
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+
+        @if (Model.Replies.Any())
+        {
+            @* Faz 6.7: Yanıt geçmişi *@
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Yanıt Geçmişi (@Model.Replies.Count)</h3>
+                </div>
+                <div class="card-body">
+                    @foreach (var r in Model.Replies)
+                    {
+                        <div class="mb-3 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between mb-1">
+                                <strong>@(r.SentByUserName ?? "(silinmiş kullanıcı)")</strong>
+                                <small class="text-secondary">@r.SentAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                            </div>
+                            <div style="white-space: pre-wrap;">@r.Body</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
     </div>
 
     <div class="col-md-4">

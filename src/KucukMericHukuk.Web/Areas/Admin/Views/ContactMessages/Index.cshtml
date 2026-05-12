@@ -18,7 +18,9 @@
             status = (int)query.Status,
             page = pageNum,
             pageSize = query.PageSize,
-            includeDeleted = query.IncludeDeleted
+            includeDeleted = query.IncludeDeleted,
+            startDate = query.StartDate?.ToString("yyyy-MM-dd"),
+            endDate = query.EndDate?.ToString("yyyy-MM-dd")
         }) ?? "#"
     };
 
@@ -80,7 +82,21 @@
                         <span class="form-check-label">Silinmişleri göster</span>
                     </label>
                 </div>
+            </div>
+            <div class="row g-2 align-items-center mt-2">
                 <div class="col-md-auto">
+                    <label for="startDate" class="form-label small mb-0">Başlangıç</label>
+                    <input type="date" id="startDate" name="startDate"
+                           value="@(query.StartDate?.ToString("yyyy-MM-dd"))"
+                           class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-auto">
+                    <label for="endDate" class="form-label small mb-0">Bitiş</label>
+                    <input type="date" id="endDate" name="endDate"
+                           value="@(query.EndDate?.ToString("yyyy-MM-dd"))"
+                           class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-auto align-self-end">
                     <button type="submit" class="btn btn-outline-primary">
                         <i class="ti ti-search me-1"></i> Ara
                     </button>

@@ -16,4 +16,7 @@ public class ContactMessageAdminDto
     public string? UserAgent { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+
+    /// <summary>Admin'in gönderdiği yanıt geçmişi — Details sayfasında render edilir.</summary>
+    public List<ContactMessageReplyDto> Replies { get; set; } = new();
 }

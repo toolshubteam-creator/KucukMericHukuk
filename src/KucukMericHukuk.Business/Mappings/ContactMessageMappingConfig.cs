@@ -17,5 +17,12 @@ public class ContactMessageMappingConfig : IRegister
                      : src.Message);
 
         config.NewConfig<ContactMessage, ContactMessageAdminDto>();
+
+        // Faz 6.7: Reply mapping — SentByUser.FullName veya UserName fallback
+        config.NewConfig<ContactMessageReply, ContactMessageReplyDto>()
+            .Map(dest => dest.SentByUserName,
+                 src => src.SentByUser != null
+                     ? (src.SentByUser.FullName ?? src.SentByUser.UserName)
+                     : null);
     }
 }
