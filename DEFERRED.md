@@ -259,13 +259,6 @@
   - Service detay zaten LegalService'in bir parçası; ayrı schema marjinal ek değer
   - Tetik: Faz 5.4 breadcrumb turunda yeniden değerlendir
 
-- **Admin form binding audit — bool/checkbox/select** (Faz 6 sonu / cleanup turu)
-  - Faz 6.5'te tespit edilen tuzak: `asp-for="IsPublic"` (bool) MVC otomatik hidden üretir; manuel `<input type="hidden" name="IsPublic">` eklenirse form binding bozulur (`IsPublic=false&true&false` → bool model binder ilk değeri = false → checkbox işaretli olsa bile DB false)
-  - Risk: Diğer admin formlarda (Faq, Service, Attorney, Category, Article, Page, Testimonial, ContactMessages) benzer manuel hidden veya yanlış name binding olabilir
-  - Audit kapsamı: Tüm `Admin/Views/**/Edit.cshtml` + `Create.cshtml` dosyaları — bool/checkbox alanlarda manuel hidden var mı, `asp-for` ile çakışıyor mu
-  - Test coverage: Şu an sadece `MediaAdminEditTests` pattern (HTML render input count + DB end-to-end). Diğer admin formlar için bu pattern eksik → admin Edit POST + DB doğrulama integration testleri
-  - Tetik: Faz 6 sonu cleanup turu (yayın öncesi), veya yeni bug raporu gelirse erken
-
 - **Admin topbar dropdown click bug** (Faz 6+ / UI cleanup)
   - Faz 6.8 manuel teyit sırasında tespit edildi: sağ üst kullanıcı avatarına tıklamada dropdown açılmıyor
   - Veri toplandı: Bootstrap yüklü, instance kayıtlı, manuel `dd.show()` çalışıyor, ama doğal click event element'e ulaşmıyor (document capture listener bile yakalamıyor)
