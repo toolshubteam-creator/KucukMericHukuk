@@ -225,5 +225,87 @@ public class MediaServiceTests : IDisposable
         verify.Set<MediaFile>().IgnoreQueryFilters().Any(m => m.Id == id).Should().BeFalse();
     }
 
+    // ─────────────── Faz 6.5: IsPublic toggle + Public Gallery ───────────────
+
+    [Fact]
+    public async Task UpdateAsync_TogglesIsPublic_True()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context, NewStorageMock(), NewProcessorMock());
+
+        var uploaded = await sut.UploadAsync(BuildUpload());
+        uploaded.IsSuccess.Should().BeTrue();
+        var id = uploaded.Value.Id;
+        uploaded.Value.IsPublic.Should().BeFalse(); // default
+
+        var result = await sut.UpdateAsync(new MediaUpdateInputDto
+        {
+            Id = id,
+            AltText = "yeni alt",
+            IsPublic = true,
+        });
+
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var entity = verify.Set<MediaFile>().First(m => m.Id == id);
+        entity.IsPublic.Should().BeTrue();
+        entity.AltText.Should().Be("yeni alt");
+    }
+
+    [Fact]
+    public async Task UpdateAsync_TogglesIsPublic_False()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context, NewStorageMock(), NewProcessorMock());
+
+        var uploaded = await sut.UploadAsync(BuildUpload());
+        var id = uploaded.Value.Id;
+
+        await sut.UpdateAsync(new MediaUpdateInputDto { Id = id, AltText = "alt", IsPublic = true });
+        var disable = await sut.UpdateAsync(new MediaUpdateInputDto { Id = id, AltText = "alt", IsPublic = false });
+
+        disable.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var entity = verify.Set<MediaFile>().First(m => m.Id == id);
+        entity.IsPublic.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GetPublicGalleryAsync_ReturnsOnlyPublicImages_WithUrls()
+    {
+        await using var context = _factory.CreateContext();
+        var storage = NewStorageMock();
+        var sut = CreateSut(context, storage, NewProcessorMock());
+
+        // 1 public, 1 private upload
+        var pub = await sut.UploadAsync(BuildUpload(content: new byte[] { 1, 2, 3 }));
+        await sut.UpdateAsync(new MediaUpdateInputDto { Id = pub.Value.Id, AltText = "p", IsPublic = true });
+
+        var priv = await sut.UploadAsync(BuildUpload(content: new byte[] { 4, 5, 6 }, fileName: "p2.jpg"));
+        // priv IsPublic=false (default, no update)
+
+        var gallery = await sut.GetPublicGalleryAsync(page: 1, pageSize: 24);
+
+        gallery.TotalCount.Should().Be(1);
+        gallery.Items.Should().HaveCount(1);
+        gallery.Items[0].Id.Should().Be(pub.Value.Id);
+        gallery.Items[0].Url.Should().StartWith("/uploads/");
+        gallery.Items[0].ThumbnailUrl.Should().Contain("_thumb");
+    }
+
+    [Fact]
+    public async Task GetPublicGalleryAsync_EmptyDb_ReturnsEmptyPagedResult()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context, NewStorageMock(), NewProcessorMock());
+
+        var gallery = await sut.GetPublicGalleryAsync(page: 1, pageSize: 24);
+
+        gallery.TotalCount.Should().Be(0);
+        gallery.Items.Should().BeEmpty();
+    }
+
     public void Dispose() => _factory.Dispose();
 }

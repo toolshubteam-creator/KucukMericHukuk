@@ -15,6 +15,9 @@ public class MediaFile : BaseEntity
     public string Sha256 { get; set; } = string.Empty;
     public string? AltText { get; set; }
 
+    /// <summary>Public /Galeri sayfasında listelensin mi? Default false (opt-in, KVKK/TBB güvenli).</summary>
+    public bool IsPublic { get; set; } = false;
+
     public int? UploadedByUserId { get; set; }
     public ApplicationUser? UploadedBy { get; set; }
 }

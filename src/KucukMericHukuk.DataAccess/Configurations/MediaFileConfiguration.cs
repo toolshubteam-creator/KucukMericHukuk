@@ -19,8 +19,11 @@ public class MediaFileConfiguration : IEntityTypeConfiguration<MediaFile>
         builder.Property(x => x.Sha256).IsRequired().HasMaxLength(64);
         builder.Property(x => x.AltText).HasMaxLength(500);
 
+        builder.Property(x => x.IsPublic).HasDefaultValue(false);
+
         builder.HasIndex(x => x.Sha256).IsUnique();
         builder.HasIndex(x => x.CreatedAt);
+        builder.HasIndex(x => x.IsPublic);
 
         builder.HasOne(x => x.UploadedBy)
                .WithMany()
