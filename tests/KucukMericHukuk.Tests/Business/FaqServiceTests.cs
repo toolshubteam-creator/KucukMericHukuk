@@ -8,8 +8,10 @@ using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.DTOs.Faq;
 using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Entities.Translations;
+using KucukMericHukuk.Core.Interfaces.Services;
 using KucukMericHukuk.DataAccess.Context;
 using KucukMericHukuk.DataAccess.UnitOfWork;
+using KucukMericHukuk.Infrastructure.Security;
 using KucukMericHukuk.Tests.Infrastructure;
 using Mapster;
 using MapsterMapper;
@@ -22,6 +24,7 @@ public class FaqServiceTests : IDisposable
     private readonly TestDbContextFactory _factory;
     private readonly IMapper _mapper;
     private readonly IValidator<FaqInputDto> _validator;
+    private readonly IHtmlSanitizerService _sanitizer;
 
     public FaqServiceTests()
     {
@@ -32,12 +35,13 @@ public class FaqServiceTests : IDisposable
         _mapper = new Mapper(config);
 
         _validator = new FaqInputValidator();
+        _sanitizer = new HtmlSanitizerService();
     }
 
     private FaqService CreateSut(AppDbContext context)
     {
         var uow = new UnitOfWork(context);
-        return new FaqService(uow, _mapper, _validator);
+        return new FaqService(uow, _mapper, _validator, _sanitizer);
     }
 
     private static FaqInputDto BuildValidInput(
@@ -271,6 +275,88 @@ public class FaqServiceTests : IDisposable
         result.Value.Items.Should().HaveCount(1);
         result.Value.Items[0].Translations.Should().HaveCount(1);
         result.Value.Items[0].Translations[0].Question.Should().Contain("Boşanma");
+    }
+
+    // ───────────── Faz 6.6a: HtmlSanitizer pipeline ─────────────
+
+    [Fact]
+    public async Task CreateAsync_AnswerWithScriptTag_StripsScript()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var input = BuildValidInput(answer: "<p>Guvenli cevap</p><script>alert(1)</script>");
+
+        var result = await sut.CreateAsync(input);
+
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var tr = verify.Set<FaqTranslation>().First(t => t.FaqId == result.Value);
+        tr.Answer.Should().Contain("<p>Guvenli cevap</p>");
+        tr.Answer.Should().NotContain("<script>");
+        tr.Answer.Should().NotContain("alert");
+    }
+
+    [Fact]
+    public async Task CreateAsync_AnswerWithJavascriptHref_RemovesDangerousAttribute()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var input = BuildValidInput(answer: "<a href=\"javascript:alert(1)\">click</a>");
+
+        var result = await sut.CreateAsync(input);
+
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var tr = verify.Set<FaqTranslation>().First(t => t.FaqId == result.Value);
+        tr.Answer.Should().NotContain("javascript:");
+        tr.Answer.Should().NotContain("alert");
+    }
+
+    [Fact]
+    public async Task CreateAsync_AnswerWithAllowedRichTags_PreservesFormatting()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var input = BuildValidInput(answer: "<p><strong>Kalin</strong> ve <em>italik</em> metin, <a href=\"https://example.com\">link</a>.</p>");
+
+        var result = await sut.CreateAsync(input);
+
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var tr = verify.Set<FaqTranslation>().First(t => t.FaqId == result.Value);
+        tr.Answer.Should().Contain("<strong>Kalin</strong>");
+        tr.Answer.Should().Contain("<em>italik</em>");
+        tr.Answer.Should().Contain("href=\"https://example.com\"");
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ReplacesAnswerWithSanitized()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var created = await sut.CreateAsync(BuildValidInput(answer: "Eski cevap"));
+        var updateInput = BuildValidInput(
+            answer: "<p>Yeni</p><img src=\"http://evil.com/x.jpg\" onerror=\"alert(1)\">",
+            id: created.Value);
+
+        var result = await sut.UpdateAsync(updateInput);
+
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var tr = verify.Set<FaqTranslation>().First(t => t.FaqId == created.Value);
+        tr.Answer.Should().Contain("<p>Yeni</p>");
+        tr.Answer.Should().NotContain("onerror");
+        tr.Answer.Should().NotContain("alert");
+        // HTTPS-only scheme; http img kaynak kaldırılır
+        tr.Answer.Should().NotContain("http://evil.com");
     }
 
     public void Dispose() => _factory.Dispose();

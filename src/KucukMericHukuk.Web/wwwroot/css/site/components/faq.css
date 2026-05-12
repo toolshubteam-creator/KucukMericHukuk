@@ -49,3 +49,33 @@
     color: var(--color-text);
     line-height: 1.7;
 }
+
+/* Quill HTML çıktısı için rich-text formatlama (Faz 6.6a) */
+.faq-answer p { margin: 0 0 var(--space-2); }
+.faq-answer p:last-child { margin-bottom: 0; }
+.faq-answer strong { font-weight: 600; color: var(--color-primary); }
+.faq-answer em { font-style: italic; }
+.faq-answer a {
+    color: var(--color-accent-dark);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.faq-answer a:hover { color: var(--color-accent); }
+.faq-answer ul, .faq-answer ol {
+    padding-left: var(--space-4);
+    margin: 0 0 var(--space-2);
+}
+.faq-answer li { margin-bottom: 4px; }
+.faq-answer h3 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--color-primary);
+    margin: var(--space-3) 0 var(--space-2);
+}
+.faq-answer blockquote {
+    border-left: 3px solid var(--color-accent);
+    padding-left: var(--space-2);
+    margin: var(--space-2) 0;
+    color: var(--color-text-muted);
+    font-style: italic;
+}

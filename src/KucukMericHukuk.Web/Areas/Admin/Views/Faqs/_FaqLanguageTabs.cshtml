@@ -39,9 +39,12 @@
 
                 <div class="mb-3">
                     <label asp-for="Translations[i].Answer" class="form-label required"></label>
-                    <textarea asp-for="Translations[i].Answer" class="form-control" rows="6" maxlength="2000"></textarea>
+                    <textarea asp-for="Translations[i].Answer"
+                              class="form-control"
+                              data-quill-target="true"
+                              rows="8"></textarea>
                     <span asp-validation-for="Translations[i].Answer" class="invalid-feedback d-block"></span>
-                    <small class="form-hint">Düz metin. HTML kullanmayın (otomatik escape edilir).</small>
+                    <small class="form-hint">Bold, italic, liste, link, başlık (h3). Tehlikeli HTML otomatik temizlenir.</small>
                 </div>
             </div>
             firstPane = false;
