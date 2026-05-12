@@ -35,10 +35,6 @@
 
 ## Faz 4 → Frontend (Faz 6'ya ertelenen)
 
-- **Galeri sayfası** (Faz 6)
-  - Faz 4.7 daraltılmış scope kararıyla ertelendi, Faz 5'te de açılmadı
-  - Yapılacaklar: MediaFile.IsPublic field eklemek (migration), admin tarafında "public" toggle, /Galeri public sayfası grid render
-
 - **Faz 4.10 / v0.4.1 — Bütüncül tasarım cila turu**
   - Faz 4 tüm sayfalar tamamlandıktan sonra kullanıcı tarafından genel tasarım gözden geçirme talep edildi (09.05.2026)
   - Kapsam: tasarım tutarlılığı, mikro etkileşimler, tipografi ince ayar, mobile UX
