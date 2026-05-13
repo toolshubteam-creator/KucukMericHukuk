@@ -1,6 +1,8 @@
 @*
     Sidebar. Aktif state controller-bazlı (Helpers/SidebarHelpers.IsActiveController).
-    Faz 6.10: Role-based visibility — Editor sadece Dashboard + Articles + Profilim + Çıkış görür.
+    Faz 6.10: Role-based visibility — Admin tüm modülleri; Editor ve Author sadece
+    Dashboard + Articles + Profilim + Çıkış görür. Editor tüm makaleleri,
+    Author sadece kendi makalelerini düzenleyebilir (ArticlesController authz).
 *@
 <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark">
     <div class="container-fluid">

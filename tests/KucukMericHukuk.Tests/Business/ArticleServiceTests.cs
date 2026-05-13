@@ -559,7 +559,7 @@ public class ArticleServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task GetPagedAsync_EditorAuthorFilter_ShouldReturnOnlyOwnArticles()
+    public async Task GetPagedAsync_AuthorFilter_ShouldReturnOnlyOwnArticles()
     {
         await using var context = _factory.CreateContext();
         var editorId = SeedUser(context, "editor");

@@ -14,7 +14,7 @@ namespace KucukMericHukuk.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Route("admin/articles")]
-[Authorize(Roles = "Admin,Editor")]
+[Authorize(Roles = "Admin,Editor,Author")]
 public class ArticlesController : Controller
 {
     private readonly IArticleService _articleService;
@@ -49,7 +49,10 @@ public class ArticlesController : Controller
             Page = query.Page,
             PageSize = query.PageSize,
             IncludeDeleted = query.IncludeDeleted,
-            AuthorIdFilter = User.IsInRole("Admin") ? null : User.GetUserIdOrNull(),
+            // Admin ve Editor tüm makaleleri görür; Author sadece kendi makalelerini görür.
+            AuthorIdFilter = (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                ? null
+                : User.GetUserIdOrNull(),
         };
 
         var categoryLookups = await GetCategoryLookupsAsync(ct);
@@ -207,7 +210,10 @@ public class ArticlesController : Controller
 
         var input = form.Adapt<ArticleInputDto>();
         input.Id = id;
-        input.AuthorId = User.IsInRole("Admin") ? form.AuthorId : User.GetUserIdOrNull();
+        // Admin ve Editor AuthorId değiştirebilir; Author kendisine sabitlenir (hijack koruma).
+        input.AuthorId = (User.IsInRole("Admin") || User.IsInRole("Editor"))
+            ? form.AuthorId
+            : User.GetUserIdOrNull();
 
         var result = await _articleService.UpdateAsync(input, ct);
         if (result.IsFailure)
@@ -286,7 +292,8 @@ public class ArticlesController : Controller
 
     private async Task<IActionResult?> EnsureCanEditAsync(int articleId, CancellationToken ct)
     {
-        if (User.IsInRole("Admin")) return null;
+        // Admin ve Editor tüm makaleleri düzenleyebilir; Author sadece kendi makalesi.
+        if (User.IsInRole("Admin") || User.IsInRole("Editor")) return null;
 
         var article = await _uow.Articles.GetByIdIncludingDeletedAsync(articleId, ct);
         if (article is null) return NotFound();
