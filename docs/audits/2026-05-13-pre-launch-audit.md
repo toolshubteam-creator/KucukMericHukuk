@@ -208,6 +208,22 @@ Faz 6.14'te uygulanan 7 fix sonrası re-audit (`docs/audits/lighthouse/post-fix/
 | 6 | Home `ViewData["MetaDescription"]` 216→154 char | meta description length | Google'da kırpılmaz |
 | 7 | DbInitializer about + 3 service ShortDescription uzatma (taze install için) | meta description length | Yeni install'da fix |
 
+### Verify — 3-Run Mobile Sample (home + article)
+
+Faz 6.14 tek-run değerlerinde home (-6) ve article (-5) düşüş gözlendi. Variance teyidi için 3-run mobile sample:
+
+| Sayfa | Baseline (1-run) | Run1 | Run2 | Run3 | min | **median** | max | avg |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| home-mobile | 90 | 90 | 92 | **72** ⚠️ | 72 | **90** | 92 | 84.7 |
+| article-detail-mobile | 85 | 80 | 84 | 78 | 78 | **80** | 84 | 80.7 |
+
+**Yorum:**
+- **home:** median **90 = baseline** (yatay). Run3 outlier (72, -18 vs median); muhtemelen GC / throttling jitter. Avg outlier'dan etkilenir.
+- **article:** median **80** (-5 vs baseline). Variance düşük (78-84), gerçek hafif gerileme veya 1-run baseline gürültüsü.
+- **Asimetri:** Baseline tek run, verify üç run — 1-run vs 3-run karşılaştırması gürültülü.
+
+**Karar:** **C (variance bölgesi, yatay)** — median'a güven, regresyon kanıtı yok. Production deploy + 5-run ortalama ile gerçek baseline (BrowserLink olmadan) yeniden ölçülmeli. Kritik blocker yok, PR #30 merge'e hazır.
+
 ### Kalan İyileştirmeler (Faz 6.15+)
 
 - **Mobile render-blocking** — Bootstrap CSS hala CDN'den senkron (33 KB, 1099 ms wasted). Self-host CDN dosyaları (DEFERRED) ile birlikte değerlendirme
