@@ -17,6 +17,40 @@
         "Integration" => "ti-plug",
         _ => "ti-settings"
     };
+
+    // SiteSetting.Key → Türkçe label. Key'in kendisi DB'de teknik ID; UI'da kullanıcıya
+    // okunabilir görünmesi için burada map'leniyor. Bilinmeyen key fallback olarak key adını döner.
+    string SettingLabel(string key) => key switch
+    {
+        // SiteInfo group
+        "Name" => "Site Adı",
+        "Tagline" => "Slogan",
+        "Description" => "Açıklama",
+        "BaseUrl" => "Kanonik Domain",
+        "Locale" => "Yerel Ayar",
+        "TwitterHandle" => "Twitter/X Kullanıcı Adı",
+        "Telephone" => "Telefon",
+        "Email" => "E-posta",
+        "StreetAddress" => "Sokak/Cadde Adresi",
+        "AddressLocality" => "İlçe",
+        "AddressRegion" => "İl",
+        "PostalCode" => "Posta Kodu",
+        "AddressCountry" => "Ülke Kodu",
+        "Latitude" => "Enlem",
+        "Longitude" => "Boylam",
+        "AreaServed" => "Hizmet Bölgesi",
+        "OpeningHoursDescription" => "Çalışma Saatleri",
+        // Seo group
+        "DefaultOgImage" => "Varsayılan OG Görsel",
+        "GoogleSearchConsoleVerification" => "Google Search Console Doğrulama",
+        "RobotsTxt" => "robots.txt İçeriği",
+        // Integration group
+        "GoogleAnalyticsId" => "Google Analytics ID",
+        "GoogleTagManagerId" => "Google Tag Manager ID",
+        "MicrosoftClarityId" => "Microsoft Clarity ID",
+        "FacebookPixelId" => "Facebook Pixel ID",
+        _ => key
+    };
 }
 
 <div class="page-header d-print-none">
@@ -80,7 +114,7 @@
                             var inputStep = setting.DataType == "decimal" ? "any" : null;
 
                             <div class="mb-3 row">
-                                <label for="@inputId" class="col-sm-3 col-form-label">@setting.Key</label>
+                                <label for="@inputId" class="col-sm-3 col-form-label">@SettingLabel(setting.Key)</label>
                                 <div class="col-sm-9">
                                     @if (setting.DataType == "bool")
                                     {
