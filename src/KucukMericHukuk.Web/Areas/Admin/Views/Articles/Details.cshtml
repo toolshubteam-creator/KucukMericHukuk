@@ -107,6 +107,12 @@
                     <dt class="col-5">Yazar</dt>
                     <dd class="col-7">@(Model.AuthorName ?? "—")</dd>
 
+                    @if (!string.IsNullOrEmpty(Model.EditorName))
+                    {
+                        <dt class="col-5">Editör</dt>
+                        <dd class="col-7">@Model.EditorName</dd>
+                    }
+
                     <dt class="col-5">Kategori</dt>
                     <dd class="col-7">@(Model.CategoryName ?? "—")</dd>
 
