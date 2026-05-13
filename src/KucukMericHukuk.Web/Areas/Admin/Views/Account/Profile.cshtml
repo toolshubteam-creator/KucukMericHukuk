@@ -1,0 +1,102 @@
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Account.ProfileViewModel
+@{
+    ViewData["Title"] = "Profilim";
+}
+
+<div class="page-header">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">Profilim</h2>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string successMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@successMsg</div>
+}
+@if (TempData["Error"] is string errorMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errorMsg</div>
+}
+
+<div class="row g-3 mt-1">
+    <div class="col-12 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Hesap Bilgileri</h3>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-4">Ad Soyad</dt>
+                    <dd class="col-8">@(string.IsNullOrWhiteSpace(Model.FullName) ? "—" : Model.FullName)</dd>
+
+                    <dt class="col-4">Kullanıcı Adı</dt>
+                    <dd class="col-8">@Model.UserName</dd>
+
+                    <dt class="col-4">E-posta</dt>
+                    <dd class="col-8">@Model.Email</dd>
+
+                    <dt class="col-4">Rol</dt>
+                    <dd class="col-8">
+                        @if (!string.IsNullOrEmpty(Model.Role))
+                        {
+                            <span class="badge bg-blue-lt">@Model.Role</span>
+                        }
+                        else
+                        {
+                            <span class="text-secondary">—</span>
+                        }
+                    </dd>
+                </dl>
+                <small class="text-secondary d-block mt-3">
+                    Hesap bilgilerini değiştirmek için yöneticinizle iletişime geçin.
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Şifre Değiştir</h3>
+            </div>
+            <div class="card-body">
+                <form asp-action="ChangePassword" asp-controller="Account" asp-area="Admin" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="ChangePassword.OldPassword" class="form-label"></label>
+                        <input asp-for="ChangePassword.OldPassword" class="form-control"
+                               autocomplete="current-password" />
+                        <span asp-validation-for="ChangePassword.OldPassword" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ChangePassword.NewPassword" class="form-label"></label>
+                        <input asp-for="ChangePassword.NewPassword" class="form-control"
+                               autocomplete="new-password" />
+                        <span asp-validation-for="ChangePassword.NewPassword" class="invalid-feedback d-block"></span>
+                        <small class="form-hint">En az 8 karakter; büyük + küçük harf ve rakam içermeli.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ChangePassword.ConfirmPassword" class="form-label"></label>
+                        <input asp-for="ChangePassword.ConfirmPassword" class="form-control"
+                               autocomplete="new-password" />
+                        <span asp-validation-for="ChangePassword.ConfirmPassword" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-lock me-1"></i> Şifreyi Güncelle
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
