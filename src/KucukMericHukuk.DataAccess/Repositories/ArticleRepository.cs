@@ -17,6 +17,7 @@ public class ArticleRepository : GenericRepository<Article>, IArticleRepository
         => Query().AsNoTracking()
             .Include(a => a.Translations.Where(t => t.LanguageCode == languageCode))
             .Include(a => a.Author)
+            .Include(a => a.Editor)
             .Include(a => a.Category).ThenInclude(c => c!.Translations.Where(t => t.LanguageCode == languageCode))
             .Include(a => a.Tags).ThenInclude(tag => tag.Translations.Where(t => t.LanguageCode == languageCode))
             .FirstOrDefaultAsync(a => a.Status == ArticleStatus.Published
@@ -26,6 +27,7 @@ public class ArticleRepository : GenericRepository<Article>, IArticleRepository
         => Query().AsNoTracking()
             .Include(a => a.Translations.Where(t => t.LanguageCode == languageCode))
             .Include(a => a.Author)
+            .Include(a => a.Editor)
             .Include(a => a.Category).ThenInclude(c => c!.Translations.Where(t => t.LanguageCode == languageCode))
             .Include(a => a.Tags).ThenInclude(tag => tag.Translations.Where(t => t.LanguageCode == languageCode))
             .FirstOrDefaultAsync(a => a.Id == id, ct);
@@ -116,6 +118,7 @@ public class ArticleRepository : GenericRepository<Article>, IArticleRepository
         query = query
             .Include(a => a.Translations.Where(t => t.LanguageCode == languageCode))
             .Include(a => a.Author)
+            .Include(a => a.Editor)
             .Include(a => a.Category).ThenInclude(c => c!.Translations.Where(t => t.LanguageCode == languageCode))
             .AsSplitQuery();
 
@@ -147,6 +150,7 @@ public class ArticleRepository : GenericRepository<Article>, IArticleRepository
         => _dbSet
             .Include(a => a.Translations)
             .Include(a => a.Author)
+            .Include(a => a.Editor)
             .Include(a => a.Category).ThenInclude(c => c!.Translations)
             .Include(a => a.Tags).ThenInclude(t => t.Translations)
             .AsSplitQuery()

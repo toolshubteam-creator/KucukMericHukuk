@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using KucukMericHukuk.Core.DTOs.Common;
 using KucukMericHukuk.Core.Enums;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KucukMericHukuk.Web.Areas.Admin.ViewModels.Articles;
 
@@ -8,10 +9,15 @@ public class ArticleFormViewModel
 {
     public int? Id { get; set; }
 
+    [Display(Name = "Yazar")]
     public int? AuthorId { get; set; }
 
-    [Display(Name = "Yazar")]
     public string? AuthorName { get; set; }
+
+    [Display(Name = "Editör")]
+    public int? EditorId { get; set; }
+
+    public string? EditorName { get; set; }
 
     [Display(Name = "Kategori")]
     public int? CategoryId { get; set; }
@@ -37,6 +43,15 @@ public class ArticleFormViewModel
 
     public IReadOnlyList<LookupDto> Categories { get; set; } = Array.Empty<LookupDto>();
     public IReadOnlyList<LookupDto> AvailableTags { get; set; } = Array.Empty<LookupDto>();
+
+    public IReadOnlyList<SelectListItem> AuthorOptions { get; set; } = Array.Empty<SelectListItem>();
+    public IReadOnlyList<SelectListItem> EditorOptions { get; set; } = Array.Empty<SelectListItem>();
+
+    /// <summary>
+    /// Author rolündeki kullanıcı kendi makalesini düzenliyorsa AuthorId+EditorId
+    /// alanları UI'da disabled görünür (controller seviyesinde de hijack koruma var).
+    /// </summary>
+    public bool IsAuthorshipDisabled { get; set; }
 }
 
 public class ArticleTranslationFormViewModel

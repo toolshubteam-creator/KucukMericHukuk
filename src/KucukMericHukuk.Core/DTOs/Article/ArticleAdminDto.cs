@@ -8,6 +8,8 @@ public class ArticleAdminDto
     public int Id { get; set; }
     public int? AuthorId { get; set; }
     public string? AuthorName { get; set; }
+    public int? EditorId { get; set; }
+    public string? EditorName { get; set; }
     public int? CategoryId { get; set; }
     public string? CategoryName { get; set; }
     public string? FeaturedImageUrl { get; set; }

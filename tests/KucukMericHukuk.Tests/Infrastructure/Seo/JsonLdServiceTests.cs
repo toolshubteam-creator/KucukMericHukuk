@@ -95,6 +95,41 @@ public class JsonLdServiceTests
     }
 
     [Fact]
+    public void BuildArticle_WithEditor_IncludesEditorPerson()
+    {
+        var article = new ArticleDetailDto
+        {
+            Title = "Editörlü Makale",
+            Slug = "editorlu-makale",
+            PublishedAt = new DateTime(2026, 5, 13, 9, 0, 0, DateTimeKind.Utc),
+            AuthorName = "Av. Yazar",
+            EditorName = "Av. Editör"
+        };
+        var json = _sut.BuildArticle(article);
+        using var doc = JsonDocument.Parse(json);
+
+        doc.RootElement.GetProperty("editor").GetProperty("@type").GetString().Should().Be("Person");
+        doc.RootElement.GetProperty("editor").GetProperty("name").GetString().Should().Be("Av. Editör");
+    }
+
+    [Fact]
+    public void BuildArticle_NoEditor_OmitsEditorField()
+    {
+        var article = new ArticleDetailDto
+        {
+            Title = "Editörsüz Makale",
+            Slug = "editorsuz-makale",
+            AuthorName = "Av. Yazar"
+            // EditorName null
+        };
+        var json = _sut.BuildArticle(article);
+        using var doc = JsonDocument.Parse(json);
+
+        doc.RootElement.TryGetProperty("editor", out _).Should().BeFalse(
+            "EditorName boşken JSON-LD'de editor field olmamalı (Google Rich Results validation)");
+    }
+
+    [Fact]
     public void BuildPerson_includes_jobTitle_and_worksFor()
     {
         var attorney = new AttorneyDetailDto

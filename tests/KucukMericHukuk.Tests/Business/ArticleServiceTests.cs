@@ -54,6 +54,7 @@ public class ArticleServiceTests : IDisposable
         DateTime? publishedAt = null,
         bool isFeatured = false,
         int? authorId = null,
+        int? editorId = null,
         int? categoryId = null,
         int? id = null,
         List<int>? tagIds = null,
@@ -63,6 +64,7 @@ public class ArticleServiceTests : IDisposable
         {
             Id = id,
             AuthorId = authorId,
+            EditorId = editorId,
             CategoryId = categoryId,
             Status = status,
             PublishedAt = publishedAt,
@@ -607,6 +609,99 @@ public class ArticleServiceTests : IDisposable
         result.IsSuccess.Should().BeTrue();
         result.Value.TotalCount.Should().Be(0);
         result.Value.Items.Should().BeEmpty();
+    }
+
+    // -------------------- EDITOR ID (Faz 6.10a) --------------------
+
+    [Fact]
+    public async Task CreateAsync_WithEditorId_PersistsToDb()
+    {
+        await using var context = _factory.CreateContext();
+        var authorId = SeedUser(context, "author");
+        var editorId = SeedUser(context, "editor");
+        var sut = CreateSut(context);
+
+        var input = BuildValidInput(authorId: authorId, editorId: editorId);
+        var result = await sut.CreateAsync(input);
+
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var stored = await verify.Set<Article>().FirstAsync(a => a.Id == result.Value);
+        stored.AuthorId.Should().Be(authorId);
+        stored.EditorId.Should().Be(editorId);
+    }
+
+    [Fact]
+    public async Task CreateAsync_NoEditorId_PersistsAsNull()
+    {
+        await using var context = _factory.CreateContext();
+        var authorId = SeedUser(context, "author");
+        var sut = CreateSut(context);
+
+        var input = BuildValidInput(authorId: authorId);
+        var result = await sut.CreateAsync(input);
+
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var stored = await verify.Set<Article>().FirstAsync(a => a.Id == result.Value);
+        stored.EditorId.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ChangesEditorId_PersistsNewValue()
+    {
+        await using var context = _factory.CreateContext();
+        var authorId = SeedUser(context, "author");
+        var editor1Id = SeedUser(context, "editor1");
+        var editor2Id = SeedUser(context, "editor2");
+        var sut = CreateSut(context);
+
+        var created = await sut.CreateAsync(BuildValidInput(authorId: authorId, editorId: editor1Id));
+
+        var get = await sut.GetByIdAsync(created.Value);
+        var input = BuildValidInput(
+            id: created.Value,
+            title: get.Value.Translations[0].Title,
+            slug: get.Value.Translations[0].Slug,
+            authorId: authorId,
+            editorId: editor2Id);
+
+        var result = await sut.UpdateAsync(input);
+
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var stored = await verify.Set<Article>().FirstAsync(a => a.Id == created.Value);
+        stored.EditorId.Should().Be(editor2Id);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ClearEditorId_PersistsNull()
+    {
+        await using var context = _factory.CreateContext();
+        var authorId = SeedUser(context, "author");
+        var editorId = SeedUser(context, "editor");
+        var sut = CreateSut(context);
+
+        var created = await sut.CreateAsync(BuildValidInput(authorId: authorId, editorId: editorId));
+
+        var get = await sut.GetByIdAsync(created.Value);
+        var input = BuildValidInput(
+            id: created.Value,
+            title: get.Value.Translations[0].Title,
+            slug: get.Value.Translations[0].Slug,
+            authorId: authorId,
+            editorId: null);
+
+        var result = await sut.UpdateAsync(input);
+
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var stored = await verify.Set<Article>().FirstAsync(a => a.Id == created.Value);
+        stored.EditorId.Should().BeNull();
     }
 
     public void Dispose() => _factory.Dispose();

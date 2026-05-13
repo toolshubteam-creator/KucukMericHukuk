@@ -19,6 +19,8 @@ public class ArticleDetailDto
 
     public string? AuthorName { get; set; }
     public int? AuthorId { get; set; }
+    public string? EditorName { get; set; }
+    public int? EditorId { get; set; }
     public string? CategoryName { get; set; }
     public string? CategorySlug { get; set; }
     public int? CategoryId { get; set; }

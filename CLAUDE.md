@@ -283,6 +283,7 @@ Admin panelinde "silinmiş kayıtları göster" senaryolarında `query.IgnoreQue
 | --- | --- | --- |
 | `Attorney.UserId → ApplicationUser` | `SetNull` | Kullanıcı silinince attorney kaydı korunur |
 | `Article.AuthorId → ApplicationUser` | `SetNull` | Yazar silinince makale korunur |
+| `Article.EditorId → ApplicationUser` | `Restrict` | İki FK aynı tabloya SetNull olamaz (SQL Server multi-cascade); ApplicationUser soft-delete olduğu için pratikte tetiklenmez |
 | `Article.CategoryId → Category` | `SetNull` | Kategori silinince makaleler orphan kalır (manuel taşıma) |
 | `Category.ParentCategoryId → Category` | `Restrict` | Alt kategorisi olan kategori silinemez |
 | Translation → Parent (Page/Service/Attorney/Category/Tag/Article) | `Cascade` | Parent silinince translation'lar SQL düzeyinde de silinir (hard delete) |
