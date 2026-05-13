@@ -13,16 +13,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Giriş Yap — Küçükmeriç Hukuk</title>
-    @* Tabler core CSS — 1.4.0 + sha384 SRI (Faz 5.5-fix) *@
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/@@tabler/core@@1.4.0/dist/css/tabler.min.css"
-          integrity="sha384-kz+I4+mczbNiZfLAJMxOlJaZmnbRYhARHNkR2k6tal4gz7OL33/0puDD3SvkiNX9"
-          crossorigin="anonymous" />
-    @* Tabler icons-webfont — 3.42.0 + sha384 SRI (Faz 5.5-fix) *@
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/@@tabler/icons-webfont@@3.42.0/dist/tabler-icons.min.css"
-          integrity="sha384-KmZQ67jSeOgDkmQh84hM2iGH+Am0xx0RelqoJQKc6DNWc7cx+JY47Q35VEf5FL8/"
-          crossorigin="anonymous" />
+    @* Tabler core CSS — 1.4.0 self-host (Faz 6.17) *@
+    <link rel="stylesheet" href="~/lib/tabler/dist/css/tabler.min.css" asp-append-version="true" />
+    @* Tabler icons-webfont — 3.42.0 self-host (Faz 6.17) *@
+    <link rel="stylesheet" href="~/lib/tabler-icons/dist/tabler-icons.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/admin/admin.css" asp-append-version="true" />
 </head>
 <body class="d-flex flex-column">
@@ -70,9 +64,7 @@
             </div>
         </div>
     </div>
-    @* Tabler core JS — 1.4.0 + sha384 SRI (Faz 5.5-fix) *@
-    <script src="https://cdn.jsdelivr.net/npm/@@tabler/core@@1.4.0/dist/js/tabler.min.js"
-            integrity="sha384-pku3birjgGovaJ9ngF7SaxKkF/eYUvBjiMJ+jTtWbNesIj2Rud2K63+4JD7EF4gk"
-            crossorigin="anonymous"></script>
+    @* Tabler core JS — 1.4.0 self-host (Faz 6.17) *@
+    <script src="~/lib/tabler/dist/js/tabler.min.js" asp-append-version="true"></script>
 </body>
 </html>

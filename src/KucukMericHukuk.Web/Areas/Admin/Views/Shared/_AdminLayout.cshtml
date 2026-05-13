@@ -9,16 +9,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@(ViewData["Title"] ?? "Yönetim Paneli") — Küçükmeriç Hukuk</title>
-    @* Tabler core CSS — 1.4.0 + sha384 SRI (Faz 5.5-fix) *@
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/@@tabler/core@@1.4.0/dist/css/tabler.min.css"
-          integrity="sha384-kz+I4+mczbNiZfLAJMxOlJaZmnbRYhARHNkR2k6tal4gz7OL33/0puDD3SvkiNX9"
-          crossorigin="anonymous" />
-    @* Tabler icons-webfont — 3.42.0 + sha384 SRI (Faz 5.5-fix) *@
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/@@tabler/icons-webfont@@3.42.0/dist/tabler-icons.min.css"
-          integrity="sha384-KmZQ67jSeOgDkmQh84hM2iGH+Am0xx0RelqoJQKc6DNWc7cx+JY47Q35VEf5FL8/"
-          crossorigin="anonymous" />
+    @* Tabler core CSS — 1.4.0 self-host (Faz 6.17, libman) *@
+    <link rel="stylesheet" href="~/lib/tabler/dist/css/tabler.min.css" asp-append-version="true" />
+    @* Tabler icons-webfont — 3.42.0 self-host (Faz 6.17, libman) *@
+    <link rel="stylesheet" href="~/lib/tabler-icons/dist/tabler-icons.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/admin/admin.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/admin/components/medias.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/admin/components/quill-editor.css" asp-append-version="true" />
@@ -37,18 +31,12 @@
             <partial name="_AdminFooter" />
         </div>
     </div>
-    @* Tabler core JS — 1.4.0 + sha384 SRI (Faz 5.5-fix) *@
-    <script src="https://cdn.jsdelivr.net/npm/@@tabler/core@@1.4.0/dist/js/tabler.min.js"
-            integrity="sha384-pku3birjgGovaJ9ngF7SaxKkF/eYUvBjiMJ+jTtWbNesIj2Rud2K63+4JD7EF4gk"
-            crossorigin="anonymous"></script>
-    @* Bootstrap JS bundle — 5.3.3 + sha384 SRI (Faz 5.5) *@
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@@5.3.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-            crossorigin="anonymous"></script>
-    @* SweetAlert2 — 11.26.24 + sha384 SRI (Faz 5.5-fix) *@
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@@11.26.24/dist/sweetalert2.all.min.js"
-            integrity="sha384-QjoPbdj/93O7LUz0wqTxepA3tIabUD3jzfZX+x5QLvqFtHBzSw4eYFLSVthB+EDT"
-            crossorigin="anonymous"></script>
+    @* Tabler core JS — 1.4.0 self-host (Faz 6.17) *@
+    <script src="~/lib/tabler/dist/js/tabler.min.js" asp-append-version="true"></script>
+    @* Bootstrap JS bundle — 5.3.3 self-host (Faz 6.17) *@
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    @* SweetAlert2 — 11.26.24 self-host (Faz 6.17) *@
+    <script src="~/lib/sweetalert2/dist/sweetalert2.all.min.js" asp-append-version="true"></script>
     <script src="~/js/admin/sweet-alert-init.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

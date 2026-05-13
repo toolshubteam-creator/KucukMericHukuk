@@ -15,10 +15,12 @@ public class SecurityHeadersMiddleware
 
     private static string BuildCsp(bool isDevelopment)
     {
+        // Faz 6.17: tüm vendor JS/CSS self-host (wwwroot/lib/), CDN allowlist tasfiye.
+        // Geriye sadece Cloudflare Turnstile kaldı (Cloudflare-managed, self-host edilmez).
         // connect-src: fetch/XHR/WebSocket destinations
-        // - Production: 'self' + Turnstile + jsdelivr (source map fetch'leri, Faz 6.8 logout dropdown fix'i)
+        // - Production: 'self' + Turnstile (challenges.cloudflare.com)
         // - Development: ek olarak ws://localhost:* (BrowserLink + browser-refresh) + http(s)://localhost:*
-        var connectSrc = "'self' https://challenges.cloudflare.com https://cdn.jsdelivr.net";
+        var connectSrc = "'self' https://challenges.cloudflare.com";
         if (isDevelopment)
         {
             connectSrc += " ws://localhost:* wss://localhost:* http://localhost:* https://localhost:*";
@@ -26,9 +28,9 @@ public class SecurityHeadersMiddleware
 
         return
             "default-src 'self'; " +
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://challenges.cloudflare.com; " +
-            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; " +
-            "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; " +
+            "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; " +
+            "style-src 'self' 'unsafe-inline'; " +
+            "font-src 'self' data:; " +
             "img-src 'self' data: https:; " +
             $"connect-src {connectSrc}; " +
             "frame-src https://challenges.cloudflare.com; " +

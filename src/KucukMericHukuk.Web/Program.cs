@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO.Compression;
 using System.Threading.RateLimiting;
 using FluentValidation.AspNetCore;
 using KucukMericHukuk.Business;
@@ -20,6 +21,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Localization.Routing;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -215,6 +217,31 @@ builder.Services.AddAntiforgery(opts =>
     opts.HeaderName = "RequestVerificationToken";
 });
 
+// Response Compression (Faz 6.17): CDN'den jsdelivr brotli serve ediyordu; self-host sonrası
+// dev/test ortamında Bootstrap+Lucide uncompressed → mobile total size 397→1201 KiB. Brotli+Gzip
+// ile bunu telafi ediyoruz. EnableForHttps=true: BREACH attack riski yok (response body'de
+// secret + user-controlled content yok; static asset + Razor HTML compress safe).
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+    {
+        "application/octet-stream",
+        "image/svg+xml",
+        "application/manifest+json"
+    });
+});
+builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Optimal;
+});
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Optimal;
+});
+
 var app = builder.Build();
 
 // Security headers (Faz 5.7) — EN ÜST (her response'a uygulanır)
@@ -229,6 +256,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Response Compression (Faz 6.17) — UseStaticFiles'tan ÖNCE olmalı (sıra önemli).
+app.UseResponseCompression();
 
 // Static asset cache — asp-append-version="true" + hashed querystring zaten cache-busting
 // yapıyor (file değişince ?v=hash değişir, browser cache miss → yeni dosya). Bu nedenle

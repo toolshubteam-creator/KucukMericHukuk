@@ -1,0 +1,69 @@
+{
+  "version": "1.0",
+  "defaultProvider": "jsdelivr",
+  "libraries": [
+    {
+      "library": "bootstrap@5.3.3",
+      "destination": "wwwroot/lib/bootstrap",
+      "files": [
+        "dist/css/bootstrap.min.css",
+        "dist/js/bootstrap.bundle.min.js"
+      ]
+    },
+    {
+      "library": "@tabler/core@1.4.0",
+      "destination": "wwwroot/lib/tabler",
+      "files": [
+        "dist/css/tabler.min.css",
+        "dist/js/tabler.min.js"
+      ]
+    },
+    {
+      "library": "@tabler/icons-webfont@3.42.0",
+      "destination": "wwwroot/lib/tabler-icons",
+      "files": [
+        "dist/tabler-icons.min.css",
+        "dist/fonts/tabler-icons.woff",
+        "dist/fonts/tabler-icons.woff2",
+        "dist/fonts/tabler-icons.ttf"
+      ]
+    },
+    {
+      "library": "lucide@1.14.0",
+      "destination": "wwwroot/lib/lucide",
+      "files": [
+        "dist/umd/lucide.min.js"
+      ]
+    },
+    {
+      "library": "quill@2.0.3",
+      "destination": "wwwroot/lib/quill",
+      "files": [
+        "dist/quill.snow.css",
+        "dist/quill.js"
+      ]
+    },
+    {
+      "library": "sweetalert2@11.26.24",
+      "destination": "wwwroot/lib/sweetalert2",
+      "files": [
+        "dist/sweetalert2.all.min.js"
+      ]
+    },
+    {
+      "library": "choices.js@11.1.0",
+      "destination": "wwwroot/lib/choices",
+      "files": [
+        "public/assets/styles/choices.min.css",
+        "public/assets/scripts/choices.min.js"
+      ]
+    },
+    {
+      "library": "sortablejs@1.15.6",
+      "destination": "wwwroot/lib/sortablejs",
+      "files": [
+        "Sortable.min.js"
+      ]
+    }
+  ]
+}

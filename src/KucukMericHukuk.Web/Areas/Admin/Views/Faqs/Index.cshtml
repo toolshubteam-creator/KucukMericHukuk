@@ -210,9 +210,7 @@
 </div>
 
 @section Scripts {
-    @* SortableJS — 1.15.6 + sha384 SRI (Faz 6.6b). Faq drag-drop reorder icin. *@
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@@1.15.6/Sortable.min.js"
-            integrity="sha384-HZZ/fukV+9G8gwTNjN7zQDG0Sp7MsZy5DDN6VfY3Be7V9dvQpEpR2jF2HlyFUUjU"
-            crossorigin="anonymous"></script>
+    @* SortableJS — 1.15.6 self-host (Faz 6.17, libman). Faq drag-drop reorder icin. *@
+    <script src="~/lib/sortablejs/Sortable.min.js" asp-append-version="true"></script>
     <script src="~/js/admin/faq-reorder.js" asp-append-version="true"></script>
 }
