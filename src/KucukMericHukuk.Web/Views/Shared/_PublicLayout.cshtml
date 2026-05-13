@@ -9,9 +9,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     @Html.MetaTags()
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    @* Faz 6.14: Google Fonts self-host. wwwroot/fonts/ altında 12 woff2 (Playfair 3w + Inter 3w × latin+latin-ext).
+       Google CDN'e preconnect kaldırıldı, render-blocking 889ms tasarruf. *@
+    <link rel="stylesheet" href="~/css/fonts.css" asp-append-version="true" />
 
     @* Bootstrap CSS — 5.3.3 jsdelivr + sha384 SRI (Faz 5.5) *@
     <link rel="stylesheet"
@@ -39,16 +39,18 @@
 
     <partial name="_CookieConsent" />
 
+    @* Faz 6.14: Tüm public script'ler defer — parser HTML parse ederken parallel download,
+       DOMContentLoaded sonrası exec. Body sonunda olmaları sıralı garantili. *@
     @* Bootstrap JS bundle — 5.3.3 + sha384 SRI (Faz 5.5) *@
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@@5.3.3/dist/js/bootstrap.bundle.min.js"
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@@5.3.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
             crossorigin="anonymous"></script>
     @* Lucide icons — 1.14.0 pin + sha384 SRI (Faz 5.5; @@latest tag yerine pinli sürüm) *@
-    <script src="https://unpkg.com/lucide@@1.14.0/dist/umd/lucide.min.js"
+    <script defer src="https://unpkg.com/lucide@@1.14.0/dist/umd/lucide.min.js"
             integrity="sha384-jB6ZXxyEV94yzTxgLMvrwwNbn/pTTqwrMDI+v8FV5o5FnId/yn3DJwSdrDujU9A7"
             crossorigin="anonymous"></script>
-    <script src="~/js/site/site.js" asp-append-version="true"></script>
-    <script src="~/js/site/cookie-consent.js" asp-append-version="true"></script>
+    <script defer src="~/js/site/site.js" asp-append-version="true"></script>
+    <script defer src="~/js/site/cookie-consent.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

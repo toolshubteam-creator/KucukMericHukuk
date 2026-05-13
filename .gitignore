@@ -436,3 +436,6 @@ FodyWeavers.xsd
 
 # Faz 3.1+ — kullanıcı yüklenen medya dosyaları (Local file storage)
 src/KucukMericHukuk.Web/wwwroot/uploads/
+
+# Faz 6.14: fetch-fonts.js geçici CSS (woff2 download kaynağı, repo'da gerek yok)
+scripts/.fonts-source.css

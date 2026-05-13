@@ -34,6 +34,10 @@
     --color-accent: #C9A961;
     --color-accent-dark: #A88A45;
     --color-accent-light: #D9BD7C;
+    /* Faz 6.14: text-on-light için WCAG AA uyumlu koyu altın. #A88A45 beyaz/krem üzerinde
+       3.07:1 (FAIL); #7B6232 ~5.5:1 (AA). Sadece text/link rolünde kullanılır;
+       background/border/decorative yerler --color-accent-dark kullanmaya devam eder. */
+    --color-accent-text: #7B6232;
 
     --color-bg: #FAF7F2;
     --color-bg-alt: #FFFFFF;
@@ -92,7 +96,7 @@ a {
     text-decoration: none;
     transition: color 0.2s ease;
 }
-a:hover { color: var(--color-accent-dark); }
+a:hover { color: var(--color-accent-text); }
 
 /* --- Site header (geçici, Faz 4.2'de detaylanacak) --- */
 .site-header {
@@ -131,7 +135,7 @@ a:hover { color: var(--color-accent-dark); }
 
 /* --- Helper utilities (custom, kıt kullanım) --- */
 .container-narrow { max-width: 800px; margin-inline: auto; }
-.text-accent { color: var(--color-accent-dark); }
+.text-accent { color: var(--color-accent-text); }
 .bg-cream { background-color: var(--color-bg); }
 .section { padding: var(--space-5) 0; }
 

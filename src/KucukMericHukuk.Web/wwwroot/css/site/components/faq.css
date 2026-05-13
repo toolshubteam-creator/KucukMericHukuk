@@ -26,7 +26,7 @@
 
 .faq-question.accordion-button:hover {
     background-color: var(--color-bg);
-    color: var(--color-accent-dark);
+    color: var(--color-accent-text); /* Faz 6.14: WCAG AA contrast */
 }
 
 .faq-question.accordion-button:not(.collapsed) {
@@ -56,7 +56,7 @@
 .faq-answer strong { font-weight: 600; color: var(--color-primary); }
 .faq-answer em { font-style: italic; }
 .faq-answer a {
-    color: var(--color-accent-dark);
+    color: var(--color-accent-text); /* Faz 6.14: WCAG AA contrast */
     text-decoration: underline;
     text-underline-offset: 2px;
 }

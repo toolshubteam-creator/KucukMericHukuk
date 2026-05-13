@@ -12,7 +12,7 @@
     font-size: 0.875rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--color-accent-dark);
+    color: var(--color-accent-text); /* Faz 6.14: WCAG AA contrast */
     font-weight: 600;
 }
 
@@ -83,7 +83,7 @@
 }
 
 .article-content a {
-    color: var(--color-accent-dark);
+    color: var(--color-accent-text); /* Faz 6.14: WCAG AA contrast */
     text-decoration: underline;
 }
 

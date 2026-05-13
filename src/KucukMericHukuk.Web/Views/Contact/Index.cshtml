@@ -106,7 +106,8 @@
                         <div class="form-check">
                             <input asp-for="KvkkConsent" class="form-check-input" required />
                             <label asp-for="KvkkConsent" class="form-check-label">
-                                <a asp-controller="Pages" asp-action="Detail" asp-route-culture="@culture" asp-route-slug="aydinlatma" target="_blank">Aydınlatma metnini</a> okudum, onaylıyorum.
+                                @* Faz 6.14: Lighthouse a11y link-in-text-block — sadece renkle ayırt edilmesin, underline ekle *@
+                                <a asp-controller="Pages" asp-action="Detail" asp-route-culture="@culture" asp-route-slug="aydinlatma" target="_blank" style="text-decoration: underline;">Aydınlatma metnini</a> okudum, onaylıyorum.
                             </label>
                             <div>
                                 <span asp-validation-for="KvkkConsent" class="text-danger small"></span>

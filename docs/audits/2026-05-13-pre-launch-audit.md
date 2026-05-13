@@ -165,6 +165,58 @@ Tüm ana public URL'ler dahil. Production deploy'da `BaseUrl` admin panelinden p
 
 ---
 
+---
+
+## Post-Fix Sonuçları (Faz 6.14)
+
+Faz 6.14'te uygulanan 7 fix sonrası re-audit (`docs/audits/lighthouse/post-fix/`):
+
+### Önce / Sonra
+
+| Sayfa | Perf | A11y | Best | SEO |
+|---|---|---|---|---|
+| about-desktop | 99 | 100 | 100 | 100 |
+| about-mobile | 74→**79** (+5) | 100 | 100 | 100 |
+| article-detail-desktop | 99 | 96→**100** (+4) | 100 | 100 |
+| article-detail-mobile | 85→**80** (-5)* | 96→**100** (+4) | 100 | 100 |
+| contact-desktop | 95→**97** (+2) | 93→**100** (+7) | 100 | 100 |
+| contact-mobile | **67→77** (+10) ✨ | 93→**100** (+7) | 100 | 100 |
+| home-desktop | 99 | 96→**100** (+4) | 100 | 100 |
+| home-mobile | 90→**84** (-6)* | 96→**100** (+4) | 100 | 100 |
+| service-detail-desktop | 99→**100** (+1) | 96→**100** (+4) | 100 | 100 |
+| service-detail-mobile | 93→**95** (+2) | 96→**100** (+4) | 100 | 100 |
+
+\* Lighthouse `--throttling-method=simulate` ±5-10 puan run-to-run variance gösterir (dev env'da daha belirgin). Net trend pozitif.
+
+### Toplulaştırılmış Ortalama
+
+- **Perf (mobile)**: 82 → **83**
+- **Perf (desktop)**: 98 → **99**
+- **A11y**: 96 → **100** ✨
+- **Best Practices**: 100 (değişmedi)
+- **SEO**: 100 (değişmedi)
+
+### Uygulanan Fix'ler
+
+| # | Fix | Etkilenen audit | Sonuç |
+|---|---|---|---|
+| 1 | `Cache-Control: max-age=31536000, immutable` (UseStaticFiles OnPrepareResponse) | `cache-insight` (34 KiB/sayfa) | TTL=0 → 1 yıl |
+| 2 | Google Fonts self-host (`wwwroot/fonts/` 12 woff2 + `fonts.css`) | `render-blocking-insight` (889 ms Google Fonts CSS) | CDN→ same-origin |
+| 3 | Public layout script'lerine `defer` (Bootstrap bundle + Lucide + site.js + cookie-consent.js) | parallel download | render-block azalır |
+| 4 | `--color-accent-text: #7B6232` token (WCAG AA ~5.5:1) | `color-contrast` (3.07-3.28:1 → 5.5:1) | A11y 100/100 her sayfada |
+| 5 | Contact KVKK link `text-decoration: underline` | `link-in-text-block` | A11y kazanım |
+| 6 | Home `ViewData["MetaDescription"]` 216→154 char | meta description length | Google'da kırpılmaz |
+| 7 | DbInitializer about + 3 service ShortDescription uzatma (taze install için) | meta description length | Yeni install'da fix |
+
+### Kalan İyileştirmeler (Faz 6.15+)
+
+- **Mobile render-blocking** — Bootstrap CSS hala CDN'den senkron (33 KB, 1099 ms wasted). Self-host CDN dosyaları (DEFERRED) ile birlikte değerlendirme
+- **Unused CSS tree-shake** — Bootstrap full bundle yüklenmesi (13-24 KiB savings)
+- **About + Service mevcut LocalDB**: seed default uzadı ama key var → atla mantığı; admin panelinden manuel uzatma gerek (kullanıcı sorumluluğunda)
+- **Home mobile -6 / article-detail mobile -5 variance** — production deploy + 3 run ortalaması ile teyit
+
+---
+
 ## Production Re-audit Önerisi (Faz 6.14 sonrası)
 
 Faz 6.14 critical fix'lerden sonra ve production deploy sırasında **gerçek domain üzerinden** Lighthouse + WebPageTest + Google Search Console (Mobile-Friendly Test, Rich Results Test) ile re-audit. Beklenen iyileşme: mobile perf 67→85+, desktop 95→98+.
