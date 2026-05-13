@@ -55,9 +55,6 @@
 
 ## Faz 6'ya Aktarılan (Faz 5 boyunca eklendi)
 
-- **Email confirmation** (Identity)
-  - Faz 1'de kapalı bırakıldı, seed user EmailConfirmed=true ile geçiyor
-
 - **Token DRY refactor — admin + public ortak `tokens.css`**
   - Faz 4.1'de admin.css :root token'ları ve site.css :root token'ları aynı renk değerleriyle iki dosyada duplicate yazıldı
   - Refactor: ortak `wwwroot/css/tokens.css` her iki layout'ta `<link>` ile yüklenir
