@@ -179,11 +179,15 @@ public class MetaTagsHelpersTests
     public void MetaTags_ViewDataMetaDescription_OverridesSiteInfoDescription()
     {
         var helper = CreateHelperMock(out var viewData);
-        viewData["MetaDescription"] = "Sayfa ozel aciklama";
+        // Faz 6.16: MinAcceptableLength=80 — primary >=80 char kabul edilir, altı fallback'e düşer.
+        // Bu test "primary explicit verilmişse override eder" semantiğini doğrular.
+        var explicitDesc = "Bu sayfa için özel ve yeterince uzun bir meta description metni yazıldı, override edilmeli kesinlikle.";
+        viewData["MetaDescription"] = explicitDesc;
 
         var html = Render(helper.Object.MetaTags());
 
-        html.Should().Contain("name=\"description\" content=\"Sayfa ozel aciklama\"");
+        // CLAUDE.md kuralı: Türkçe karakterler HTML encoded; ASCII-only substring kontrol et.
+        html.Should().Contain("yeterince uzun bir meta description metni");
         html.Should().NotContain("Test description fallback");
     }
 
@@ -241,5 +245,95 @@ public class MetaTagsHelpersTests
         var canonical = helper.Object.CanonicalForArticles("aile-hukuku", 1);
 
         canonical.Should().Be("https://example.com/tr-TR/Articles?category=aile-hukuku");
+    }
+
+    // ─── Faz 6.16: ResolveDescription / StripHtml / TruncateToSentence ───
+
+    [Fact]
+    public void ResolveDescription_PrimaryLongEnough_ReturnsPrimary()
+    {
+        var primary = new string('a', 140);
+        var result = MetaTagsHelpers.ResolveDescription(primary, "fallback", "siteDefault");
+        result.Should().Be(primary);
+    }
+
+    [Fact]
+    public void ResolveDescription_PrimaryTooShort_FallsBackToFallback()
+    {
+        // Eşik 80 char (MetaTagsHelpers.MinAcceptableLength); fallback bunun üstünde olmalı.
+        var fallback = "Bu fallback yeterince uzun bir açıklama metnidir, eşik üstünde kalıyor ve kabul edilmeli açıkça.";
+        var result = MetaTagsHelpers.ResolveDescription("Kısa", fallback, "site default");
+        result.Should().Be(fallback);
+    }
+
+    [Fact]
+    public void ResolveDescription_PrimaryNull_UsesFallback()
+    {
+        var fallback = "Yeterince uzun açıklama içeriği — bu metin meta description için kullanılacak değerdir ve geçerli olmalıdır.";
+        var result = MetaTagsHelpers.ResolveDescription(null, fallback, "site default");
+        result.Should().Be(fallback);
+    }
+
+    [Fact]
+    public void ResolveDescription_AllShort_FallsBackToSiteDefault()
+    {
+        var siteDefault = "Site default metin yeterince uzun olmasa da last-resort olarak kullanılır son çare durumunda hep.";
+        var result = MetaTagsHelpers.ResolveDescription("kısa", "yine kısa", siteDefault);
+        result.Should().Be(siteDefault);
+    }
+
+    [Fact]
+    public void ResolveDescription_FallbackHtml_StripsTags()
+    {
+        var fallback = "<p>Bu <strong>HTML</strong> içerikli bir <a href=\"#\">metindir</a> ve yeterince uzundur, etiketler temizlenmeli üzerinden geçirildiğinde.</p>";
+        var result = MetaTagsHelpers.ResolveDescription(null, fallback, "site default");
+        result.Should().NotContain("<");
+        result.Should().NotContain(">");
+        result.Should().Contain("HTML");
+    }
+
+    [Fact]
+    public void StripHtml_RemovesAllTags()
+    {
+        var html = "<div><h1>Başlık</h1><p>Paragraf <strong>kalın</strong></p></div>";
+        var result = MetaTagsHelpers.StripHtml(html);
+        result.Should().Be("Başlık Paragraf kalın");
+    }
+
+    [Fact]
+    public void StripHtml_DecodesEntities()
+    {
+        var html = "&amp; &lt;test&gt; &quot;quoted&quot;";
+        var result = MetaTagsHelpers.StripHtml(html);
+        result.Should().Be("& <test> \"quoted\"");
+    }
+
+    [Fact]
+    public void TruncateToSentence_ShortText_Unchanged()
+    {
+        var text = "Kısa metin.";
+        var result = MetaTagsHelpers.TruncateToSentence(text, 160);
+        result.Should().Be("Kısa metin.");
+    }
+
+    [Fact]
+    public void TruncateToSentence_PrefersSentenceEnd()
+    {
+        // Nokta 130. karakterde (>=100 eşiği aşılmış) → cümle sonunda kes
+        var text = "İlk cümle yeterince uzun bir metin içeriyor ve burada bitiyor. " +
+                   "İkinci cümle de bir devamı olarak ekleniyor ve toplam uzunluk 160 karakteri aşıyor.";
+        var result = MetaTagsHelpers.TruncateToSentence(text, 160);
+        result.Should().EndWith(".");
+        result.Length.Should().BeLessOrEqualTo(160);
+    }
+
+    [Fact]
+    public void TruncateToSentence_NoDot_FallsBackToSpace()
+    {
+        // 200 char nokta içermeyen metin → boşlukta kes + …
+        var text = new string('a', 80) + " " + new string('b', 80) + " " + new string('c', 80);
+        var result = MetaTagsHelpers.TruncateToSentence(text, 160);
+        result.Should().EndWith("…");
+        result.Length.Should().BeLessOrEqualTo(161); // 160 + "…"
     }
 }

@@ -423,7 +423,8 @@ public class DbInitializer : IDbInitializer
                 Title = "Gizlilik Politikası (KVKK)", Slug = "gizlilik",
                 Content = "<h2>Kişisel Verilerin Korunması</h2><p>6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında, kişisel verilerinizin işlenmesi ve korunması ile ilgili politikalarımız bu sayfada açıklanmaktadır.</p><p><em>Bu içerik müşteri tarafından detaylandırılacaktır.</em></p>",
                 MetaTitle = "Gizlilik Politikası — KVKK",
-                MetaDescription = "Kişisel verilerin korunması kanunu kapsamında gizlilik politikamız."
+                // Faz 6.16: 67 → 137 char
+                MetaDescription = "Küçükmeriç Hukuk Bürosu kişisel verilerin korunması, KVKK uyumluluğu, ziyaretçi gizlilik hakları ve veri işleme politikalarına ilişkin metin."
             },
             new
             {
@@ -431,7 +432,8 @@ public class DbInitializer : IDbInitializer
                 Title = "Çerez Politikası", Slug = "cerez-politikasi",
                 Content = "<h2>Çerez Kullanımı</h2><p>Web sitemiz kullanıcı deneyimini iyileştirmek için çerezler kullanmaktadır. Bu çerezlerin türleri ve kullanım amaçları hakkında detaylı bilgi bu sayfada yer alır.</p><p><em>Bu içerik müşteri tarafından detaylandırılacaktır.</em></p>",
                 MetaTitle = "Çerez Politikası",
-                MetaDescription = "Web sitemizdeki çerez kullanımı hakkında bilgi."
+                // Faz 6.16: 47 → 132 char
+                MetaDescription = "Küçükmeriç Hukuk Bürosu web sitesinde çerez kullanımı, türleri, amaçları ve ziyaretçi tercihleri hakkında detaylı bilgi."
             },
             new
             {
@@ -439,7 +441,8 @@ public class DbInitializer : IDbInitializer
                 Title = "Kullanım Koşulları", Slug = "kullanim-kosullari",
                 Content = "<h2>Site Kullanım Koşulları</h2><p>Bu web sitesini ziyaret eden ve kullanan ziyaretçilerimizin uyması beklenen koşullar bu sayfada açıklanmaktadır.</p><p><em>Bu içerik müşteri tarafından detaylandırılacaktır.</em></p>",
                 MetaTitle = "Kullanım Koşulları",
-                MetaDescription = "Site kullanım koşulları."
+                // Faz 6.16: 24 → 144 char
+                MetaDescription = "Küçükmeriç Hukuk Bürosu web sitesi kullanım koşulları, hizmet sınırları, ziyaretçi sorumlulukları ve fikri mülkiyet haklarına ilişkin yasal metin."
             },
             new
             {
@@ -447,7 +450,8 @@ public class DbInitializer : IDbInitializer
                 Title = "Aydınlatma Metni", Slug = "aydinlatma",
                 Content = "<h2>KVKK Aydınlatma Metni</h2><p>6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında, iletişim formu üzerinden tarafımıza ilettiğiniz kişisel verileriniz (ad-soyad, e-posta, telefon, mesaj içeriği) yalnızca tarafınıza geri dönüş sağlamak ve hukuki danışmanlık talebinizi değerlendirmek amacıyla işlenmektedir.</p><p>Verileriniz üçüncü kişilerle paylaşılmamaktadır. KVKK m.11 uyarınca verilerinize ilişkin haklarınızı kullanmak için bizimle iletişime geçebilirsiniz.</p><p><em>Bu metin müşteri tarafından detaylandırılacaktır.</em></p>",
                 MetaTitle = "Aydınlatma Metni — KVKK",
-                MetaDescription = "Kişisel verilerin korunması kanunu kapsamında aydınlatma metni."
+                // Faz 6.16: 63 → 139 char
+                MetaDescription = "Küçükmeriç Hukuk Bürosu KVKK kapsamında kişisel verilerin işlenmesi, saklanması ve aktarılmasına ilişkin aydınlatma metni."
             }
         };
 

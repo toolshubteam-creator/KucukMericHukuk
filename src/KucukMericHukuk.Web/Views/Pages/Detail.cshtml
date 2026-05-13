@@ -2,7 +2,9 @@
 @using KucukMericHukuk.Web.Helpers
 @{
     ViewData["Title"] = !string.IsNullOrEmpty(Model.Page.MetaTitle) ? Model.Page.MetaTitle : Model.Page.Title;
+    // Faz 6.16: MetaDescription kısaysa Content'ten otomatik fallback (HTML strip + truncate).
     ViewData["MetaDescription"] = Model.Page.MetaDescription;
+    ViewData["MetaDescriptionFallback"] = Model.Page.Content;
 
     ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
     {
