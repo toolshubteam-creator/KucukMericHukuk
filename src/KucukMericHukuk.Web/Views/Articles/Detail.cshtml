@@ -42,7 +42,12 @@
             <div class="article-detail__meta">
                 @if (!string.IsNullOrEmpty(Model.Article.AuthorName))
                 {
-                    <span>@Model.Article.AuthorName</span>
+                    <span>Yazar: @Model.Article.AuthorName</span>
+                    <span class="article-detail__meta-sep">·</span>
+                }
+                @if (!string.IsNullOrEmpty(Model.Article.EditorName))
+                {
+                    <span>Editör: @Model.Article.EditorName</span>
                     <span class="article-detail__meta-sep">·</span>
                 }
                 <span>@publishedDate</span>

@@ -93,6 +93,13 @@ public class JsonLdService : IJsonLdService
                     ["name"] = article.AuthorName
                 }
                 : null,
+            ["editor"] = !string.IsNullOrEmpty(article.EditorName)
+                ? new Dictionary<string, object?>
+                {
+                    ["@type"] = "Person",
+                    ["name"] = article.EditorName
+                }
+                : null,
             ["publisher"] = new Dictionary<string, object?>
             {
                 ["@type"] = "LegalService",

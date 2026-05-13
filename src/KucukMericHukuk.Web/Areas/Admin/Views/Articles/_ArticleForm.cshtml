@@ -48,6 +48,49 @@
 
         <div class="card mt-3">
             <div class="card-header">
+                <h3 class="card-title">Sorumlular</h3>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="AuthorId" class="form-label"></label>
+                    <select asp-for="AuthorId" class="form-select"
+                            disabled="@Model.IsAuthorshipDisabled">
+                        <option value="">(seçilmedi)</option>
+                        @foreach (var opt in Model.AuthorOptions)
+                        {
+                            <option value="@opt.Value" selected="@(opt.Selected)">@opt.Text</option>
+                        }
+                    </select>
+                    @if (Model.IsAuthorshipDisabled)
+                    {
+                        @* Disabled select POST'a value göndermez — gizli input ile koru *@
+                        <input type="hidden" asp-for="AuthorId" />
+                    }
+                    <span asp-validation-for="AuthorId" class="invalid-feedback d-block"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="EditorId" class="form-label"></label>
+                    <select asp-for="EditorId" class="form-select"
+                            disabled="@Model.IsAuthorshipDisabled">
+                        <option value="">(editör atanmadı)</option>
+                        @foreach (var opt in Model.EditorOptions)
+                        {
+                            <option value="@opt.Value" selected="@(opt.Selected)">@opt.Text</option>
+                        }
+                    </select>
+                    @if (Model.IsAuthorshipDisabled)
+                    {
+                        <input type="hidden" asp-for="EditorId" />
+                    }
+                    <span asp-validation-for="EditorId" class="invalid-feedback d-block"></span>
+                    <small class="form-hint">JSON-LD schema'da @@editor olarak işaretlenir (SEO).</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
                 <h3 class="card-title">Sınıflandırma</h3>
             </div>
             <div class="card-body">
@@ -110,5 +153,5 @@
     </div>
 </div>
 
-<input type="hidden" asp-for="AuthorId" />
 <input type="hidden" asp-for="AuthorName" />
+<input type="hidden" asp-for="EditorName" />

@@ -10,6 +10,9 @@ public class Article : BaseEntity, ITranslatable<ArticleTranslation>
     public int? AuthorId { get; set; }
     public ApplicationUser? Author { get; set; }
 
+    public int? EditorId { get; set; }
+    public ApplicationUser? Editor { get; set; }
+
     public int? CategoryId { get; set; }
     public Category? Category { get; set; }
 

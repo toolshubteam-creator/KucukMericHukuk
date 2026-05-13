@@ -40,6 +40,8 @@ public class ArticleMappingConfig : IRegister
             .Map(dest => dest.LanguageCode, src => src.Translations.Select(t => t.LanguageCode).FirstOrDefault() ?? string.Empty)
             .Map(dest => dest.AuthorName,
                  src => src.Author != null ? (src.Author.FullName ?? src.Author.UserName) : null)
+            .Map(dest => dest.EditorName,
+                 src => src.Editor != null ? (src.Editor.FullName ?? src.Editor.UserName) : null)
             .Map(dest => dest.CategoryName,
                  src => src.Category != null
                      ? src.Category.Translations.Select(t => t.Name).FirstOrDefault()
@@ -54,6 +56,8 @@ public class ArticleMappingConfig : IRegister
         config.NewConfig<Article, ArticleAdminDto>()
             .Map(dest => dest.AuthorName,
                  src => src.Author != null ? (src.Author.FullName ?? src.Author.UserName) : null)
+            .Map(dest => dest.EditorName,
+                 src => src.Editor != null ? (src.Editor.FullName ?? src.Editor.UserName) : null)
             .Map(dest => dest.CategoryName,
                  src => src.Category != null
                      ? src.Category.Translations.Select(t => t.Name).FirstOrDefault()
@@ -74,6 +78,7 @@ public class ArticleMappingConfig : IRegister
             .Ignore(dest => dest.DeletedAt!)
             .Ignore(dest => dest.ViewCount)
             .Ignore(dest => dest.Author!)
+            .Ignore(dest => dest.Editor!)
             .Ignore(dest => dest.Category!)
             .Ignore(dest => dest.Tags);
 

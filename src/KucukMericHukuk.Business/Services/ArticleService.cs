@@ -185,6 +185,7 @@ public class ArticleService : IArticleService
         var article = new Article
         {
             AuthorId = input.AuthorId,
+            EditorId = input.EditorId,
             CategoryId = input.CategoryId,
             FeaturedImageUrl = input.FeaturedImageUrl,
             Status = input.Status,
@@ -252,6 +253,7 @@ public class ArticleService : IArticleService
             return Result.Failure(translationsResult.Errors);
 
         article.AuthorId = input.AuthorId;
+        article.EditorId = input.EditorId;
         article.CategoryId = input.CategoryId;
         article.FeaturedImageUrl = input.FeaturedImageUrl;
         article.IsFeatured = input.IsFeatured;

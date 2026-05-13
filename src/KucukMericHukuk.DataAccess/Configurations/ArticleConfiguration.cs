@@ -23,6 +23,14 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
             .HasForeignKey(a => a.AuthorId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        // ApplicationUser soft-delete kullandığı için hard-delete senaryosu yok.
+        // SQL Server multi-cascade-path engeli için Restrict — Author zaten SetNull;
+        // ikisi birden SetNull olursa "cycles or multiple cascade paths" hatası.
+        builder.HasOne(a => a.Editor)
+            .WithMany()
+            .HasForeignKey(a => a.EditorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasMany(a => a.Translations)
             .WithOne(t => t.Article)
             .HasForeignKey(t => t.ArticleId)

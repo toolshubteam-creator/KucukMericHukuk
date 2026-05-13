@@ -8,7 +8,8 @@ public class ArticleFormMappingConfig : IRegister
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<ArticleFormViewModel, ArticleInputDto>()
-            .Ignore(dest => dest.AuthorId!);
+            .Ignore(dest => dest.AuthorId!)
+            .Ignore(dest => dest.EditorId!);
         config.NewConfig<ArticleTranslationFormViewModel, ArticleTranslationInputDto>();
     }
 }

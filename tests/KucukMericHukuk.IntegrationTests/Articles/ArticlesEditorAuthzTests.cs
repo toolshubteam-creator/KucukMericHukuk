@@ -341,13 +341,14 @@ public class ArticlesEditorAuthzTests : IClassFixture<IntegrationTestFactory>
         return user.Id;
     }
 
-    private async Task<int> SeedArticleAsync(string slug, string title, int? authorId)
+    private async Task<int> SeedArticleAsync(string slug, string title, int? authorId, int? editorId = null)
     {
         using var scope = _factory.Services.CreateScope();
         var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var article = new Article
         {
             AuthorId = authorId,
+            EditorId = editorId,
             Status = ArticleStatus.Draft,
             IsFeatured = false,
             CreatedAt = DateTime.UtcNow,

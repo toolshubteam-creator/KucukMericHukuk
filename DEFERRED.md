@@ -235,22 +235,6 @@
 
 ---
 
-## Faz 6.10a → Article EditorId field + JSON-LD editor
-
-- **Article EditorId field + JSON-LD editor + Editor seçici** (Faz 6.10a)
-  - Faz 6.10 hot-fix'inde Author/Editor rol ayrımı yapıldı (Author yazar, Editor düzenler).
-  - Eksik:
-    - `Article` entity'sine `EditorId` field (nullable FK → `ApplicationUser`)
-    - Migration `AddArticleEditorId`
-    - Article admin form'da Editor seçici dropdown (Editor rolündeki user'lar)
-    - Edit POST'ta Editor/Admin EditorId güncellenir (Author değiştiremez — hijack koruma)
-    - Public Article view: "Yazar: X — Editör: Y" görüntüleme
-    - `IJsonLdService.BuildArticle` → editor alanı (Person schema, Article author'a paralel)
-    - Test: EditorId atama, JSON-LD editor render, Author EditorId hijack koruma
-  - Tetik: Faz 6.10 hot-fix sonrası, yakın
-
----
-
 ## Faz 6 → Yayına Alma
 
 - **Müşteri iletişim bilgileri** (Faz 0 → SiteInfo doldurma)

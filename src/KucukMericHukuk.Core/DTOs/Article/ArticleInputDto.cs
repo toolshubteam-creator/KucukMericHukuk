@@ -6,6 +6,7 @@ public class ArticleInputDto
 {
     public int? Id { get; set; }
     public int? AuthorId { get; set; }
+    public int? EditorId { get; set; }
     public int? CategoryId { get; set; }
     public string? FeaturedImageUrl { get; set; }
     public DateTime? PublishedAt { get; set; }

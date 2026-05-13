@@ -2,13 +2,16 @@ using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.DTOs.Article;
 using KucukMericHukuk.Core.DTOs.Common;
+using KucukMericHukuk.Core.Entities.Identity;
 using KucukMericHukuk.Core.Interfaces;
 using KucukMericHukuk.Core.Interfaces.Services;
 using KucukMericHukuk.Web.Areas.Admin.ViewModels.Articles;
 using KucukMericHukuk.Web.Extensions;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KucukMericHukuk.Web.Areas.Admin.Controllers;
 
@@ -19,15 +22,18 @@ public class ArticlesController : Controller
 {
     private readonly IArticleService _articleService;
     private readonly IUnitOfWork _uow;
+    private readonly UserManager<ApplicationUser> _userManager;
     private readonly ILogger<ArticlesController> _logger;
 
     public ArticlesController(
         IArticleService articleService,
         IUnitOfWork uow,
+        UserManager<ApplicationUser> userManager,
         ILogger<ArticlesController> logger)
     {
         _articleService = articleService;
         _uow = uow;
+        _userManager = userManager;
         _logger = logger;
     }
 
@@ -104,9 +110,13 @@ public class ArticlesController : Controller
     {
         ViewData["Title"] = "Yeni Makale";
 
+        var currentUserId = User.GetUserIdOrNull();
         var vm = new ArticleFormViewModel
         {
             Status = Core.Enums.ArticleStatus.Draft,
+            // Yeni makale: yazar oturum açan kullanıcı; editör default boş (Editor/Admin
+            // form'dan seçebilir, Author rolündeki kullanıcı için dropdown disabled).
+            AuthorId = currentUserId,
             Translations = LanguageCodes.Supported
                 .Select(lang => new ArticleTranslationFormViewModel { LanguageCode = lang })
                 .ToList(),
@@ -128,7 +138,18 @@ public class ArticlesController : Controller
         }
 
         var input = form.Adapt<ArticleInputDto>();
-        input.AuthorId = User.GetUserIdOrNull();
+        var currentUserId = User.GetUserIdOrNull();
+
+        // Author rolü kendini AuthorId'den hijack edemez; Admin/Editor başka yazar seçebilir.
+        input.AuthorId = (User.IsInRole("Admin") || User.IsInRole("Editor"))
+            ? (form.AuthorId ?? currentUserId)
+            : currentUserId;
+
+        // EditorId: Admin/Editor form'dan seçebilir, boşsa atanmaz (null).
+        // Author rolü EditorId set edemez.
+        input.EditorId = (User.IsInRole("Admin") || User.IsInRole("Editor"))
+            ? form.EditorId
+            : null;
 
         var result = await _articleService.CreateAsync(input, ct);
         if (result.IsFailure)
@@ -165,6 +186,8 @@ public class ArticlesController : Controller
             Id = dto.Id,
             AuthorId = dto.AuthorId,
             AuthorName = dto.AuthorName,
+            EditorId = dto.EditorId,
+            EditorName = dto.EditorName,
             CategoryId = dto.CategoryId,
             FeaturedImageUrl = dto.FeaturedImageUrl,
             PublishedAt = dto.PublishedAt,
@@ -210,10 +233,21 @@ public class ArticlesController : Controller
 
         var input = form.Adapt<ArticleInputDto>();
         input.Id = id;
-        // Admin ve Editor AuthorId değiştirebilir; Author kendisine sabitlenir (hijack koruma).
-        input.AuthorId = (User.IsInRole("Admin") || User.IsInRole("Editor"))
-            ? form.AuthorId
-            : User.GetUserIdOrNull();
+
+        if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+        {
+            // Admin/Editor: form'dan AuthorId + EditorId
+            input.AuthorId = form.AuthorId;
+            input.EditorId = form.EditorId;
+        }
+        else
+        {
+            // Author rolü: kendi ID'sine sabitlenir; EditorId mevcut DB değeri ile korunur
+            // (form'dan gelen değer ignore edilir → hijack koruma).
+            var existing = await _uow.Articles.GetByIdIncludingDeletedAsync(id, ct);
+            input.AuthorId = User.GetUserIdOrNull();
+            input.EditorId = existing?.EditorId;
+        }
 
         var result = await _articleService.UpdateAsync(input, ct);
         if (result.IsFailure)
@@ -329,5 +363,56 @@ public class ArticlesController : Controller
                 Name = t.Translations.FirstOrDefault()?.Name ?? $"#{t.Id}",
             })
             .ToList();
+
+        vm.AuthorOptions = await BuildUserOptionsAsync(includeRoles: new[] { "Admin", "Author" }, selectedId: vm.AuthorId);
+        vm.EditorOptions = await BuildUserOptionsAsync(includeRoles: new[] { "Admin", "Editor" }, selectedId: vm.EditorId);
+
+        // Author rolündeki kullanıcı (Admin/Editor değil) AuthorId+EditorId değiştiremez.
+        vm.IsAuthorshipDisabled = User.IsInRole("Author") && !User.IsInRole("Admin") && !User.IsInRole("Editor");
+    }
+
+    /// <summary>
+    /// Verilen rollerden birine sahip aktif (IsActive && !IsDeleted) kullanıcıları
+    /// SelectListItem listesi olarak döner. <paramref name="selectedId"/> varsa
+    /// dropdown'da o değer pre-selected olur. Mevcut atanmış kullanıcı listede yoksa
+    /// (örn. silinmiş Admin) "(silinmiş kullanıcı #id)" placeholder olarak eklenir.
+    /// </summary>
+    private async Task<IReadOnlyList<SelectListItem>> BuildUserOptionsAsync(
+        string[] includeRoles,
+        int? selectedId)
+    {
+        var users = new List<ApplicationUser>();
+        foreach (var role in includeRoles)
+        {
+            var inRole = await _userManager.GetUsersInRoleAsync(role);
+            foreach (var u in inRole)
+            {
+                if (u.IsActive && !u.IsDeleted && users.All(x => x.Id != u.Id))
+                    users.Add(u);
+            }
+        }
+
+        var items = users
+            .OrderBy(u => u.FullName ?? u.UserName)
+            .Select(u => new SelectListItem
+            {
+                Value = u.Id.ToString(),
+                Text = u.FullName ?? u.UserName ?? u.Email ?? $"#{u.Id}",
+                Selected = selectedId.HasValue && selectedId.Value == u.Id,
+            })
+            .ToList();
+
+        // Selected id listede yoksa (örn. inactive olmuş user) placeholder ekle
+        if (selectedId.HasValue && items.All(i => i.Value != selectedId.Value.ToString()))
+        {
+            items.Insert(0, new SelectListItem
+            {
+                Value = selectedId.Value.ToString(),
+                Text = $"(kullanıcı #{selectedId.Value})",
+                Selected = true,
+            });
+        }
+
+        return items;
     }
 }
