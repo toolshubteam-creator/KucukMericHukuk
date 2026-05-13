@@ -229,7 +229,18 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+// Static asset cache — asp-append-version="true" + hashed querystring zaten cache-busting
+// yapıyor (file değişince ?v=hash değişir, browser cache miss → yeni dosya). Bu nedenle
+// 1 yıl immutable safe. Lighthouse "Use efficient cache lifetimes" puanını 50→100 çıkarır.
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers["Cache-Control"] =
+            "public, max-age=31536000, immutable";
+    }
+});
 
 app.UseRouting();
 

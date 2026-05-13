@@ -61,12 +61,6 @@
   - Trade-off: tutarlılık vs çift dosya değiştirme riski; şimdilik bilinçli duplicate
   - Tetik: Faz 5/6 cleanup turunda
 
-- **Google Fonts self-host (Playfair Display + Inter)**
-  - Faz 4.1'de Google Fonts CDN ile yüklendi (preconnect + display=swap)
-  - Self-host avantaj: 1 daha az DNS, GDPR safer, indirme garantili boyut
-  - Implementation: woff2 dosyalarını `wwwroot/fonts/` altına indir, @font-face ile bağla
-  - Tetik: Faz 5/6 PageSpeed optimizasyon turunda
-
 - **Self-hosting CDN dosyaları** (Faz 6 / yayın hazırlığı)
   - Faz 5.5'te CDN + SRI ile gidildi — tedarik zinciri saldırılarına karşı korumalı, ama CDN downtime'a bağımlı
   - Yayın öncesi bootstrap.min.css + js + lucide.min.js + quill.snow.css + quill.js wwwroot/lib/ altına self-host edilebilir

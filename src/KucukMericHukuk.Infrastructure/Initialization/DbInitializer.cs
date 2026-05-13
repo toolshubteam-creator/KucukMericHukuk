@@ -266,7 +266,8 @@ public class DbInitializer : IDbInitializer
                     LanguageCode = "tr-TR",
                     Name = "Ceza Hukuku",
                     Slug = "ceza-hukuku",
-                    ShortDescription = "Ceza davalarında uzman hukuki destek.",
+                    // Faz 6.14: meta description uzunluğu (Lighthouse SEO)
+                    ShortDescription = "Soruşturma, kovuşturma ve infaz aşamalarında deneyimli temsil. Müvekkillerimize geniş kapsamlı ceza hukuku danışmanlığı ve dava takibi hizmetleri.",
                     FullDescription = "<p>Ceza hukuku alanında müvekkillerimize geniş kapsamlı danışmanlık ve dava takibi hizmeti sağlıyoruz. Soruşturma, kovuşturma ve infaz aşamalarında deneyimli temsil sunuyoruz.</p>"
                 }
             }
@@ -283,7 +284,7 @@ public class DbInitializer : IDbInitializer
                     LanguageCode = "tr-TR",
                     Name = "Aile Hukuku",
                     Slug = "aile-hukuku",
-                    ShortDescription = "Boşanma, velayet ve nafaka davalarında deneyim.",
+                    ShortDescription = "Anlaşmalı ve çekişmeli boşanma, velayet, nafaka ve mal paylaşımı davalarında hassas yaklaşım. Sürecin her aşamasında müvekkilimizin yanındayız.",
                     FullDescription = "<p>Aile hukuku konularında hassas yaklaşımla, sürecin her aşamasında yanınızdayız. Anlaşmalı ve çekişmeli boşanma, velayet, nafaka ve mal paylaşımı davaları.</p>"
                 }
             }
@@ -300,7 +301,7 @@ public class DbInitializer : IDbInitializer
                     LanguageCode = "tr-TR",
                     Name = "İş Hukuku",
                     Slug = "is-hukuku",
-                    ShortDescription = "İşçi ve işveren hakları, iş davaları.",
+                    ShortDescription = "Kıdem tazminatı, ihbar tazminatı, işe iade ve iş kazası davalarında işçi ve işveren tarafında deneyimli temsil ve danışmanlık hizmetleri.",
                     FullDescription = "<p>İş hukuku alanında işçi ve işveren tarafında deneyimli temsil. Kıdem tazminatı, ihbar tazminatı, işe iade ve iş kazası davaları.</p>"
                 }
             }
@@ -413,7 +414,8 @@ public class DbInitializer : IDbInitializer
                 Title = "Hakkımızda", Slug = "hakkimizda",
                 Content = "<h2>Küçükmeriç Hukuk Bürosu</h2><p>Sakarya Serdivan'da hizmet veren büromuz, müvekkillerimize geniş hukuki alanlarda uzmanlık ve titiz takip sağlamaktadır.</p><p>Misyonumuz, etik ve şeffaf çalışma ilkeleri çerçevesinde adil hukuki çözümler üretmektir.</p>",
                 MetaTitle = "Hakkımızda — Küçükmeriç Hukuk Bürosu",
-                MetaDescription = "Sakarya Serdivan'da hizmet veren Küçükmeriç Hukuk Bürosu hakkında bilgi."
+                // Faz 6.14: 72 → 152 char (Google 155-160 hedef)
+                MetaDescription = "Sakarya Serdivan'da hizmet veren Küçükmeriç Hukuk Bürosu — kurucularımız, çalışma alanlarımız ve müvekkillerimize sunduğumuz hukuki hizmet anlayışı."
             },
             new
             {

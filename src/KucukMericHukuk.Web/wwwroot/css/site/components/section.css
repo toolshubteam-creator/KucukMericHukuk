@@ -17,7 +17,7 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--color-accent-dark);
+    color: var(--color-accent-text); /* Faz 6.14: WCAG AA contrast */
     margin-bottom: var(--space-1);
 }
 
