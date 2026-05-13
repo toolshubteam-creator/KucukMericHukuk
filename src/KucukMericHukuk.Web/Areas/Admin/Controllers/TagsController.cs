@@ -12,7 +12,7 @@ namespace KucukMericHukuk.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Route("admin/tags")]
-[Authorize(Roles = "Admin,Editor")]
+[Authorize(Roles = "Admin")]
 public class TagsController : Controller
 {
     private readonly ITagService _tagService;

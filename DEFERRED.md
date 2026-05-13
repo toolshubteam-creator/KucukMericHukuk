@@ -145,17 +145,6 @@
   - Server-side throttling gerekebilir (rate limit, MediaService
     isteğe bağlı kuyruk)
 
-- **Article: Editor/Author rol bazlı yetkilendirme**
-  - Faz 3 başlangıç kararıyla ertelendi (3 başında: B seçeneği)
-  - Editor rolündeki kullanıcı sadece `Article.AuthorId == currentUserId`
-    olan kayıtları görür/düzenler/siler
-  - Implementation: IAuthorizationService + custom AuthorizationHandler
-    (`ArticleAuthorRequirement`) + service katmanında guard
-  - Integration test gerekir (3 senaryo: kendi makalesi, başkasının
-    makalesi, admin tüm makaleler)
-  - Faz 3'te tüm Article CRUD `[Authorize(Roles = "Admin")]` — service'te
-    AuthorId ataması yapılır, yetki guard'ı sonradan eklenir (breaking değil)
-
 - **Article: Scheduled publishing (zamanlanmış yayın)**
   - Faz 3 başlangıç kararıyla ertelendi (Status akışı sadeleştirildi)
   - Senaryo: `PublishedAt > Now && Status = Published` → frontend gizler,
@@ -246,6 +235,22 @@
 
 ---
 
+## Faz 6.10a → Article EditorId field + JSON-LD editor
+
+- **Article EditorId field + JSON-LD editor + Editor seçici** (Faz 6.10a)
+  - Faz 6.10 hot-fix'inde Author/Editor rol ayrımı yapıldı (Author yazar, Editor düzenler).
+  - Eksik:
+    - `Article` entity'sine `EditorId` field (nullable FK → `ApplicationUser`)
+    - Migration `AddArticleEditorId`
+    - Article admin form'da Editor seçici dropdown (Editor rolündeki user'lar)
+    - Edit POST'ta Editor/Admin EditorId güncellenir (Author değiştiremez — hijack koruma)
+    - Public Article view: "Yazar: X — Editör: Y" görüntüleme
+    - `IJsonLdService.BuildArticle` → editor alanı (Person schema, Article author'a paralel)
+    - Test: EditorId atama, JSON-LD editor render, Author EditorId hijack koruma
+  - Tetik: Faz 6.10 hot-fix sonrası, yakın
+
+---
+
 ## Faz 6 → Yayına Alma
 
 - **Müşteri iletişim bilgileri** (Faz 0 → SiteInfo doldurma)
@@ -266,18 +271,6 @@
   - Kök sebep belirsiz: muhtemelen Tabler theme + Bootstrap entegrasyon detayı, browser-level event capture problemi, veya başka subtle bir konflikt
   - Geçici çözüm: Sidebar'a Profilim + Çıkış Yap item'ları eklendi (`_AdminSidebar.cshtml`, dropdown bypass) — kullanıcı pratik olarak logout'a erişebilir
   - Tetik: Faz 7 / UI cleanup turu veya başka bir admin sayfasında benzer dropdown gerektiğinde
-
-- **Editor rolü sidebar item erişim haritası netleştirme** (Faz 6+ / UX)
-  - Faz 6.8 manuel teyit Madde 3'te tespit edildi: Editor login olunca hiçbir sidebar item'a giremiyor
-  - Spec madde 6.1: Editor "yalnızca kendi makalelerini yazma, düzenleme — diğer panellere erişim yok"
-  - Beklenen: Articles erişimi VAR, diğer modüller 403 veya sidebar'dan gizli
-  - Mevcut: Editor sidebar'da hangi item'ları görüyor + tıkladığında hangileri 403 — kesin durum belirsiz, Madde 3 raporda "hiç giremiyor" denildi
-  - İlgili DEFERRED: "Article: Editor/Author rol bazlı yetkilendirme" (Faz 3'ten beri)
-  - Çözüm yaklaşımı: Sidebar item'larında `@if (User.IsInRole("Admin") || User.IsInRole("Editor"))` koşullu render + Articles controller `Editor` rolüne `[Authorize(Roles = "Admin,Editor")]`
-  - Tetik: Article AuthorId yetkilendirme implementation (DEFERRED'da Faz 3'ten beri) ile birlikte ele al
-
-
-
 
 - **Production seed credentials**
   - `Seed__AdminPassword` env var ile farklı + güçlü değer

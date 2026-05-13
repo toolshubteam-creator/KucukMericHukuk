@@ -17,6 +17,16 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>
     public const string AdminPassword = "Test!Pass123.";
     public const string AdminRoleName = "Admin";
 
+    // Editor rolü: tüm makaleleri görür ve düzenler (review/edit görevi).
+    public const string EditorEmail = "editor@test.local";
+    public const string EditorPassword = "Test!Pass123.";
+    public const string EditorRoleName = "Editor";
+
+    // Author rolü: sadece kendi makalelerini görür ve düzenler.
+    public const string AuthorEmail = "author@test.local";
+    public const string AuthorPassword = "Test!Pass123.";
+    public const string AuthorRoleName = "Author";
+
     private SqliteConnection? _connection;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -81,6 +91,40 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(user, AdminRoleName);
+            }
+        }
+
+        if (await userManager.FindByEmailAsync(EditorEmail) is null)
+        {
+            var user = new ApplicationUser
+            {
+                UserName = EditorEmail,
+                Email = EditorEmail,
+                EmailConfirmed = true,
+                FullName = "Test Editor"
+            };
+
+            var result = await userManager.CreateAsync(user, EditorPassword);
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, EditorRoleName);
+            }
+        }
+
+        if (await userManager.FindByEmailAsync(AuthorEmail) is null)
+        {
+            var user = new ApplicationUser
+            {
+                UserName = AuthorEmail,
+                Email = AuthorEmail,
+                EmailConfirmed = true,
+                FullName = "Test Author"
+            };
+
+            var result = await userManager.CreateAsync(user, AuthorPassword);
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, AuthorRoleName);
             }
         }
     }

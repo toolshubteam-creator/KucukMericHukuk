@@ -143,6 +143,7 @@ public class ArticleService : IArticleService
             page: query.Page,
             pageSize: query.PageSize,
             includeDeleted: query.IncludeDeleted,
+            authorIdFilter: query.AuthorIdFilter,
             ct: ct);
 
         var mapped = paged.Items.Select(a => _mapper.Map<ArticleAdminDto>(a)).ToList();

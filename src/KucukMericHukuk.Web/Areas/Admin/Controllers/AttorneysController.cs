@@ -17,7 +17,7 @@ namespace KucukMericHukuk.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Route("admin/attorneys")]
-[Authorize(Roles = "Admin,Editor")]
+[Authorize(Roles = "Admin")]
 public class AttorneysController : Controller
 {
     private readonly IAttorneyService _attorneyService;
