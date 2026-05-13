@@ -5,9 +5,13 @@
     ViewData["Title"] = !string.IsNullOrEmpty(Model.Article.MetaTitle)
         ? Model.Article.MetaTitle
         : Model.Article.Title;
-    ViewData["MetaDescription"] = !string.IsNullOrEmpty(Model.Article.MetaDescription)
-        ? Model.Article.MetaDescription
-        : Model.Article.Excerpt;
+    // Faz 6.16: Meta description fallback chain — MetaDescription kısa olsa bile
+    // MetaTagsHelpers.ResolveDescription Excerpt → Content sırasını dener (HTML strip + truncate).
+    ViewData["MetaDescription"] = Model.Article.MetaDescription;
+    ViewData["MetaDescriptionFallback"] =
+        !string.IsNullOrWhiteSpace(Model.Article.Excerpt)
+            ? Model.Article.Excerpt
+            : Model.Article.Content;
     ViewData["OgImage"] = Model.Article.FeaturedImageUrl;
     ViewData["OgType"] = "article";
 

@@ -1,0 +1,19 @@
+Sayfa | HTTP | Char | Status | Description (ilk 90)
+------|------|------|--------|---------------------
+terms | 200 | 136 | OK | Site KullanXm KoXullarX Bu web sitesini ziyaret eden ve kullanan ziyaretXilerimizin uymasX
+contact | 200 | 141 | OK | KXXXkmeriX Hukuk BXrosu ile iletiXime geXin. Sakarya SerdivanXda hukuki danXXmanlXk, rande
+about | 200 | 157 | OK | Sakarya SerdivanXda hizmet veren KXXXkmeriX Hukuk BXrosu X ceza, aile, iX, miras ve ticare
+gallery | 200 | 124 | OK | KXXXkmeriX Hukuk BXrosu galerisi X Sakarya Serdivan ofisimiz, avukat kadromuz ve XalXXma o
+articles-list | 200 | 116 | OK | Hukuki geliXmeler, gXrXX yazXlarX ve dava deXerlendirmeleri. Ceza, aile, iX ve ticaret huk
+article-detail | 200 | 157 | OK | Sakarya SerdivanXda hizmet veren KXXXkmeriX Hukuk BXrosu X ceza, aile, iX, miras ve ticare
+home | 200 | 139 | OK | Sakarya SerdivanXda KXXXkmeriX Hukuk BXrosu X ceza, aile, iX, miras ve ticaret hukukunda p
+disclosure | 200 | 156 | OK | KVKK AydXnlatma Metni 6698 sayXlX KiXisel Verilerin KorunmasX Kanunu (KVKK) kapsamXnda, il
+attorneys-list | 200 | 144 | OK | KXXXkmeriX Hukuk BXrosu avukat kadrosu X ceza, aile, iX ve ticaret hukuku alanlarXnda dene
+service-ceza | 200 | 157 | OK | Sakarya SerdivanXda hizmet veren KXXXkmeriX Hukuk BXrosu X ceza, aile, iX, miras ve ticare
+attorney-detail | 200 | 157 | OK | Sakarya SerdivanXda hizmet veren KXXXkmeriX Hukuk BXrosu X ceza, aile, iX, miras ve ticare
+faqs | 200 | 151 | OK | KXXXkmeriX Hukuk BXrosuXna sXkXa sorulan sorular ve cevaplarX. AvukatlXk hizmetleri, Xcret
+service-is | 200 | 157 | OK | Sakarya SerdivanXda hizmet veren KXXXkmeriX Hukuk BXrosu X ceza, aile, iX, miras ve ticare
+service-aile | 200 | 157 | OK | Sakarya SerdivanXda hizmet veren KXXXkmeriX Hukuk BXrosu X ceza, aile, iX, miras ve ticare
+services-list | 200 | 149 | OK | KXXXkmeriX Hukuk BXrosuXnun uzmanlaXtXXX hukuk alanlarX: ceza, aile, iX, miras, gayrimenku
+cookie | 200 | 158 | OK | Xerez KullanXmX Web sitemiz kullanXcX deneyimini iyileXtirmek iXin Xerezler kullanmaktadXr
+privacy | 200 | 150 | OK | KiXisel Verilerin KorunmasX 6698 sayXlX KiXisel Verilerin KorunmasX Kanunu (KVKK) kapsamXn

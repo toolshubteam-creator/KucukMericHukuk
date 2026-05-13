@@ -224,6 +224,60 @@ Faz 6.14 tek-run değerlerinde home (-6) ve article (-5) düşüş gözlendi. Va
 
 **Karar:** **C (variance bölgesi, yatay)** — median'a güven, regresyon kanıtı yok. Production deploy + 5-run ortalama ile gerçek baseline (BrowserLink olmadan) yeniden ölçülmeli. Kritik blocker yok, PR #30 merge'e hazır.
 
+---
+
+## Faz 6.16 — SEO Meta Description Deep-Dive
+
+Faz 6.13/6.14'te tek-sayfa-bazlı meta düzeltmeleri yapıldı; 6.16'da **17 public sayfanın tamamı** sistematik tarandı.
+
+### Tarama (Önce vs Sonra)
+
+17 public sayfa curl ile tarandı, `meta name="description"` char count ölçüldü (HTML entity decode sonrası).
+
+| Sayfa | Önce | Sonra | Status | Fix kaynağı |
+|---|---:|---:|---|---|
+| home | 139 | 139 | ✅ | — |
+| about | 29 | 157 | ✅ | Page.Content fallback (Helper) |
+| services-list | 103 | 149 | ✅ | view hardcoded uzat |
+| service-ceza | 37 | 157 | ✅ | Service.FullDescription fallback |
+| service-aile | 47 | 157 | ✅ | Service.FullDescription fallback |
+| service-is | 37 | 157 | ✅ | Service.FullDescription fallback |
+| attorneys-list | 72 | 144 | ✅ | view hardcoded uzat |
+| attorney-detail | 77 | 157 | ✅ | Attorney.FullBio fallback |
+| articles-list | 116 | 116 | ✅ | — |
+| article-detail | 73 | 157 | ✅ | Article.Content fallback |
+| faqs | 96 | 151 | ✅ | view hardcoded uzat |
+| gallery | 67 | 124 | ✅ | view hardcoded uzat |
+| contact | 97 | 141 | ✅ | view hardcoded uzat |
+| privacy | 67 | 150 | ✅ | Page.Content fallback |
+| cookie | 47 | 158 | ✅ | Page.Content fallback |
+| terms | 24 | 136 | ✅ | Page.Content fallback |
+| disclosure | 63 | 156 | ✅ | Page.Content fallback |
+
+**Sonuç:** 14 TOO_SHORT → **0** (17/17 OK). Tüm sayfalar SEO ideal aralığında (110-170 char).
+
+### Lighthouse SEO Re-Audit (4 sayfa)
+
+| Sayfa | Önce SEO | Sonra SEO |
+|---|---:|---:|
+| home-mobile | 100 | **100** |
+| about-mobile | 100 | **100** |
+| service-ceza-mobile | 100 | **100** |
+| article-detail-mobile | 100 | **100** |
+
+SEO skor 100 korundu (regresyon yok).
+
+### Implementation Özeti
+
+- **`MetaTagsHelpers.ResolveDescription`** — length-aware fallback chain (primary → fallback → siteDefault), HTML strip + sentence truncate. Eşik: 80 char (altı kabul edilmez, sonraki kaynağa geç).
+- **`StripHtml`** — tag temizleme + entity decode + whitespace normalize.
+- **`TruncateToSentence`** — 160 char hedef, nokta sonu öncelik, kelime sınırı fallback (≥100 char konum).
+- **5 detail view** Content/FullDescription/FullBio fallback olarak `ViewData["MetaDescriptionFallback"]`'a verildi (Article, Service, Page, Attorney).
+- **5 list/static view** hardcoded meta description literal'leri 120-160 char aralığına uzatıldı (services, attorneys, faqs, gallery, contact + Page seed: privacy/cookie/terms/disclosure).
+
+### Test
+- 428 + 10 = **438 PASSED** — MetaTagsHelpers ResolveDescription/StripHtml/TruncateToSentence + revised override semantics.
+
 ### Kalan İyileştirmeler (Faz 6.15+)
 
 - **Mobile render-blocking** — Bootstrap CSS hala CDN'den senkron (33 KB, 1099 ms wasted). Self-host CDN dosyaları (DEFERRED) ile birlikte değerlendirme

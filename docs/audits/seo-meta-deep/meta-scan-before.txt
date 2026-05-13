@@ -1,0 +1,19 @@
+Sayfa | HTTP | Char | Status | Description (ilk 90)
+------|------|------|--------|---------------------
+terms | 200 | 24 | TOO_SHORT | Site kullanXm koXullarX.
+contact | 200 | 97 | TOO_SHORT | KXXXkmeriX Hukuk BXrosu ile iletiXime geXin. Serdivan/Sakarya X randevu ve danXXmanlXk tal
+about | 200 | 29 | TOO_SHORT | Sakarya Serdivan hukuk bXrosu
+gallery | 404 | 157 | OK | Sakarya SerdivanXda hizmet veren KXXXkmeriX Hukuk BXrosu X ceza, aile, iX, miras ve ticare
+articles-list | 200 | 116 | OK | Hukuki geliXmeler, gXrXX yazXlarX ve dava deXerlendirmeleri. Ceza, aile, iX ve ticaret huk
+article-detail | 200 | 73 | TOO_SHORT | Bir hukuki sXreX baXlatmadan Xnce dikkat edilmesi gereken temel noktalar.
+home | 200 | 139 | OK | Sakarya SerdivanXda KXXXkmeriX Hukuk BXrosu X ceza, aile, iX, miras ve ticaret hukukunda p
+disclosure | 200 | 63 | TOO_SHORT | KiXisel verilerin korunmasX kanunu kapsamXnda aydXnlatma metni.
+attorneys-list | 200 | 72 | TOO_SHORT | KXXXkmeriX Hukuk BXrosu avukat ekibi. Deneyimli avukatlarXmXzla tanXXXn.
+service-ceza | 200 | 37 | TOO_SHORT | Ceza davalarXnda uzman hukuki destek.
+attorney-detail | 200 | 77 | TOO_SHORT | Hukuk alanXnda deneyimli avukat. DetaylX iXerik mXXteri tarafXndan girilecek.
+faqs | 200 | 96 | TOO_SHORT | KXXXkmeriX Hukuk BXrosu X sXk sorulan sorular ve hukuki danXXmanlXk sXreXleri hakkXnda bil
+service-is | 200 | 37 | TOO_SHORT | XXXi ve iXveren haklarX, iX davalarX.
+service-aile | 200 | 47 | TOO_SHORT | BoXanma, velayet ve nafaka davalarXnda deneyim.
+services-list | 200 | 103 | TOO_SHORT | KXXXkmeriX Hukuk BXrosu uzmanlXk alanlarX: ceza, aile, iX, miras, gayrimenkul, ticaret ve 
+cookie | 200 | 47 | TOO_SHORT | Web sitemizdeki Xerez kullanXmX hakkXnda bilgi.
+privacy | 200 | 67 | TOO_SHORT | KiXisel verilerin korunmasX kanunu kapsamXnda gizlilik politikamXz.

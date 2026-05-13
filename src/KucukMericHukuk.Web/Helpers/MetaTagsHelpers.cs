@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 using KucukMericHukuk.Core.Common;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -18,6 +19,8 @@ public static class MetaTagsHelpers
     /// View'larda set edilen ViewData anahtarları:
     /// - Title (string?)            — sayfa adı; null ise ana sayfa olarak değerlendirilir
     /// - MetaDescription (string?)  — sayfa-özel description; yoksa SiteInfo.Description
+    /// - MetaDescriptionFallback (string?) — MetaDescription &lt;50 char ise denenir;
+    ///                                       HTML strip + sentence truncate uygulanır (Faz 6.16)
     /// - OgImage (string?)          — relative ya da absolute URL; yoksa SiteInfo.DefaultOgImage
     /// - OgType (string?)           — "website" (default), "article", "profile"
     /// - CanonicalUrl (string?)     — explicit canonical override; yoksa BaseUrl + Request.Path
@@ -39,10 +42,14 @@ public static class MetaTagsHelpers
                 : $"{siteInfo.Name} — {siteInfo.Tagline}")
             : $"{pageTitle} | {siteInfo.Name}";
 
-        // Description (fallback: SiteInfo.Description)
-        var description = viewData["MetaDescription"] as string;
-        if (string.IsNullOrEmpty(description))
-            description = siteInfo.Description;
+        // Description — Faz 6.16: length-aware fallback chain
+        //   1) ViewData["MetaDescription"]  (>=50 char ise kullan, truncate)
+        //   2) ViewData["MetaDescriptionFallback"] (HTML strip + truncate)
+        //   3) siteInfo.Description (son çare)
+        var description = ResolveDescription(
+            viewData["MetaDescription"] as string,
+            viewData["MetaDescriptionFallback"] as string,
+            siteInfo.Description);
 
         // OG image (fallback: default; absolute prefix)
         var ogImage = viewData["OgImage"] as string;
@@ -119,5 +126,71 @@ public static class MetaTagsHelpers
             qs.Add($"page={pageNumber}");
 
         return qs.Count == 0 ? basePath : basePath + "?" + string.Join("&", qs);
+    }
+
+    // ─── Faz 6.16: Meta description fallback helpers ───
+
+    // Faz 6.16: SEO için ideal aralık 120-160 char. Kabul eşiği 80 — bu üstündeki
+    // değerler kullanılır, altındakiler bir sonraki fallback'e geçer. Eşik düşük
+    // tutulursa kısa Excerpt (~70 char) kullanılır ve Content fallback tetiklenmez.
+    private const int MinAcceptableLength = 80;
+    private const int MaxRecommendedLength = 160;
+
+    /// <summary>
+    /// Verilen kaynak listesinden ilk &quot;yeterince uzun&quot; (≥50 char, HTML strip sonrası) olanı
+    /// 160 char civarına truncate ederek döner. Hiçbiri uygun değilse <paramref name="siteDefault"/>'a düşer.
+    /// </summary>
+    public static string ResolveDescription(string? primary, string? fallback, string siteDefault)
+    {
+        foreach (var candidate in new[] { primary, fallback })
+        {
+            if (string.IsNullOrWhiteSpace(candidate)) continue;
+            var stripped = StripHtml(candidate);
+            if (stripped.Length < MinAcceptableLength) continue;
+            return TruncateToSentence(stripped, MaxRecommendedLength);
+        }
+        // siteDefault zaten temizlenmiş varsayılır; yine de strip + truncate uygulanır.
+        var defaultStripped = StripHtml(siteDefault ?? string.Empty);
+        return TruncateToSentence(defaultStripped, MaxRecommendedLength);
+    }
+
+    private static readonly Regex HtmlTagRegex =
+        new("<[^>]+>", RegexOptions.Compiled | RegexOptions.Singleline);
+    private static readonly Regex WhitespaceRegex =
+        new(@"\s+", RegexOptions.Compiled);
+
+    /// <summary>
+    /// HTML tag'lerini siler, çoklu whitespace'i tek boşluğa indirir, HTML entity'leri decode eder.
+    /// </summary>
+    public static string StripHtml(string? html)
+    {
+        if (string.IsNullOrWhiteSpace(html)) return string.Empty;
+        var withoutTags = HtmlTagRegex.Replace(html, " ");
+        var decoded = System.Net.WebUtility.HtmlDecode(withoutTags);
+        return WhitespaceRegex.Replace(decoded, " ").Trim();
+    }
+
+    /// <summary>
+    /// Metni en fazla <paramref name="maxLength"/> karaktere kısaltır; mümkünse cümle sonunda (`.`),
+    /// olmazsa kelime sınırında (`space`) keser. Tail "…" eklenir kelime kesiminde.
+    /// 100 karakterden kısa nokta/boşluk konumlarına kesim yapılmaz (kırpıntı bırakmamak için).
+    /// </summary>
+    public static string TruncateToSentence(string text, int maxLength = MaxRecommendedLength)
+    {
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+        if (text.Length <= maxLength) return text;
+
+        var window = text.Substring(0, maxLength);
+
+        // Cümle sonu öncelikli (≥100 char civarında bir nokta varsa kullan)
+        var lastDot = window.LastIndexOf('.');
+        if (lastDot >= 100) return window.Substring(0, lastDot + 1);
+
+        // Kelime sınırı fallback
+        var lastSpace = window.LastIndexOf(' ');
+        if (lastSpace >= 100) return window.Substring(0, lastSpace) + "…";
+
+        // Aşırı kırpıntı durumu: maxLength'te kesip ellipsis ekle
+        return window + "…";
     }
 }

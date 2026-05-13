@@ -4,9 +4,12 @@
     ViewData["Title"] = !string.IsNullOrEmpty(Model.Service.MetaTitle)
         ? Model.Service.MetaTitle
         : Model.Service.Name;
-    ViewData["MetaDescription"] = !string.IsNullOrEmpty(Model.Service.MetaDescription)
-        ? Model.Service.MetaDescription
-        : Model.Service.ShortDescription;
+    // Faz 6.16: Meta fallback chain — MetaDescription kısaysa ShortDescription, sonra FullDescription
+    ViewData["MetaDescription"] = Model.Service.MetaDescription;
+    ViewData["MetaDescriptionFallback"] =
+        !string.IsNullOrWhiteSpace(Model.Service.ShortDescription)
+            ? Model.Service.ShortDescription
+            : Model.Service.FullDescription;
     ViewData["OgImage"] = Model.Service.FeaturedImage;
 
     var iconName = string.IsNullOrEmpty(Model.Service.Icon) ? "scale" : Model.Service.Icon;

@@ -228,6 +228,14 @@
 
 ## Faz 6 → Yayına Alma
 
+- **Müşteri içerik tamamlanınca meta description revize** (Yayın öncesi son tur)
+  - Faz 6.16'da generic/örnek meta description'lar set edildi (Page seed + view literal'leri)
+  - Müşteri gerçek içerik geldiğinde her sayfa için anahtar kelime optimize meta description yazılmalı
+  - `MetaTagsHelpers.ResolveDescription` length-aware fallback sigorta: explicit boş/kısa olsa bile Excerpt/Content'ten otomatik çıkar
+  - Mevcut LocalDB'de Page/Service/Article entity'lerinde kısa MetaDescription değerleri varsa admin panelden uzatma gerekir (seed key-bazlı idempotent, otomatik update etmez)
+  - Tetik: Müşteri içerik teslim turundan sonra
+
+
 - **Service detay JSON-LD** (Faz 5.4 / Faz 6)
   - Faz 5.2'de Article + Person + FAQPage işlendi; Service detay için LegalService alt-tipi (örn. ProfessionalService) düşünülebilir
   - Service detay zaten LegalService'in bir parçası; ayrı schema marjinal ek değer

@@ -5,9 +5,12 @@
     ViewData["Title"] = !string.IsNullOrEmpty(Model.Attorney.MetaTitle)
         ? Model.Attorney.MetaTitle
         : Model.Attorney.FullName;
-    ViewData["MetaDescription"] = !string.IsNullOrEmpty(Model.Attorney.MetaDescription)
-        ? Model.Attorney.MetaDescription
-        : Model.Attorney.ShortBio;
+    // Faz 6.16: MetaDescription kısaysa ShortBio, sonra FullBio fallback
+    ViewData["MetaDescription"] = Model.Attorney.MetaDescription;
+    ViewData["MetaDescriptionFallback"] =
+        !string.IsNullOrWhiteSpace(Model.Attorney.ShortBio)
+            ? Model.Attorney.ShortBio
+            : Model.Attorney.FullBio;
     ViewData["OgImage"] = Model.Attorney.ProfileImageUrl;
     ViewData["OgType"] = "profile";
 

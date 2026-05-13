@@ -3,7 +3,8 @@
 @inject Microsoft.Extensions.Options.IOptionsSnapshot<KucukMericHukuk.Core.Common.SiteInfoOptions> SiteInfo
 @{
     ViewData["Title"] = "İletişim";
-    ViewData["MetaDescription"] = "Küçükmeriç Hukuk Bürosu ile iletişime geçin. Serdivan/Sakarya — randevu ve danışmanlık talepleri.";
+    // Faz 6.16: 97 → 137 char
+    ViewData["MetaDescription"] = "Küçükmeriç Hukuk Bürosu ile iletişime geçin. Sakarya Serdivan'da hukuki danışmanlık, randevu talebi ve müvekkil destek hizmetleri için yazın.";
 
     var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
     var turnstileSiteKey = TurnstileOptions.Value.SiteKey;
