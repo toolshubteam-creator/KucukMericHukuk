@@ -241,6 +241,22 @@
   - Geçici çözüm: Sidebar'a Profilim + Çıkış Yap item'ları eklendi (`_AdminSidebar.cshtml`, dropdown bypass) — kullanıcı pratik olarak logout'a erişebilir
   - Tetik: Faz 7 / UI cleanup turu veya başka bir admin sayfasında benzer dropdown gerektiğinde
 
+- **Randevu modülü** (Spec madde 2.1, Faz 7 / post-launch)
+  - Public randevu talep formu (ad, soyad, telefon, e-posta, tercih edilen tarih/saat, konu) + KVKK onay
+  - Entity (`Appointment`), DTO, Service, Repository
+  - Admin yönetim: gelen talepler listesi, durum (Pending/Confirmed/Rejected/Completed), onay/red aksiyonları
+  - Email bildirimi: admin'e yeni talep, müvekkile onay/red yanıtı
+  - JSON-LD: Schedule.org Reservation (opsiyonel)
+  - Geçici çözüm Faz 6.15'te: `_HeroSection.cshtml` + `_CtaSection.cshtml` içindeki "Randevu Alın" linkleri `/tr-TR/Contact`'a yönlendiriliyor — kullanıcı genel iletişim formundan talebini yazabilir
+  - Tetik: Müşteri "randevu sistemi kullanacağız" onayı veya yayın sonrası kullanım ihtiyacı
+
+- **Dashboard widget genişletme** (Spec madde 5.1, Faz 7)
+  - Mevcut: yalnızca ContactMessages widget'ı (`/admin` dashboard)
+  - Eksik: son makaleler, 404 hataları sayısı, son aktivite logları, ziyaretçi özeti
+  - Mevcut data zaten DB'de (`ActivityLogs`, `NotFoundLogs`, `Articles`); sadece widget UI + AdminController action gerek
+  - Faz 6.13 cross-browser test sırasında not düşüldü (`docs/audits/2026-05-13-cross-browser-test.md`)
+  - Tetik: Yayın sonrası iterasyon — gerçek kullanım datası geldikten sonra (hangi widget'lar değerli görülecek)
+
 ---
 
 ## Belirsiz Zamanlama
