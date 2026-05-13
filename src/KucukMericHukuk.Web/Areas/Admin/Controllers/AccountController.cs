@@ -102,6 +102,80 @@ public class AccountController : Controller
         return RedirectToAction("Login");
     }
 
+    [HttpGet("profile")]
+    [Authorize]
+    public async Task<IActionResult> Profile()
+    {
+        ViewData["Title"] = "Profilim";
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+
+        var vm = await BuildProfileViewModelAsync(user);
+        return View(vm);
+    }
+
+    [HttpPost("profile/change-password")]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ProfileViewModel form)
+    {
+        ViewData["Title"] = "Profilim";
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null) return Challenge();
+
+        // DataAnnotations ChangePassword alt-objesi üzerinde — sadece o branch'i kontrol et.
+        // (Üst-seviye Profile metin alanları read-only, formdan gelmez/gelmemeli.)
+        if (!ModelState.IsValid)
+        {
+            var vm = await BuildProfileViewModelAsync(user);
+            vm.ChangePassword = form.ChangePassword;
+            return View(nameof(Profile), vm);
+        }
+
+        var result = await _userManager.ChangePasswordAsync(
+            user,
+            form.ChangePassword.OldPassword,
+            form.ChangePassword.NewPassword);
+
+        if (!result.Succeeded)
+        {
+            foreach (var err in result.Errors)
+            {
+                // Identity password policy hataları ChangePassword alanına bağlanır,
+                // validation summary'de değil ilgili input grubunun yanında görünür.
+                ModelState.AddModelError(
+                    $"{nameof(ProfileViewModel.ChangePassword)}.{nameof(ChangePasswordInputModel.NewPassword)}",
+                    err.Description);
+            }
+
+            var vm = await BuildProfileViewModelAsync(user);
+            vm.ChangePassword = form.ChangePassword;
+            return View(nameof(Profile), vm);
+        }
+
+        // Security stamp güncellendi — mevcut cookie geçerli ama refresh edilmeli ki
+        // yeni hash ile claims yeniden üretilsin (diğer aktif oturumlar invalidate olur).
+        await _signInManager.RefreshSignInAsync(user);
+
+        _logger.LogInformation("Kullanıcı şifresi değiştirildi: {Email}", user.Email);
+        TempData["Success"] = "Şifreniz başarıyla değiştirildi.";
+        return RedirectToAction(nameof(Profile));
+    }
+
+    private async Task<ProfileViewModel> BuildProfileViewModelAsync(ApplicationUser user)
+    {
+        var roles = await _userManager.GetRolesAsync(user);
+        return new ProfileViewModel
+        {
+            FullName = user.FullName ?? string.Empty,
+            UserName = user.UserName ?? string.Empty,
+            Email = user.Email ?? string.Empty,
+            Role = roles.FirstOrDefault() ?? string.Empty,
+        };
+    }
+
     private IActionResult RedirectToLocal(string? returnUrl)
     {
         if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
