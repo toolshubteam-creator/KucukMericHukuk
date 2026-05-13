@@ -234,12 +234,6 @@
 
 ## Faz 6 → Yayına Alma
 
-- **Müşteri iletişim bilgileri** (Faz 0 → SiteInfo doldurma)
-  - Faz 6.1'de SiteSettings entity eklendi — yapısal hazır, admin /admin/site-settings sayfasından düzenleyebilir
-  - Müşteri Telephone, Email, StreetAddress, PostalCode, Latitude/Longitude değerlerini admin panelinden girer
-  - LegalService schema bu alanlarla zenginleşir; şu an boş alanlar schema'da render edilmez
-  - Tetik: Faz 0 müşteri içerik teslimatı (artık yalnızca müşteri tarafı blocker, geliştirme tarafı tamam)
-
 - **Service detay JSON-LD** (Faz 5.4 / Faz 6)
   - Faz 5.2'de Article + Person + FAQPage işlendi; Service detay için LegalService alt-tipi (örn. ProfessionalService) düşünülebilir
   - Service detay zaten LegalService'in bir parçası; ayrı schema marjinal ek değer
@@ -252,13 +246,6 @@
   - Kök sebep belirsiz: muhtemelen Tabler theme + Bootstrap entegrasyon detayı, browser-level event capture problemi, veya başka subtle bir konflikt
   - Geçici çözüm: Sidebar'a Profilim + Çıkış Yap item'ları eklendi (`_AdminSidebar.cshtml`, dropdown bypass) — kullanıcı pratik olarak logout'a erişebilir
   - Tetik: Faz 7 / UI cleanup turu veya başka bir admin sayfasında benzer dropdown gerektiğinde
-
-- **Production seed credentials**
-  - `Seed__AdminPassword` env var ile farklı + güçlü değer
-  - User Secrets sadece dev
-
-- **LocalDB → SQL Server** geçişi
-  - Connection string env var
 
 ---
 

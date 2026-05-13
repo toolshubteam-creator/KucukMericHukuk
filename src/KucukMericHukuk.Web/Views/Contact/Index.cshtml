@@ -1,5 +1,6 @@
 @model KucukMericHukuk.Web.ViewModels.Contact.ContactFormViewModel
 @inject Microsoft.Extensions.Options.IOptions<KucukMericHukuk.Core.Common.TurnstileOptions> TurnstileOptions
+@inject Microsoft.Extensions.Options.IOptionsSnapshot<KucukMericHukuk.Core.Common.SiteInfoOptions> SiteInfo
 @{
     ViewData["Title"] = "İletişim";
     ViewData["MetaDescription"] = "Küçükmeriç Hukuk Bürosu ile iletişime geçin. Serdivan/Sakarya — randevu ve danışmanlık talepleri.";
@@ -7,6 +8,11 @@
     var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
     var turnstileSiteKey = TurnstileOptions.Value.SiteKey;
     var turnstileEnabled = TurnstileOptions.Value.Enabled;
+
+    var site = SiteInfo.Value;
+    var fullAddress = string.Join(", ",
+        new[] { site.StreetAddress, site.AddressLocality, site.AddressRegion }
+            .Where(s => !string.IsNullOrWhiteSpace(s)));
 
     ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
     {
@@ -29,18 +35,34 @@
             <aside class="contact-info">
                 <h2 class="contact-info__title">İletişim bilgileri</h2>
                 <ul class="contact-info__list">
-                    <li>
-                        <i data-lucide="map-pin" width="20" height="20"></i>
-                        <span>Serdivan / Sakarya</span>
-                    </li>
-                    <li>
-                        <i data-lucide="mail" width="20" height="20"></i>
-                        <span>info@kucukmerichukuk.av.tr</span>
-                    </li>
-                    <li>
-                        <i data-lucide="clock" width="20" height="20"></i>
-                        <span>Hafta içi 09:00 — 18:00</span>
-                    </li>
+                    @if (!string.IsNullOrWhiteSpace(fullAddress))
+                    {
+                        <li>
+                            <i data-lucide="map-pin" width="20" height="20"></i>
+                            <span>@fullAddress</span>
+                        </li>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(site.Telephone))
+                    {
+                        <li>
+                            <i data-lucide="phone" width="20" height="20"></i>
+                            <a href="tel:@System.Text.RegularExpressions.Regex.Replace(site.Telephone, @"\s+", "")">@site.Telephone</a>
+                        </li>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(site.Email))
+                    {
+                        <li>
+                            <i data-lucide="mail" width="20" height="20"></i>
+                            <a href="mailto:@site.Email">@site.Email</a>
+                        </li>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(site.OpeningHoursDescription))
+                    {
+                        <li>
+                            <i data-lucide="clock" width="20" height="20"></i>
+                            <span>@site.OpeningHoursDescription</span>
+                        </li>
+                    }
                 </ul>
             </aside>
 

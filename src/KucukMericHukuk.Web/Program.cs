@@ -267,6 +267,15 @@ app.MapAreaControllerRoute(
     areaName: "Admin",
     pattern: "admin/{controller=Admin}/{action=Index}/{id?}");
 
+// Production env'da admin seed credentials zorunlu — eksikse startup fail.
+// Dev'de DbInitializer warn ile devam ediyor; production'da bu kabul edilemez.
+if (app.Environment.IsProduction())
+{
+    var seedOptions = app.Configuration.GetSection(SeedOptions.SectionName).Get<SeedOptions>()
+        ?? new SeedOptions();
+    seedOptions.ValidateForProduction();
+}
+
 // DbInitializer (Testing ortamında çalıştırma — testler izole DB kullanıyor)
 if (!app.Environment.IsEnvironment("Testing"))
 {

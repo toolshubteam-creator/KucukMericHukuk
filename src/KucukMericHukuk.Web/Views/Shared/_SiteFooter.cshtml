@@ -1,13 +1,34 @@
-@* Faz 4.6: footer alt linkler eklendi (KVKK, Çerez, Kullanım) *@
+@* Faz 4.6: footer alt linkler (KVKK, Çerez, Kullanım)
+   Faz 6.12-fix: SiteInfo bilgileri (Telephone/Email/Address) admin /site-settings'ten render edilir *@
+@inject Microsoft.Extensions.Options.IOptionsSnapshot<KucukMericHukuk.Core.Common.SiteInfoOptions> SiteInfo
 @{
     var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+    var site = SiteInfo.Value;
+    var addressLine = string.Join(" / ",
+        new[] { site.AddressLocality, site.AddressRegion }
+            .Where(s => !string.IsNullOrWhiteSpace(s)));
 }
 <footer class="site-footer">
     <div class="container">
         <div class="row">
             <div class="col-md-6">
-                <p class="mb-1"><strong>Küçükmeriç Hukuk Bürosu</strong></p>
-                <p class="mb-0 small">Serdivan / Sakarya</p>
+                <p class="mb-1"><strong>@site.Name</strong></p>
+                @if (!string.IsNullOrWhiteSpace(addressLine))
+                {
+                    <p class="mb-1 small">@addressLine</p>
+                }
+                @if (!string.IsNullOrWhiteSpace(site.Telephone))
+                {
+                    <p class="mb-1 small">
+                        <a href="tel:@System.Text.RegularExpressions.Regex.Replace(site.Telephone, @"\s+", "")">@site.Telephone</a>
+                    </p>
+                }
+                @if (!string.IsNullOrWhiteSpace(site.Email))
+                {
+                    <p class="mb-0 small">
+                        <a href="mailto:@site.Email">@site.Email</a>
+                    </p>
+                }
             </div>
             <div class="col-md-6 text-md-end">
                 <p class="mb-1 small">&copy; @DateTime.Now.Year Tüm hakları saklıdır.</p>
