@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /Identity/
+Disallow: /Contact/ThankYou
+Disallow: /Error/
+Allow: /
+
+Sitemap: https://localhost:7082/sitemap.xml
