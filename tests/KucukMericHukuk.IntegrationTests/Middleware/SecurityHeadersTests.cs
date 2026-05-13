@@ -33,16 +33,18 @@ public class SecurityHeadersTests : IClassFixture<IntegrationTestFactory>
     }
 
     [Fact]
-    public async Task Csp_ConnectSrc_IncludesJsDelivr_ForSourceMapFetches()
+    public async Task Csp_AllowList_ExcludesCdnSources_AfterSelfHost()
     {
-        // Faz 6.8 fix: cdn.jsdelivr.net connect-src'de olmazsa Bootstrap/Tabler script source map fetch'leri bloklanır
-        // → bazı JS özellikleri (dropdown init dahil) hatalı çalışabilir.
+        // Faz 6.17: tüm vendor JS/CSS wwwroot/lib/ altına self-host edildi.
+        // CSP'den cdn.jsdelivr.net + unpkg.com tasfiye edildi; geriye sadece Cloudflare Turnstile kaldı.
         var client = _factory.CreateClient();
         var response = await client.GetAsync("/tr-TR/");
         var csp = response.Headers.GetValues("Content-Security-Policy").FirstOrDefault();
 
         csp.Should().NotBeNullOrEmpty();
-        // connect-src direktifinde jsdelivr olmalı
-        csp.Should().MatchRegex(@"connect-src[^;]*https://cdn\.jsdelivr\.net");
+        csp.Should().NotContain("cdn.jsdelivr.net");
+        csp.Should().NotContain("unpkg.com");
+        // Turnstile istisna — script-src + frame-src + connect-src'de korunur (Cloudflare-managed)
+        csp.Should().MatchRegex(@"script-src[^;]*https://challenges\.cloudflare\.com");
     }
 }

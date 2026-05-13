@@ -61,18 +61,6 @@
   - Trade-off: tutarlılık vs çift dosya değiştirme riski; şimdilik bilinçli duplicate
   - Tetik: Faz 5/6 cleanup turunda
 
-- **Self-hosting CDN dosyaları** (Faz 6 / yayın hazırlığı)
-  - Faz 5.5'te CDN + SRI ile gidildi — tedarik zinciri saldırılarına karşı korumalı, ama CDN downtime'a bağımlı
-  - Yayın öncesi bootstrap.min.css + js + lucide.min.js + quill.snow.css + quill.js wwwroot/lib/ altına self-host edilebilir
-  - asp-append-version cache busting ile birlikte
-  - Tetik: Production öncesi karar veya CDN downtime yaşanırsa
-
-- **CI'da SRI doğrulama** (Faz 6+ / CI pipeline)
-  - Faz 5.5'te scripts/sri-check.{sh,ps1} manuel çalıştırılır
-  - GitHub Actions workflow: PR'da scripts/sri-check.sh çalıştır, layout'taki integrity attribute'larıyla karşılaştır, uyuşmazlık varsa fail
-  - Bootstrap/Lucide/Quill sürümü güncellenirken hash güncellenmeyi unutursa production'da kırılma riski → CI bunu yakalar
-  - Tetik: Faz 6 CI/CD kurulumu
-
 - **Sitemap caching** (Faz 6 / performans)
   - Faz 5.3'te request-time generation (DB hit her istekte: 4 query)
   - Crawler trafiği yüksekleşirse 1h MemoryCache eklenir
@@ -191,7 +179,7 @@
 - **Turnstile JS pin/SRI istisna** (kalıcı not)
   - challenges.cloudflare.com/turnstile/v0/api.js Cloudflare server-maintained, otomatik update
   - SRI hash bozulur (her güncellemede deploy fail), pin yapılmaz (Cloudflare resmi pratiği)
-  - Diğer CDN dosyalarımız (Bootstrap, Lucide, Tabler, Quill, SweetAlert2, Choices) pin+SRI'lı; Turnstile istisna
+  - Faz 6.17 sonrası diğer vendor JS/CSS hepsi self-host (wwwroot/lib/, libman); Turnstile tek CDN istisnası
   - sri-check.{sh,ps1} URL listesine EKLENMEZ
 
 - **CSP nonce-based hardening** (Faz 6+ / OWASP)
