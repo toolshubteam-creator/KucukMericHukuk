@@ -9,6 +9,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     @Html.MetaTags()
 
+    @* Faz 6.23: Tasarım token'ları — ilk CSS, diğer stiller bunun üzerine kurulur *@
+    <link rel="stylesheet" href="~/css/tokens.css" asp-append-version="true" />
+
     @* Faz 6.14: Google Fonts self-host. wwwroot/fonts/ altında 12 woff2 (Playfair 3w + Inter 3w × latin+latin-ext).
        Google CDN'e preconnect kaldırıldı, render-blocking 889ms tasarruf. *@
     <link rel="stylesheet" href="~/css/fonts.css" asp-append-version="true" />
