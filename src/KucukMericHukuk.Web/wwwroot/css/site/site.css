@@ -25,29 +25,19 @@
 @import url('components/error-page.css');
 @import url('components/cookie-consent.css');
 
-/* --- Design tokens (admin.css ile birebir aynı renk seti, ayrı dosya) --- */
+/* --- Design tokens ---
+   Renk token'ları: wwwroot/css/tokens.css (Faz 6.23 token DRY) —
+   _PublicLayout + _BareLayout tokens.css'i ilk CSS olarak yükler.
+   Aşağıdaki spacing / radius / tipografi token'ları public'e özel. */
 :root {
-    --color-primary: #0F2A23;
-    --color-primary-dark: #081814;
-    --color-primary-light: #1F4438;
-
-    --color-accent: #C9A961;
-    --color-accent-dark: #A88A45;
-    --color-accent-light: #D9BD7C;
-    /* Faz 6.14: text-on-light için WCAG AA uyumlu koyu altın. #A88A45 beyaz/krem üzerinde
-       3.07:1 (FAIL); #7B6232 ~5.5:1 (AA). Sadece text/link rolünde kullanılır;
-       background/border/decorative yerler --color-accent-dark kullanmaya devam eder. */
-    --color-accent-text: #7B6232;
-
-    --color-bg: #FAF7F2;
-    --color-bg-alt: #FFFFFF;
-    --color-text: #2C2C2A;
-    --color-text-muted: #6B6B6B;
-    --color-border: #E5E0D5;
-
     /* Public-özel: tipografi */
     --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
     --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+    /* Faz 6.23: ortak sayfa H1 ölçeği — detay sayfası başlıkları (page/service/article/attorney)
+       bu token'ı kullanır. section-public__title ve error-page__title bilinçli olarak ayrı
+       (farklı bağlam: sayfa-içi bölüm başlığı / hata sayfası). */
+    --font-size-page-title: clamp(2rem, 4vw, 3rem);
 
     /* 8px tabanlı ölçü skalası (CLAUDE.md §9) */
     --space-1: 8px;
@@ -136,24 +126,8 @@ a:hover { color: var(--color-accent-text); }
 /* --- Helper utilities (custom, kıt kullanım) --- */
 .container-narrow { max-width: 800px; margin-inline: auto; }
 .text-accent { color: var(--color-accent-text); }
-.bg-cream { background-color: var(--color-bg); }
-.section { padding: var(--space-5) 0; }
 
 /* --- Buton overlay (Bootstrap btn üzerine marka rengi) --- */
-.btn-primary-brand {
-    background-color: var(--color-primary);
-    border: 1px solid var(--color-primary);
-    color: var(--color-bg-alt);
-    padding: 12px 28px;
-    border-radius: var(--radius-sm);
-    font-weight: 500;
-    transition: background-color 0.2s ease;
-}
-.btn-primary-brand:hover {
-    background-color: var(--color-primary-light);
-    color: var(--color-bg-alt);
-}
-
 .btn-accent {
     background-color: var(--color-accent);
     border: 1px solid var(--color-accent);
@@ -186,7 +160,7 @@ a:hover { color: var(--color-accent-text); }
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-1);
 }
 
 .breadcrumb-item {
@@ -198,7 +172,7 @@ a:hover { color: var(--color-accent-text); }
 .breadcrumb-item:not(:first-child)::before {
     content: '\203A';
     color: var(--color-text-muted, #6B6B6B);
-    margin-right: 8px;
+    margin-right: var(--space-1);
     font-weight: 400;
 }
 

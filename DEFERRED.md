@@ -35,10 +35,19 @@
 
 ## Faz 4 → Frontend (Faz 6'ya ertelenen)
 
-- **Faz 4.10 / v0.4.1 — Bütüncül tasarım cila turu**
+- **Faz 4.10 / v0.4.1 — Bütüncül tasarım cila turu** (kısmen yapıldı — Faz 6.23)
   - Faz 4 tüm sayfalar tamamlandıktan sonra kullanıcı tarafından genel tasarım gözden geçirme talep edildi (09.05.2026)
-  - Kapsam: tasarım tutarlılığı, mikro etkileşimler, tipografi ince ayar, mobile UX
-  - Tetik: kullanıcı isteğiyle, Faz 6 yayın öncesi cila turu
+  - **Faz 6.23'te yapıldı (C1-C5):** token DRY (ortak `tokens.css`), ölü CSS temizliği,
+    hard-coded değerler → token, buton tutarlılığı, tipografi hiyerarşisi (ortak H1 ölçeği)
+  - **KAPSAM DIŞI kalan — ayrı mini-cila turuna / Faz 7'ye:**
+    * Kart stili tutarsızlığı (envanter 7.x — hover gölge/border/padding sapması;
+      attorney-card'ın border + gölge yokluğu KASITLI tasarım olabilir, teyit gerek)
+    * Responsive breakpoint hizalama (envanter 8.1 — 600px/480px → Bootstrap 576px;
+      geniş görsel regresyon yüzeyi, ayrı dikkatli tur + kapsamlı mobile kontrol gerek)
+    * rgba shadow tokenization (envanter 4.3 — shadow token sistemi tasarımı gerektirir)
+    * Kart başlık font-size (envanter 6.3 — service-card 1.5rem vs diğerleri 1.25rem;
+      kasıtlı vurgu olabilir, kullanıcı teyidi bekliyor)
+  - Tetik: ayrı mini-cila turu veya Faz 7
 
 - **Browser Link dev-time uyarıları temizliği** (Faz 6)
   - Faz 4.8 console'unda tespit edildi: "Unload event listeners deprecated" + Cookie HTTPS uyarıları
