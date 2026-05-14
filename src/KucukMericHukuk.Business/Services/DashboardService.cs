@@ -1,0 +1,51 @@
+using KucukMericHukuk.Core.DTOs.Article;
+using KucukMericHukuk.Core.DTOs.Dashboard;
+using KucukMericHukuk.Core.Interfaces;
+using KucukMericHukuk.Core.Interfaces.Services;
+using MapsterMapper;
+
+namespace KucukMericHukuk.Business.Services;
+
+/// <summary>
+/// Admin Dashboard widget'larının veri kaynağı (Faz 6.21). ContactMessageService'in
+/// dashboard widget metotlarıyla aynı rol — IUnitOfWork üzerinden salt-okuma, mutasyon yok.
+/// </summary>
+public class DashboardService : IDashboardService
+{
+    private readonly IUnitOfWork _uow;
+    private readonly IMapper _mapper;
+
+    public DashboardService(IUnitOfWork uow, IMapper mapper)
+    {
+        _uow = uow;
+        _mapper = mapper;
+    }
+
+    public async Task<RecentArticlesWidgetDto> GetRecentArticlesAsync(
+        string languageCode, int count, CancellationToken ct = default)
+    {
+        var recent = await _uow.Articles.GetRecentAsync(languageCode, count, ct);
+        var total = await _uow.Articles.CountAsync(ct: ct);
+
+        return new RecentArticlesWidgetDto
+        {
+            TotalCount = total,
+            RecentArticles = _mapper.Map<List<ArticleListDto>>(recent),
+        };
+    }
+
+    public async Task<SiteSummaryWidgetDto> GetSiteSummaryAsync(CancellationToken ct = default)
+    {
+        // CountAsync (predicate'siz) soft-delete query filter'ından geçer → aktif kayıt sayısı.
+        return new SiteSummaryWidgetDto
+        {
+            ArticleCount = await _uow.Articles.CountAsync(ct: ct),
+            ServiceCount = await _uow.Services.CountAsync(ct: ct),
+            AttorneyCount = await _uow.Attorneys.CountAsync(ct: ct),
+            PageCount = await _uow.Pages.CountAsync(ct: ct),
+            MediaCount = await _uow.MediaFiles.CountAsync(ct: ct),
+            FaqCount = await _uow.Faqs.CountAsync(ct: ct),
+            TestimonialCount = await _uow.Testimonials.CountAsync(ct: ct),
+        };
+    }
+}
