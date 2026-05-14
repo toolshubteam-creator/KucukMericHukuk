@@ -1,0 +1,152 @@
+@model KucukMericHukuk.Web.ViewModels.Appointment.AppointmentFormViewModel
+@inject Microsoft.Extensions.Options.IOptions<KucukMericHukuk.Core.Common.TurnstileOptions> TurnstileOptions
+@inject Microsoft.Extensions.Options.IOptionsSnapshot<KucukMericHukuk.Core.Common.SiteInfoOptions> SiteInfo
+@{
+    ViewData["Title"] = "Randevu Talebi";
+    ViewData["MetaDescription"] = "Küçükmeriç Hukuk Bürosu'ndan randevu talep edin. Sakarya Serdivan'da hukuki danışmanlık için tercih ettiğiniz tarih ve saati bildirin.";
+
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+    var turnstileSiteKey = TurnstileOptions.Value.SiteKey;
+    var turnstileEnabled = TurnstileOptions.Value.Enabled;
+
+    var site = SiteInfo.Value;
+    var fullAddress = string.Join(", ",
+        new[] { site.StreetAddress, site.AddressLocality, site.AddressRegion }
+            .Where(s => !string.IsNullOrWhiteSpace(s)));
+
+    ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
+    {
+        new("Ana Sayfa", "/tr-TR/"),
+        new("Randevu Talebi", null)
+    };
+}
+
+<section class="section-public">
+    <div class="container">
+        <div class="section-public__header">
+            <p class="section-public__eyebrow">Randevu</p>
+            <h1 class="section-public__title">Randevu talebinde bulunun</h1>
+            <p class="section-public__lead">
+                Hukuki danışmanlık için aşağıdaki formu doldurun; tercih ettiğiniz tarih ve saati iletin, en kısa sürede size dönüş yapalım.
+            </p>
+        </div>
+
+        <div class="contact-grid">
+            <aside class="contact-info">
+                <h2 class="contact-info__title">İletişim bilgileri</h2>
+                <ul class="contact-info__list">
+                    @if (!string.IsNullOrWhiteSpace(fullAddress))
+                    {
+                        <li>
+                            <i data-lucide="map-pin" width="20" height="20"></i>
+                            <span>@fullAddress</span>
+                        </li>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(site.Telephone))
+                    {
+                        <li>
+                            <i data-lucide="phone" width="20" height="20"></i>
+                            <a href="tel:@System.Text.RegularExpressions.Regex.Replace(site.Telephone, @"\s+", "")">@site.Telephone</a>
+                        </li>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(site.Email))
+                    {
+                        <li>
+                            <i data-lucide="mail" width="20" height="20"></i>
+                            <a href="mailto:@site.Email">@site.Email</a>
+                        </li>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(site.OpeningHoursDescription))
+                    {
+                        <li>
+                            <i data-lucide="clock" width="20" height="20"></i>
+                            <span>@site.OpeningHoursDescription</span>
+                        </li>
+                    }
+                </ul>
+            </aside>
+
+            <form class="contact-form" method="post" asp-action="Submit" asp-route-culture="@culture" novalidate>
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="contact-form__honeypot" aria-hidden="true">
+                    <label for="Website">Website (boş bırakın)</label>
+                    <input type="text" name="Website" id="Website" tabindex="-1" autocomplete="off" />
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Name" class="form-label">Ad Soyad *</label>
+                        <input asp-for="Name" class="form-control" required autocomplete="name" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label">E-posta *</label>
+                        <input asp-for="Email" type="email" class="form-control" required autocomplete="email" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Phone" class="form-label">Telefon *</label>
+                        <input asp-for="Phone" type="tel" class="form-control" required autocomplete="tel" />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Subject" class="form-label">Konu *</label>
+                        <input asp-for="Subject" class="form-control" required autocomplete="off" />
+                        <span asp-validation-for="Subject" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="PreferredDate" class="form-label">Tercih edilen tarih *</label>
+                        <input asp-for="PreferredDate" type="date" class="form-control" required />
+                        <span asp-validation-for="PreferredDate" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="PreferredTimeNote" class="form-label">Tercih edilen saat</label>
+                        <input asp-for="PreferredTimeNote" class="form-control" autocomplete="off"
+                               placeholder="Örn. öğleden sonra, 14:00 civarı" />
+                        <span asp-validation-for="PreferredTimeNote" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Notes" class="form-label">Ek açıklama</label>
+                        <textarea asp-for="Notes" class="form-control" rows="5" autocomplete="off"></textarea>
+                        <span asp-validation-for="Notes" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input asp-for="KvkkConsent" class="form-check-input" required />
+                            <label asp-for="KvkkConsent" class="form-check-label">
+                                <a asp-controller="Pages" asp-action="Detail" asp-route-culture="@culture" asp-route-slug="aydinlatma" target="_blank" class="text-decoration-underline">Aydınlatma metnini</a> okudum, onaylıyorum.
+                            </label>
+                            <div>
+                                <span asp-validation-for="KvkkConsent" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+                    @if (turnstileEnabled)
+                    {
+                        <div class="col-12">
+                            <div class="cf-turnstile"
+                                 data-sitekey="@turnstileSiteKey"
+                                 data-response-field-name="TurnstileToken"
+                                 data-theme="light"
+                                 data-size="normal"></div>
+                        </div>
+                    }
+                    <div class="col-12">
+                        <button type="submit" class="btn-accent">Randevu Talebini Gönder</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @if (turnstileEnabled)
+    {
+        @* Turnstile JS — Cloudflare maintained, sürüm pin/SRI uygulanmaz (DEFERRED notu) *@
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    }
+}

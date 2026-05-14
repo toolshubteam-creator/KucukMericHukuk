@@ -1,0 +1,19 @@
+@{
+    ViewData["Title"] = "Randevu talebiniz alındı";
+    ViewData["MetaRobots"] = "noindex, nofollow";
+
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+
+<section class="section-public">
+    <div class="container container-narrow text-center">
+        <div class="thank-you-icon">
+            <i data-lucide="check-circle-2" width="64" height="64"></i>
+        </div>
+        <h1 class="section-public__title">Randevu talebiniz alındı</h1>
+        <p class="section-public__lead mb-4">
+            Talebiniz değerlendirildikten sonra onay veya bilgilendirme için size e-posta ile dönüş yapılacaktır. Acil durumlarda telefon ile ulaşmanızı rica ederiz.
+        </p>
+        <a class="btn-accent" asp-controller="Home" asp-action="Index" asp-route-culture="@culture">Ana Sayfaya Dön</a>
+    </div>
+</section>
