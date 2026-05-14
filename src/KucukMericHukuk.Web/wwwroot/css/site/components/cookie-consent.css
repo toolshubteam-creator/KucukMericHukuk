@@ -40,21 +40,11 @@
     color: var(--color-accent);
 }
 
+/* Faz 6.23: görsel stiller .btn-accent'ten gelir (view'da iki sınıf birlikte);
+   burada yalnızca cookie banner'a özel layout modifier'ları kalır. */
 .cookie-consent__accept {
-    background-color: var(--color-accent);
-    color: var(--color-primary-dark);
-    border: none;
-    padding: 10px 24px;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s ease;
     flex-shrink: 0;
-}
-
-.cookie-consent__accept:hover {
-    background-color: var(--color-accent-dark);
-    color: var(--color-bg-alt);
 }
 
 @media (max-width: 600px) {
