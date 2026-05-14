@@ -311,3 +311,12 @@
   - Başka tüketici (örn. URL routing, Sitemap üretici) bağımsız ihtiyaç
     duyarsa ayrı dosyaya taşınır: `Core/Common/SluggedEntityType.cs`
   - Şu an taşımaya gerek yok — single-tenant interface tarafı
+
+- **PROGRESS.md Faz 6 tablosu senkron borcu** (Faz 6 kapanışı / 6.26)
+  - PROGRESS.md "Tamamlanan Adımlar" tablosu 6.17/#33'te duruyor — 6.18-6.22
+    satırları işlenmemiş (6.18 belge senkron, 6.19 turnstile, 6.20 csp nonce,
+    6.21 dashboard widget, 6.22 randevu modülü)
+  - Tek tek eklemek yerine Faz 6 kapanışında (6.26) toplu doc-sync turunda
+    tablo güncellenir
+  - CLAUDE.md §11 + DEFERRED.md güncel — sadece PROGRESS.md tablosu geride
+  - Tetik: Faz 6 kapanış adımı (6.26)
