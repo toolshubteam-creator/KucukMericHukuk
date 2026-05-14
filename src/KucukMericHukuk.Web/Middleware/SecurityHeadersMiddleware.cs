@@ -1,19 +1,50 @@
+using System.Security.Cryptography;
 using Microsoft.Extensions.Hosting;
 
 namespace KucukMericHukuk.Web.Middleware;
 
 public class SecurityHeadersMiddleware
 {
+    /// <summary>
+    /// Faz 6.20: per-request CSP nonce'a Razor view'lardan + helper'lardan
+    /// (JsonLdHelpers) erişim için HttpContext.Items anahtarı.
+    /// </summary>
+    public const string NonceItemKey = "csp-nonce";
+
     private readonly RequestDelegate _next;
-    private readonly string _contentSecurityPolicy;
+    private readonly bool _isDevelopment;
 
     public SecurityHeadersMiddleware(RequestDelegate next, IHostEnvironment env)
     {
         _next = next;
-        _contentSecurityPolicy = BuildCsp(env.IsDevelopment());
+        _isDevelopment = env.IsDevelopment();
     }
 
-    private static string BuildCsp(bool isDevelopment)
+    public async Task InvokeAsync(HttpContext context)
+    {
+        // Faz 6.20: per-request kriptografik nonce. View render'dan ve OnStarting
+        // callback'inden ÖNCE Items'a yazılır — JSON-LD helper'ı + inline script'ler
+        // bu nonce'u okuyabilsin diye sıra kritik.
+        var nonce = Convert.ToBase64String(RandomNumberGenerator.GetBytes(16));
+        context.Items[NonceItemKey] = nonce;
+
+        var contentSecurityPolicy = BuildCsp(nonce, _isDevelopment);
+
+        context.Response.OnStarting(() =>
+        {
+            var headers = context.Response.Headers;
+            headers["X-Content-Type-Options"] = "nosniff";
+            headers["X-Frame-Options"] = "DENY";
+            headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+            headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=()";
+            headers["Content-Security-Policy"] = contentSecurityPolicy;
+            return Task.CompletedTask;
+        });
+
+        await _next(context);
+    }
+
+    private static string BuildCsp(string nonce, bool isDevelopment)
     {
         // Faz 6.17: tüm vendor JS/CSS self-host (wwwroot/lib/), CDN allowlist tasfiye.
         // Geriye sadece Cloudflare Turnstile kaldı (Cloudflare-managed, self-host edilmez).
@@ -28,7 +59,10 @@ public class SecurityHeadersMiddleware
 
         return
             "default-src 'self'; " +
-            "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; " +
+            // Faz 6.20: 'unsafe-inline' kaldırıldı — inline script'ler (JSON-LD) per-request
+            // nonce ile yetkilendirilir. Turnstile dış src script olduğu için host allowlist yeterli.
+            $"script-src 'self' 'nonce-{nonce}' https://challenges.cloudflare.com; " +
+            // style-src 'unsafe-inline' bilinçli korundu — Faz 6.20 kapsam dışı (ayrı DEFERRED maddesi).
             "style-src 'self' 'unsafe-inline'; " +
             "font-src 'self' data:; " +
             "img-src 'self' data: https:; " +
@@ -37,21 +71,5 @@ public class SecurityHeadersMiddleware
             "frame-ancestors 'none'; " +
             "base-uri 'self'; " +
             "form-action 'self';";
-    }
-
-    public async Task InvokeAsync(HttpContext context)
-    {
-        context.Response.OnStarting(() =>
-        {
-            var headers = context.Response.Headers;
-            headers["X-Content-Type-Options"] = "nosniff";
-            headers["X-Frame-Options"] = "DENY";
-            headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
-            headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=()";
-            headers["Content-Security-Policy"] = _contentSecurityPolicy;
-            return Task.CompletedTask;
-        });
-
-        await _next(context);
     }
 }

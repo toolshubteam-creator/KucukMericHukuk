@@ -175,12 +175,12 @@
   - Faz 6.17 sonrası diğer vendor JS/CSS hepsi self-host (wwwroot/lib/, libman); Turnstile tek CDN istisnası
   - sri-check.{sh,ps1} URL listesine EKLENMEZ
 
-- **CSP nonce-based hardening** (Faz 6+ / OWASP)
-  - Faz 5.7'de CSP'de script-src 'unsafe-inline' var (JSON-LD ve Razor inline script'ler için)
-  - 'unsafe-inline' XSS payload'ları çalıştırır — pragmatik ama tam koruma değil
-  - Hardening: Razor middleware'i nonce üretir, inline script'lerde nonce attribute, CSP'de script-src 'self' 'nonce-{rand}'
-  - Kapsam: ~15 inline script tag (JSON-LD partial'lar + cookie-consent + cf-turnstile callback)
-  - Tetik: Penetration test sonucu veya production OWASP audit
+- **CSP style-src 'unsafe-inline' hardening** (Faz 6+ / OWASP)
+  - Faz 6.20'de script-src nonce'landı ('unsafe-inline' kaldırıldı); style-src bilinçli kapsam dışı bırakıldı
+  - style-src'de hâlâ 'unsafe-inline' var — inline style= attribute'ları + olası inline <style> blokları taranmadı
+  - Bootstrap/Tabler/SweetAlert2/Quill runtime'da inline style enjekte eder (popper, modal, tooltip pozisyonlama) — nonce'lamak kırılgan, kapsamlı görsel regresyon testi gerekir
+  - Çözüm seçenekleri: per-request nonce style-src'ye de uygula (vendor uyumu test edilmeli) VEYA 'unsafe-hashes' + bilinen hash'ler
+  - Tetik: Penetration test sonucu veya production OWASP audit ikinci tur
 
 - **Distributed RateLimit** (Faz 6+ / scale)
   - Faz 5.7'de in-memory limiter (tek instance bağımlı)

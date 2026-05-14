@@ -54,7 +54,9 @@
                            class="form-control" placeholder="Kategori adında ara..." />
                 </div>
                 <div class="col-md-3">
-                    <select name="ParentCategoryId" class="form-select" onchange="this.form.submit()">
+                    @* Faz 6.20: inline onchange handler kaldırıldı (CSP nonce hardening) —
+                       data-auto-submit + category-filter.js listener. *@
+                    <select name="ParentCategoryId" class="form-select" data-auto-submit>
                         <option value="">Tüm üst kategoriler</option>
                         @foreach (var p in Model.AvailableParents)
                         {
@@ -209,3 +211,7 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script src="~/js/admin/category-filter.js" asp-append-version="true"></script>
+}
