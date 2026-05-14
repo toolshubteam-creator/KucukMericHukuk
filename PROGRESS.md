@@ -14,9 +14,109 @@
 | 3 | İçerik yönetimi modülleri | 2 hafta | ✅ Tamamlandı |
 | 4 | Frontend tasarım & geliştirme | 3 hafta | ✅ Tamamlandı |
 | 5 | SEO, entegrasyon, güvenlik | 1 hafta | ✅ Tamamlandı |
-| 6 | Test, düzeltme, yayına alma | 1 hafta | ⏳ Beklemede |
+| 6 | Test, düzeltme, yayına alma | 1 hafta | 🔄 Devam ediyor |
 
 **Toplam:** 10 hafta (+2 hafta tampon önerisi)
+
+---
+
+## FAZ 6 — Test, Düzeltme, Yayına Hazırlık — 🔄 DEVAM EDİYOR
+
+**Başlama Tarihi:** 12.05.2026
+**Tag:** — (Faz 6 kapanışında v0.6.0)
+**Süre:** 17 alt-adım + 4 hot-fix (devam ediyor)
+
+### Kapsam
+
+Spec Faz 6 ("Test, düzeltme, yayına alma") iki kaynaktan beslendi: spec'in orijinal yayın-hazırlığı kapsamı + Faz 5'ten taşınan ~30 DEFERRED maddesi. İlk stratejik kararla Faz 6 "yayın hazırlığı", Faz 7 "post-launch backlog" olarak ayrıldı; içerik-bağımlı ve YAGNI maddeleri Faz 7'ye bırakıldı. Faz 6 alt-adımları beş tematik grupta ilerledi: altyapı + admin tamamlama (SiteSettings, robots.txt admin, MetaTagsHelpers testi), içerik modülleri (Testimonial, Galeri, Faq cila, ContactMessage), kullanıcı/yetki tamamlama (User management, form audit, Editor/Author authz, Profil + şifre), production-readiness konfigürasyonu, ve audit + performans turu (pre-launch audit, audit-driven fix, cross-browser, SEO meta deep-dive, CDN self-host + response compression).
+
+### Alt-Adım Planı
+
+| Grup | Alt-Adımlar |
+| --- | --- |
+| Altyapı + Admin tamamlama | 6.1 SiteSettings · 6.2 robots.txt admin · 6.3 MetaTagsHelpers testi |
+| İçerik modülleri | 6.4 + 6.4a Testimonial · 6.5 Galeri · 6.6a + 6.6b Faq cila · 6.7 ContactMessage |
+| Kullanıcı + yetki | 6.8 + 6.8-fix User management · 6.9 form audit · 6.10 + 6.10-fix Editor/Author authz · 6.10a + 6.10a-fix Article EditorId · 6.11 Profil + şifre |
+| Production-readiness | 6.12 Production-readiness + SiteInfo |
+| Audit + performans | 6.13 pre-launch audit · 6.14 audit-driven fix · 6.15 cross-browser · 6.16 SEO meta deep-dive · 6.17 CDN self-host + response compression |
+
+### Tamamlanan Adımlar
+
+| Adım | Açıklama | PR |
+| --- | --- | --- |
+| 6.1 | DB-backed SiteSettings entity + admin form (Site Bilgileri / SEO / Entegrasyonlar tab'ları) | #14 |
+| 6.2 | robots.txt admin yönetimi (SiteSettings altyapısı üstüne) | #15 |
+| 6.3 | MetaTagsHelpers birim testi — title suffix + og:image + canonical + robots, 14 test | #16 |
+| 6.4 | Testimonial entity + admin CRUD + public Referanslar sayfası — TBB-uyumlu seed + 17 test | #17 |
+| 6.4a | Ana sayfa featured testimonial bölümü — `_TestimonialsCarousel` partial + HomeViewModel + 2 integration test | #18 |
+| 6.5 | Galeri sayfası — MediaFile.IsPublic + admin toggle + public grid + lightbox + 11 test | #19 |
+| 6.5-fix | IsPublic form binding bug — manuel hidden field kaldırıldı + 3 regresyon test | #19 |
+| 6.6a | Faq Quill editor entegrasyonu | #20 |
+| 6.6b | Faq DisplayOrder drag-drop UI | #20 |
+| 6.7 | ContactMessage in-app reply + durum takibi (entity extensions + reply view + MailKit) | #21 |
+| 6.8 | Kullanıcı yönetimi modülü — Identity admin CRUD + rol + lockout reset + IsActive guard'lar | #23 |
+| 6.8-fix | ConfirmPassword alanı (Create + ResetPassword) + Logout action ve butonu | #23 |
+| 6.9 | Admin form binding audit — bool/checkbox/select; 0 bug, sistem temiz | #24 |
+| 6.10 | Editor/Author authz — Article ownership filter + sidebar rol haritası + 10 test | #25 |
+| 6.10-fix | Author/Editor authz hot-fix — rol refactor (`Admin,Editor,Author`) + 5 yeni test | #25 |
+| 6.10a | Article.EditorId field + JSON-LD editor alanı + admin form Editor seçici + public "Yazar/Editör" | #26 |
+| 6.10a-fix | Admin article details editor alanı düzeltmesi | #26 |
+| 6.11 | Profil sayfası + şifre değiştir — Identity ChangePassword + SignIn refresh + 8 test | #27 |
+| 6.12 | Production-readiness — seed credentials env-var enforcement + SQL Server config + SiteInfo seed + footer/contact render fix + admin form TR label | #28 |
+| 6.13 | Pre-launch audit — Lighthouse (5 sayfa × 2 form factor) + static SEO analizi, audit-only | #29 |
+| 6.14 | Audit-driven fix'ler — cache headers + Google Fonts self-host + render-block defer + color contrast + meta + 3-run verify | #30 |
+| 6.15 | Cross-browser test (Chrome/Firefox/Safari/Edge × 6 sayfa, 24/24) + "Randevu Alın" geçici Contact yönlendirme | #31 |
+| 6.16 | SEO meta description deep-dive — 17 sayfa tarandı, fallback logic + entity seed + ~9 test | #32 |
+| 6.17 | CDN self-host (Bootstrap/Tabler/Lucide/Quill/SweetAlert2 → wwwroot/lib) + response compression (brotli/gzip) | #33 |
+
+### Altyapı + Admin Tamamlama (6.1 – 6.3)
+
+DB-backed `SiteSettings` entity anahtar-değer çifti pattern'i ile kuruldu; admin form Site Bilgileri (17 alan), SEO (3 alan) ve Entegrasyonlar (4 alan) sekmeleri altında düzenlenebilir. robots.txt admin yönetimi bu altyapının üstüne eklendi — Faz 5'te hardcoded olan `SitemapService.BuildRobotsTxt()` artık SiteSettings'ten besleniyor. MetaTagsHelpers için 14 birim test yazıldı (`MetaTags()` 11 + `CanonicalForArticles()` 3) — Faz 5'te eklenen helper'a regresyon güvenlik ağı.
+
+### İçerik Modülleri (6.4 – 6.7)
+
+Testimonial yeni entity olarak sıfırdan kuruldu (entity + admin CRUD + public Referanslar sayfası), ardından ana sayfaya featured testimonial bölümü eklendi. Galeri, yeni entity yerine mevcut `MediaFile` altyapısının üstüne `IsPublic` bool kolonu + admin toggle + public grid + lightbox olarak ince bir katman halinde yapıldı. Faq modülüne Quill editor ve DisplayOrder drag-drop UI eklendi. ContactMessage modülüne in-app reply (MailKit ile e-posta gönderimi) + okundu/yanıtlandı durum takibi geldi.
+
+### Kullanıcı + Yetki Tamamlama (6.8 – 6.11)
+
+Kullanıcı yönetimi modülü Identity `UserManager`/`RoleManager` bazlı kuruldu (Repository bypass — Identity Core istisnası): admin CRUD, lockout reset, `IsActive` soft-delete field'ı, ve guard'lar (self-deactivate, last-admin protect, self-role-downgrade). Admin form binding audit'i çalıştırıldı — 6.5 ve 6.8 bug'larının izole hatalar olduğu, sistemik tasarım problemi olmadığı doğrulandı (Faz 2.4a FluentValidation service-level kararı yapısal koruma sağlıyor). Editor/Author yetkilendirmesi Faz 3'ten beri DEFERRED'daydı; hot-fix + 6.10a ile tamamlandı: Author kendi makalelerini yazar, Editor tüm makaleleri düzenler (review görevi), Article entity'ye `EditorId` field'ı eklendi, JSON-LD Article schema `author` + `editor` ayrı alanlarla zenginleşti. Profil sayfası + şifre değiştir akışı eklendi.
+
+### Production-Readiness (6.12)
+
+Üç madde tek PR'da: seed credentials production env'da zorunlu hale getirildi (`Seed__AdminEmail`/`Password`/`FullName` yoksa startup fail, dev'de `appsettings.json` fallback), connection string production'da env-var'dan okunuyor (`appsettings.Production.json` placeholder), SiteInfo placeholder müşteri bilgileri örnek değerlerle dolduruldu. Footer/contact SiteInfo render fix ve admin form Türkçe label cilası da bu PR'a dahil edildi.
+
+### Audit + Performans Turu (6.13 – 6.17)
+
+Pre-launch audit (Lighthouse 5 sayfa × 2 form factor + static SEO) hiç kod değiştirmeden çalıştırıldı, öncelikli backlog çıkarıldı. 6.14 audit-driven fix'ler bu backlog'u kapattı: static cache headers, Google Fonts self-host, render-blocking CSS/JS defer, color contrast a11y düzeltmesi. Cross-browser test 4 tarayıcı × 6 sayfa = 24/24 geçti; bu turda "Randevu Alın" buton linkleri (Hero + CTA) geçici olarak Contact sayfasına yönlendirildi (Randevu modülü Faz 7'ye DEFERRED). SEO meta description deep-dive'da 17 public sayfa tarandı, 14'ünde 110 karakter altı tespit edildi; MetaTagsHelpers'a fallback logic (explicit → content → site default) + HTML strip/truncate helper eklendi. 6.17'de tüm CDN paketleri `wwwroot/lib` altına self-host edildi (libman), CSP allowlist'ten `cdn.jsdelivr.net` çıkarıldı (Cloudflare Turnstile kaldı); self-host sonrası localhost dev mode uncompressed serve nedeniyle mobil Lighthouse skoru düştüğü için aynı PR'a response compression (brotli + gzip) eklendi ve skorlar baseline'a döndü/üstüne çıktı.
+
+### Önemli Kararlar
+
+- **Faz 6 / Faz 7 ayrımı.** Faz 6 = yayın hazırlığı (minimum viable launch), Faz 7 = post-launch backlog. İçerik-bağımlı (Galeri/Testimonial doluluk) ve YAGNI maddeleri (distributed RateLimit, hreflang, CSP Report-URI) Faz 7'ye bırakıldı — tetikler DEFERRED.md'de açık.
+- **Galeri için yeni entity değil, MediaFile.IsPublic.** Over-engineering'den kaçınıldı; mevcut altyapının üstüne tek kolon + toggle.
+- **Editor/Author rol modeli (C yolu: hot-fix + 6.10a).** Mevcut Faz 6.10 commit'leri çöpe atılmadan üzerine inşa edildi; sonuç A yolu (redesign) ile aynı, atomicity daha iyi. Author = makaleyi yazan avukat, Editor = düzenleyen kişi; JSON-LD `author` + `editor` ayrı.
+- **Kullanıcı yönetimi Identity bypass.** `UserManager`/`RoleManager` doğrudan kullanıldı — Repository pattern Identity Core için istisna. `IsActive` BaseEntity soft-delete yerine ayrı field.
+- **Production-readiness 3 madde tek blok.** Seed enforcement + SQL Server config + SiteInfo — biri olmadan diğeri eksik kalan "yayın öncesi konfigürasyon" bütünü.
+- **Response compression dev'de de aktif.** Lighthouse audit doğruluğu için + Kestrel direct-serve senaryosunda production güvencesi. BREACH riski static asset için kabul (`EnableForHttps=true`).
+- **PROGRESS.md Faz 6 PR-bazlı kayıt.** Önceki fazlarda commit hash kullanıldı; Faz 6'da PR numarası (#14–#33) tercih edildi — 17 alt-adım + 4 hot-fix için daha okunaklı.
+
+### Test
+
+- Faz 6 başı: 308 PASSED → Faz 6.17 sonu: **438 PASSED** (358 unit + 80 integration; Faz 6'da +130 yeni test)
+- Build: 0 error / 0 warning
+- Lighthouse (6.17 sonrası): Accessibility / Best Practices / SEO her sayfada 100; mobil performans 80-95, masaüstü 99-100
+- Cross-browser: 4 tarayıcı × 6 sayfa = 24/24, console error yok
+
+### DEFERRED Notları
+
+Faz 6 boyunca çok sayıda DEFERRED maddesi kapatıldı (MetaTagsHelpers testi, Testimonial, Galeri, Faq cila, ContactMessage reply, kullanıcı yönetimi, lockout reset, Editor/Author authz, admin form binding audit, production seed credentials, LocalDB→SQL Server, SiteInfo, Google Fonts self-host, CDN self-host, CI SRI doğrulama, kısa meta descriptions). Faz 7'ye / belirsiz zamanlamaya taşınan başlıca maddeler:
+
+- **Randevu modülü** (Spec 2.1) — entity + DTO + service + repository + public form + admin yönetim + e-posta bildirim. 6.15'te "Randevu Alın" geçici Contact yönlendirmesi yapıldı.
+- **Dashboard widget genişletme** (Spec 5.1) — son makaleler / 404 sayısı / aktivite logları / ziyaretçi özeti; data DB'de mevcut, sadece UI gerek.
+- **Bütüncül tasarım cila turu (v0.4.1)** — Faz 4'ten ertelenmiş UX turu.
+- **Token DRY refactor** — admin + public ortak `tokens.css`.
+- **HSTS preload** — SSL/HTTPS production hazır olunca.
+- **Admin topbar dropdown bug** — uzun debug seansı sonuçsuz, sidebar bypass çalışıyor.
+- **Pre-commit hook FluentValidator kontrolü**, **müşteri içeriği tamamlanınca meta description revize**, ve production deploy tarafı (SSL, hosting, Search Console gönderimi).
 
 ---
 

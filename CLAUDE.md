@@ -409,7 +409,7 @@ Integration test'lerde `IntegrationTestFactory` `SecurePolicy.SameAsRequest`'e i
 
 ## 11. Faz Durumu
 
-**Mevcut Faz:** Faz 3 — İçerik yönetimi modülleri (Article + Medya yöneticisi) sıraya alındı.
+**Mevcut Faz:** Faz 6 — Test, Düzeltme, Yayına Hazırlık (🔄 devam ediyor). 6.1–6.17 tamamlandı, 6.18 belge senkronizasyonu.
 
 - ✅ **Faz 1 — Proje Kurulumu & Mimari** tamamlandı (05.05.2026): 5 katmanlı solution, BaseEntity + Identity, 6 domain entity + translation, Generic Repository + UoW + 6 özel repository, 24 DTO + 6 Mapster mapping config, çok dilli altyapı, 11 test PASSED
 - ✅ **Faz 2 — Yönetim Paneli (Admin CMS)** tamamlandı (06.05.2026, tag `v0.2.0`): 5 modül full CRUD (Page/Tag/Service/Category/Attorney), cookie auth + 3 rol seed, FluentValidation server+client side, SweetAlert2 + Quill + Tabler 1.4.0, integration test altyapısı, **180/180 test PASSED** (167 birim + 13 integration), 29 commit
