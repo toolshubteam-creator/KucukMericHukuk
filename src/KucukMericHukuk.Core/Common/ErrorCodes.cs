@@ -86,6 +86,11 @@ public static class ErrorCodes
         public const string ReplyBodyRequired = "ContactMessage.ReplyBodyRequired";
     }
 
+    public static class Appointment
+    {
+        public const string NotFound = "Appointment.NotFound";
+    }
+
     public static class SiteSetting
     {
         public const string NotFound = "SiteSetting.NotFound";
