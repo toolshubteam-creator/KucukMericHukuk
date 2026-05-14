@@ -99,6 +99,14 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link @Html.IsActiveController("Appointments")" asp-action="Index" asp-controller="Appointments" asp-area="Admin">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-calendar-event"></i>
+                            </span>
+                            <span class="nav-link-title">Randevular</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link @Html.IsActiveController("Testimonials")" asp-action="Index" asp-controller="Testimonials" asp-area="Admin">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <i class="ti ti-star"></i>

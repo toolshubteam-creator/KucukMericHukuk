@@ -1,0 +1,231 @@
+@using KucukMericHukuk.Core.DTOs.Appointment
+@using KucukMericHukuk.Core.Enums
+@using KucukMericHukuk.Web.Areas.Admin.ViewModels.Shared
+@model KucukMericHukuk.Core.DTOs.Common.PagedResult<KucukMericHukuk.Core.DTOs.Appointment.AppointmentListDto>
+@{
+    ViewData["Title"] = "Randevu Talepleri";
+    var query = ViewBag.Query as AppointmentQueryDto ?? new AppointmentQueryDto();
+
+    var paginationVm = new PaginationViewModel
+    {
+        PageNumber = Model.PageNumber,
+        TotalPages = Model.TotalPages,
+        HasPrevious = Model.HasPrevious,
+        HasNext = Model.HasNext,
+        GetPageUrl = pageNum => Url.Action("Index", "Appointments", new
+        {
+            area = "Admin",
+            keyword = query.Keyword,
+            status = query.Status.HasValue ? ((int)query.Status.Value).ToString() : null,
+            page = pageNum,
+            pageSize = query.PageSize,
+            includeDeleted = query.IncludeDeleted,
+            startDate = query.StartDate?.ToString("yyyy-MM-dd"),
+            endDate = query.EndDate?.ToString("yyyy-MM-dd")
+        }) ?? "#"
+    };
+
+    var statusOptions = new (int? Value, string Label)[]
+    {
+        (null, "Hepsi"),
+        ((int)AppointmentStatus.Pending, "Bekliyor"),
+        ((int)AppointmentStatus.Confirmed, "Onaylandı"),
+        ((int)AppointmentStatus.Rejected, "Reddedildi"),
+        ((int)AppointmentStatus.Completed, "Tamamlandı")
+    };
+}
+
+@functions {
+    static (string Css, string Label) StatusBadge(AppointmentStatus status) => status switch
+    {
+        AppointmentStatus.Confirmed => ("bg-success-lt", "Onaylandı"),
+        AppointmentStatus.Rejected => ("bg-danger-lt", "Reddedildi"),
+        AppointmentStatus.Completed => ("bg-secondary-lt", "Tamamlandı"),
+        _ => ("bg-warning-lt", "Bekliyor")
+    };
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">Randevu Talepleri</h2>
+            <div class="text-secondary">Toplam @Model.TotalCount kayıt</div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string okMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@okMsg</div>
+}
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+
+<div class="card mt-3">
+    <div class="card-body border-bottom">
+        <form asp-action="Index" asp-controller="Appointments" asp-area="Admin" method="get">
+            <div class="row g-2 align-items-center">
+                <div class="col-md">
+                    <input type="search" name="keyword" value="@query.Keyword"
+                           class="form-control" placeholder="Ad, e-posta, telefon veya konu içinde ara..." />
+                </div>
+                <div class="col-md-auto">
+                    <select name="status" class="form-select">
+                        @foreach (var (val, label) in statusOptions)
+                        {
+                            var current = query.Status.HasValue ? (int?)query.Status.Value : null;
+                            if (current == val)
+                            {
+                                <option value="@(val?.ToString())" selected>@label</option>
+                            }
+                            else
+                            {
+                                <option value="@(val?.ToString())">@label</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <label class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox"
+                               name="includeDeleted" value="true"
+                               @(query.IncludeDeleted ? "checked" : "") />
+                        <span class="form-check-label">Silinmişleri göster</span>
+                    </label>
+                </div>
+            </div>
+            <div class="row g-2 align-items-center mt-2">
+                <div class="col-md-auto">
+                    <label for="startDate" class="form-label small mb-0">Başlangıç</label>
+                    <input type="date" id="startDate" name="startDate"
+                           value="@(query.StartDate?.ToString("yyyy-MM-dd"))"
+                           class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-auto">
+                    <label for="endDate" class="form-label small mb-0">Bitiş</label>
+                    <input type="date" id="endDate" name="endDate"
+                           value="@(query.EndDate?.ToString("yyyy-MM-dd"))"
+                           class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-auto align-self-end">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="ti ti-search me-1"></i> Ara
+                    </button>
+                    <a asp-action="Index" asp-controller="Appointments" asp-area="Admin"
+                       class="btn btn-outline-secondary">Temizle</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">Randevu talebi bulunamadı</p>
+            <p class="empty-subtitle text-secondary">
+                @if (!string.IsNullOrWhiteSpace(query.Keyword))
+                {
+                    <text>"@query.Keyword" araması için sonuç yok.</text>
+                }
+                else
+                {
+                    <text>Henüz hiç randevu talebi gelmemiş.</text>
+                }
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter">
+                <thead>
+                    <tr>
+                        <th style="width:160px">Talep Tarihi</th>
+                        <th style="width:240px">Talep Eden</th>
+                        <th>Konu / Tercih Edilen Tarih</th>
+                        <th style="width:140px">Durum</th>
+                        <th class="w-1">Eylemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.Items)
+                    {
+                        var rowClass = a.IsDeleted ? "text-muted" : "";
+                        var (badgeCss, badgeLabel) = StatusBadge(a.Status);
+
+                        <tr class="@rowClass">
+                            <td>@a.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                <div>@a.Name</div>
+                                <small class="text-secondary">@a.Email</small><br />
+                                <small class="text-secondary">@a.Phone</small>
+                            </td>
+                            <td>
+                                <div>@a.Subject</div>
+                                <small class="text-secondary">
+                                    @a.PreferredDate.ToString("dd.MM.yyyy")
+                                    @if (!string.IsNullOrWhiteSpace(a.PreferredTimeNote))
+                                    {
+                                        <text> — @a.PreferredTimeNote</text>
+                                    }
+                                </small>
+                            </td>
+                            <td>
+                                @if (a.IsDeleted)
+                                {
+                                    <span class="badge bg-danger-lt">Silinmiş</span>
+                                }
+                                else
+                                {
+                                    <span class="badge @badgeCss">@badgeLabel</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-controller="Appointments" asp-area="Admin"
+                                   asp-route-id="@a.Id" class="btn btn-sm btn-outline-secondary"
+                                   title="Detay"><i class="ti ti-eye"></i></a>
+
+                                @if (!a.IsDeleted)
+                                {
+                                    <form asp-action="Delete" asp-controller="Appointments" asp-area="Admin"
+                                          asp-route-id="@a.Id" method="post" class="d-inline"
+                                          data-confirm="Bu randevu talebini silmek istediğinizden emin misiniz? Daha sonra geri yükleyebilirsiniz."
+                                          data-confirm-title="Randevu Talebini Sil"
+                                          data-confirm-button="Sil">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Restore" asp-controller="Appointments" asp-area="Admin"
+                                          asp-route-id="@a.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Geri Yükle">
+                                            <i class="ti ti-restore"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                <strong>@((Model.PageNumber - 1) * Model.PageSize + 1)</strong> -
+                <strong>@Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)</strong>
+                arası, toplam <strong>@Model.TotalCount</strong> kayıt
+            </p>
+            <div class="ms-auto">
+                <partial name="_Pagination" model="paginationVm" />
+            </div>
+        </div>
+    }
+</div>
