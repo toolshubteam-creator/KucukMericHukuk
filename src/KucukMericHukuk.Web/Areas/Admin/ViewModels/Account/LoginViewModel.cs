@@ -18,4 +18,7 @@ public class LoginViewModel
     public bool RememberMe { get; set; }
 
     public string? ReturnUrl { get; set; }
+
+    /// <summary>Cloudflare Turnstile token (Faz 6.19). Widget data-response-field-name="TurnstileToken" ile bind olur.</summary>
+    public string? TurnstileToken { get; set; }
 }

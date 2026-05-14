@@ -1,4 +1,5 @@
 using KucukMericHukuk.Core.Entities.Identity;
+using KucukMericHukuk.Core.Interfaces.Services;
 using KucukMericHukuk.Web.Areas.Admin.ViewModels.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,15 +14,18 @@ public class AccountController : Controller
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ITurnstileVerifier _turnstile;
     private readonly ILogger<AccountController> _logger;
 
     public AccountController(
         SignInManager<ApplicationUser> signInManager,
         UserManager<ApplicationUser> userManager,
+        ITurnstileVerifier turnstile,
         ILogger<AccountController> logger)
     {
         _signInManager = signInManager;
         _userManager = userManager;
+        _turnstile = turnstile;
         _logger = logger;
     }
 
@@ -43,12 +47,24 @@ public class AccountController : Controller
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting("admin-login")]
-    public async Task<IActionResult> Login(LoginViewModel model)
+    public async Task<IActionResult> Login(LoginViewModel model, CancellationToken ct)
     {
         ViewData["Title"] = "Giriş Yap";
 
         if (!ModelState.IsValid)
         {
+            return View(model);
+        }
+
+        // Faz 6.19: Turnstile bot doğrulama — başarısızsa kimlik denenmeden döner
+        // (UserManager/SignInManager'a hiç gidilmez). Identity lockout ek katman olarak korunur.
+        var remoteIp = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var turnstileOk = await _turnstile.VerifyAsync(model.TurnstileToken, remoteIp, ct);
+        if (!turnstileOk)
+        {
+            _logger.LogWarning("Turnstile doğrulaması başarısız login denemesi: {Email}", model.Email);
+            ModelState.AddModelError(string.Empty,
+                "Bot doğrulaması başarısız oldu. Lütfen sayfayı yenileyip tekrar deneyin.");
             return View(model);
         }
 

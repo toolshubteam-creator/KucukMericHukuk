@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KucukMericHukuk.IntegrationTests.Infrastructure;
@@ -34,6 +35,18 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>
         // Program.cs Testing environment'ında AppDbContext registration'ını ve
         // DbInitializer çağrısını atlar — burada SQLite in-memory ile yeniden kayıt.
         builder.UseEnvironment("Testing");
+
+        // Faz 6.19: Turnstile test ortamında devre dışı — ITurnstileVerifier'ın
+        // dokümante davranışı gereği Enabled=false her zaman true döner. Böylece
+        // Contact form + admin login POST'ları gerçek cf-turnstile token'ı olmadan
+        // test edilebilir. Production kodu dokunulmaz (Cookie SecurePolicy override ile aynı pattern).
+        builder.ConfigureAppConfiguration(config =>
+        {
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Turnstile:Enabled"] = "false"
+            });
+        });
 
         builder.ConfigureServices(services =>
         {
