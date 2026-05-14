@@ -239,12 +239,16 @@
   - Geçici çözüm Faz 6.15'te: `_HeroSection.cshtml` + `_CtaSection.cshtml` içindeki "Randevu Alın" linkleri `/tr-TR/Contact`'a yönlendiriliyor — kullanıcı genel iletişim formundan talebini yazabilir
   - Tetik: Müşteri "randevu sistemi kullanacağız" onayı veya yayın sonrası kullanım ihtiyacı
 
-- **Dashboard widget genişletme** (Spec madde 5.1, Faz 7)
-  - Mevcut: yalnızca ContactMessages widget'ı (`/admin` dashboard)
-  - Eksik: son makaleler, 404 hataları sayısı, son aktivite logları, ziyaretçi özeti
-  - Mevcut data zaten DB'de (`ActivityLogs`, `NotFoundLogs`, `Articles`); sadece widget UI + AdminController action gerek
-  - Faz 6.13 cross-browser test sırasında not düşüldü (`docs/audits/2026-05-13-cross-browser-test.md`)
-  - Tetik: Yayın sonrası iterasyon — gerçek kullanım datası geldikten sonra (hangi widget'lar değerli görülecek)
+- **Dashboard widget genişletme — kalan widget'lar** (Spec madde 5.1, Faz 7)
+  - Faz 6.21'de eklendi: "Son Makaleler" + "Site Özeti" widget'ları (`IDashboardService` + 2 DTO + view card)
+  - KALAN: 404 hataları sayısı, son aktivite logları, ziyaretçi özeti
+  - **DÜZELTME (Faz 6.21 FAZ 1 keşfi):** önceki not "data zaten DB'de (`ActivityLogs`, `NotFoundLogs`)" YANLIŞ —
+    bu entity'ler kodda hiç yok. Gerçek kapsam, "widget UI" değil sıfırdan altyapı:
+    * 404 sayısı → `NotFoundLog` entity + migration + 404 logging middleware
+    * Aktivite logları → `ActivityLog` entity + migration + admin action audit infrastructure
+      (Serilog paketi `.csproj`'de referanslı ama Program.cs'te `UseSerilog` yok, sink yok — kurulması gerek)
+    * Ziyaretçi özeti → server-side tracking yok; ya kendi tracking entity'si ya GA4 Data API entegrasyonu
+  - Tetik: post-launch, canlı trafik datası ihtiyacı somutlaşınca — logging/audit altyapısı ayrı bir iş kalemi
 
 ---
 
