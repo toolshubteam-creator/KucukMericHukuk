@@ -169,13 +169,6 @@
   - README'de prod kurulum adımına eklenmeli (Faz 6)
   - Tetik: Yayına alma adımı
 
-- **Admin Login Turnstile** (Faz 6 / yayın öncesi)
-  - Faz 5.6'da sadece Contact form'da
-  - Admin login Identity lockout (5 attempt → 15 dk lockout) ile korunuyor; RateLimit Faz 5.7'de eklenecek
-  - Bot hedefi olursa (örn. credential stuffing kampanyası) admin login'e de eklenir
-  - ITurnstileVerifier zaten hazır, sadece Login.cshtml + AccountController.Login(POST) entegrasyonu
-  - Tetik: Production'da brute-force log'larında pattern görülürse
-
 - **Turnstile JS pin/SRI istisna** (kalıcı not)
   - challenges.cloudflare.com/turnstile/v0/api.js Cloudflare server-maintained, otomatik update
   - SRI hash bozulur (her güncellemede deploy fail), pin yapılmaz (Cloudflare resmi pratiği)
