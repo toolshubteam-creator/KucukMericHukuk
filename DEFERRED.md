@@ -241,14 +241,65 @@
 
 - **Dashboard widget genişletme — kalan widget'lar** (Spec madde 5.1, Faz 7)
   - Faz 6.21'de eklendi: "Son Makaleler" + "Site Özeti" widget'ları (`IDashboardService` + 2 DTO + view card)
-  - KALAN: 404 hataları sayısı, son aktivite logları, ziyaretçi özeti
-  - **DÜZELTME (Faz 6.21 FAZ 1 keşfi):** önceki not "data zaten DB'de (`ActivityLogs`, `NotFoundLogs`)" YANLIŞ —
-    bu entity'ler kodda hiç yok. Gerçek kapsam, "widget UI" değil sıfırdan altyapı:
-    * 404 sayısı → `NotFoundLog` entity + migration + 404 logging middleware
-    * Aktivite logları → `ActivityLog` entity + migration + admin action audit infrastructure
-      (Serilog paketi `.csproj`'de referanslı ama Program.cs'te `UseSerilog` yok, sink yok — kurulması gerek)
-    * Ziyaretçi özeti → server-side tracking yok; ya kendi tracking entity'si ya GA4 Data API entegrasyonu
-  - Tetik: post-launch, canlı trafik datası ihtiyacı somutlaşınca — logging/audit altyapısı ayrı bir iş kalemi
+  - KALAN widget'lar (404 sayısı, aktivite logları, ziyaretçi özeti) altyapı gerektiriyor —
+    bkz. **Faz 7 → Admin Zenginleştirme** (Grup A: 404 Takibi + Aktivite Logu; Grup B: ziyaretçi/GA4)
+  - Faz 6.21 keşfi netleştirdi: bu widget'lar "UI işi" değil; ilgili entity/middleware/audit
+    altyapısı kurulduktan sonra dashboard'a kart eklemek marjinal kalır
+
+---
+
+## Faz 7 → Admin Zenginleştirme (yayın sonrası)
+
+> Kaynak: 6.22-keşif turu (Hafriyat panel referans incelemesi). Hafriyat ile
+> Küçükmeriç aynı framework ailesi ama farklı mimari (Hafriyat tek-proje,
+> Business katmanı/soft-delete/i18n yok) — kod drop-in kopyalanamaz, her
+> özellik Küçükmeriç katmanlarına re-home edilir (~%30 şema/kavram taşınır,
+> ~%70 yeniden yazım).
+
+### Grup A — İç araçlar (Hafriyat'ta kısmen var, dış bağımlılık yok)
+
+- **404 Takibi** — Hafriyat'ta YOK, sıfırdan
+  - NotFoundLog entity + migration + 404 logging middleware + repo/UoW +
+    Business servis + admin liste/filtre + "tek-tık 301 kur" akışı
+  - Tahmini: ~2-3 alt-adım
+
+- **Aktivite Logu** — Hafriyat'ta scaffold var ama interceptor wire EDİLMEMİŞ (çalışmıyor)
+  - AuditLog entity + SaveChangesInterceptor (Küçükmeriç AppDbContext'e wire) +
+    filtre/pagination + admin liste
+  - Hafriyat interceptor mantığı iyi referans (eski/yeni JSON capture)
+  - Serilog'un da yapılandırılması gerekebilir (şu an referanslı ama config yok)
+  - Tahmini: ~2 alt-adım
+
+- **Aboneler** — Hafriyat'ta var, çalışıyor, basit (en kolay adapte)
+  - Subscriber entity + repo/UoW + Business servis + Result<T> + FluentValidation +
+    public abone formu (Turnstile/honeypot pattern) + admin liste + token ile iptal
+  - Tahmini: ~1-2 alt-adım
+
+### Grup B — Dış API entegrasyonu (Hafriyat'ta HİÇ YOK — sıfırdan + müşteri-bağımlı)
+
+- **GA4 Data API widget** — Google.Apis.AnalyticsData.v1beta + OAuth/service account
+- **Search Console API widget** — Google.Apis.SearchConsole.v1
+- **PageSpeed Insights widget** — PageSpeed API key + per-URL job
+- Ortak blocker: Google Cloud projesi, OAuth client veya service account,
+  API key/quota — müşteri tarafı kurulum gerektirir
+- Hafriyat'ta adapte edilecek kaynak kod SIFIR — tamamı yeni entegrasyon
+- Tahmini: büyük, ayrı bir entegrasyon paketi
+
+### Grup C — Yönlendirmeler (Küçükmeriç'te HİÇ YOK — sıfırdan, Hafriyat iyi referans)
+
+- **Redirect modülü** — Küçükmeriç'te redirect özelliği hiç yok
+  - Redirect entity + SlugHistory entity + RedirectMiddleware (manuel tablo +
+    otomatik slug history) + admin CRUD + döngü kontrolü (AJAX loop-check)
+  - Hafriyat'ta tam çalışır halde — middleware + loop-check mantığı düz adapte edilebilir
+  - 404 Takibi (Grup A) ile entegre: 404 → tek-tık 301 kur akışı
+  - Tahmini: ~2-3 alt-adım
+
+### Notlar
+
+- Grup C'deki diğer kalemler (Site Ayarları, Dashboard, Mesajlar/Medya/Galeri):
+  Küçükmeriç zaten eşdeğer/üstün — yapılacak bir şey yok
+- Tetik: Faz 6 tamamlanıp site yayına çıktıktan sonra; Faz 7 başında bu
+  bölüm sıralı alt-adım planına dönüştürülür
 
 ---
 
