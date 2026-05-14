@@ -49,6 +49,16 @@
       kasıtlı vurgu olabilir, kullanıcı teyidi bekliyor)
   - Tetik: ayrı mini-cila turu veya Faz 7
 
+- **Menü navigasyon fontu — logo/hero ile uyum** (Faz 6 mini-tur / cila kalanı)
+  - Logo + hero başlık Playfair Display (serif); menü başlıkları Inter (sans-serif)
+  - Spec'e teknik olarak uygun (Başlık=Playfair, Metin=Inter) ama logo ile menü aynı
+    yatay hizada olduğundan göz "uyumsuz" okuyor — kullanıcı 6.23 teyidinde fark etti
+  - Öznel tasarım kararı — FAZ 1 envanteri ölçülemez olduğu için yakalamadı
+  - Çözüm yönü: dene-gör-seç — menü için 2-3 alternatif (Playfair'e geçir / Inter'de
+    letter-spacing+weight ile karakter ver / olduğu gibi bırak), yan yana görülüp seçilir
+  - Tetik: Faz 6 içinde mini-tur (örn. 6.24 sonrası) — kart 7.x / responsive 8.1 / shadow 4.3
+    ile birlikte "cila kalanı" turunda toplanabilir
+
 - **Browser Link dev-time uyarıları temizliği** (Faz 6)
   - Faz 4.8 console'unda tespit edildi: "Unload event listeners deprecated" + Cookie HTTPS uyarıları
   - Browser Link özelliğinden kaynaklanır, production'da yok
