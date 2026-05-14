@@ -1,7 +1,11 @@
 @model KucukMericHukuk.Web.Areas.Admin.ViewModels.Account.LoginViewModel
+@inject Microsoft.Extensions.Options.IOptions<KucukMericHukuk.Core.Common.TurnstileOptions> TurnstileOptions
 @{
     ViewData["Title"] = "Giriş Yap";
     Layout = null;
+
+    var turnstileSiteKey = TurnstileOptions.Value.SiteKey;
+    var turnstileEnabled = TurnstileOptions.Value.Enabled;
 }
 @*
     Login sayfası AdminLayout kullanmaz — sade auth kartı (Tabler sign-in pattern).
@@ -54,6 +58,17 @@
                             </label>
                         </div>
 
+                        @if (turnstileEnabled)
+                        {
+                            <div class="mb-3">
+                                <div class="cf-turnstile"
+                                     data-sitekey="@turnstileSiteKey"
+                                     data-response-field-name="TurnstileToken"
+                                     data-theme="light"
+                                     data-size="normal"></div>
+                            </div>
+                        }
+
                         <div class="form-footer">
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="ti ti-login me-1"></i> Giriş Yap
@@ -66,5 +81,10 @@
     </div>
     @* Tabler core JS — 1.4.0 self-host (Faz 6.17) *@
     <script src="~/lib/tabler/dist/js/tabler.min.js" asp-append-version="true"></script>
+    @if (turnstileEnabled)
+    {
+        @* Turnstile JS — Cloudflare maintained, sürüm pin/SRI uygulanmaz (DEFERRED notu) *@
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    }
 </body>
 </html>
