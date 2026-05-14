@@ -22,6 +22,7 @@ public class UnitOfWork : IUnitOfWork
     private IContactMessageRepository? _contactMessages;
     private ISiteSettingRepository? _siteSettings;
     private ITestimonialRepository? _testimonials;
+    private IAppointmentRepository? _appointments;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -39,6 +40,7 @@ public class UnitOfWork : IUnitOfWork
     public IContactMessageRepository ContactMessages => _contactMessages ??= new ContactMessageRepository(_context);
     public ISiteSettingRepository SiteSettings => _siteSettings ??= new SiteSettingRepository(_context);
     public ITestimonialRepository Testimonials => _testimonials ??= new TestimonialRepository(_context);
+    public IAppointmentRepository Appointments => _appointments ??= new AppointmentRepository(_context);
 
     public Task<int> SaveChangesAsync(CancellationToken ct = default)
         => _context.SaveChangesAsync(ct);

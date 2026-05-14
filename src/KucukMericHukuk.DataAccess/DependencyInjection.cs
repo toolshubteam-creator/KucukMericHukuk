@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<IContactMessageRepository, ContactMessageRepository>();
         services.AddScoped<ISiteSettingRepository, SiteSettingRepository>();
         services.AddScoped<ITestimonialRepository, TestimonialRepository>();
+        services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 
         // UnitOfWork
         services.AddScoped<IUnitOfWork, DataAccessUnitOfWork>();
