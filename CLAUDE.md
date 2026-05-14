@@ -409,14 +409,14 @@ Integration test'lerde `IntegrationTestFactory` `SecurePolicy.SameAsRequest`'e i
 
 ## 11. Faz Durumu
 
-**Mevcut Faz:** Faz 6 — Test, Düzeltme, Yayına Hazırlık (🔄 devam ediyor). 6.1–6.17 tamamlandı, 6.18 belge senkronizasyonu.
+**Mevcut Faz:** Faz 6 — Test, Düzeltme, Yayına Hazırlık (🔄 devam ediyor). 6.1–6.22 tamamlandı (6.22 randevu modülü).
 
 - ✅ **Faz 1 — Proje Kurulumu & Mimari** tamamlandı (05.05.2026): 5 katmanlı solution, BaseEntity + Identity, 6 domain entity + translation, Generic Repository + UoW + 6 özel repository, 24 DTO + 6 Mapster mapping config, çok dilli altyapı, 11 test PASSED
 - ✅ **Faz 2 — Yönetim Paneli (Admin CMS)** tamamlandı (06.05.2026, tag `v0.2.0`): 5 modül full CRUD (Page/Tag/Service/Category/Attorney), cookie auth + 3 rol seed, FluentValidation server+client side, SweetAlert2 + Quill + Tabler 1.4.0, integration test altyapısı, **180/180 test PASSED** (167 birim + 13 integration), 29 commit
 - ✅ **Faz 3 — İçerik Yönetimi: Medya + Article** tamamlandı (07.05.2026): medya altyapısı (entity + LocalFileStorage + SkiaSharp) + admin galeri/upload/picker, Article tam CRUD + frontend, 226/226 test PASSED (203 birim + 23 integration)
 - ✅ **Faz 4 — Frontend (Tasarım & Geliştirme)** tamamlandı (09.05.2026, tag `v0.4.0`): 17 public sayfa + responsive + SEO temelleri + KVKK uyumlu iletişim formu + custom 404, Faq + ContactMessage entity, 231/231 test PASSED (208 birim + 23 integration)
 - ✅ **Faz 5 — SEO, Güvenlik, Admin Geri Dönüşleri** tamamlandı (11.05.2026, tag `v0.5.0`): meta tag + JSON-LD + sitemap + breadcrumb, CDN SRI + Turnstile + RateLimit + global exception middleware + security headers, Faq admin CRUD + ContactMessages liste UI, 275/275 test PASSED (246 birim + 29 integration)
-- 🔄 **Faz 6 — Test, Düzeltme, Yayına Hazırlık** devam ediyor: 6.1–6.17 tamamlandı (SiteSettings, Testimonial, Galeri, kullanıcı yönetimi, Editor/Author authz, production-readiness, pre-launch audit, CDN self-host), 438/438 test PASSED; 6.18 belge senkronizasyonu
+- 🔄 **Faz 6 — Test, Düzeltme, Yayına Hazırlık** devam ediyor: 6.1–6.22 tamamlandı (SiteSettings, Testimonial, Galeri, kullanıcı yönetimi, Editor/Author authz, production-readiness, pre-launch audit, CDN self-host, CSP nonce, dashboard widget, randevu modülü), 468/468 test PASSED
 
 Faz tamamlama detayları için `PROGRESS.md` dosyasına bakınız.
 
