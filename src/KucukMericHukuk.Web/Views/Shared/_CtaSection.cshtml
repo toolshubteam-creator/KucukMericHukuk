@@ -1,6 +1,4 @@
-@* Faz 4.2: CTA placeholder. Faz 4.5'te randevu formuna bağlanacaktı.
-   Faz 6.15: Randevu modülü gelene kadar "Randevu Alın" linki İletişim sayfasına
-   yönlendiriliyor (DEFERRED → Randevu modülü, Faz 7 / post-launch). *@
+@* Faz 4.2: CTA placeholder. Faz 6.22: "Randevu Alın" linki randevu formuna bağlandı. *@
 @{
     var ctaCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
 }
@@ -10,7 +8,7 @@
         <p class="cta-section__subtitle">
             Davanız veya hukuki sürecinizle ilgili profesyonel görüş almak için bizimle iletişime geçin.
         </p>
-        <a asp-controller="Contact" asp-action="Index" asp-route-culture="@ctaCulture"
+        <a asp-controller="Appointment" asp-action="Index" asp-route-culture="@ctaCulture"
            class="btn-accent">Randevu Alın</a>
     </div>
 </section>

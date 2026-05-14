@@ -1,6 +1,4 @@
-@* Faz 4.2: hero placeholder. Faz 4.6'da CMS Page üzerinden dinamik gelecek.
-   Faz 6.15: Randevu modülü gelene kadar "Randevu Alın" linki İletişim sayfasına
-   yönlendiriliyor (DEFERRED → Randevu modülü, Faz 7 / post-launch). *@
+@* Faz 4.2: hero placeholder. Faz 4.6'da CMS Page üzerinden dinamik gelecek. *@
 @{
     var heroCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
 }
@@ -12,7 +10,7 @@
             <p class="hero__subtitle">
                 Küçükmeriç Hukuk Bürosu olarak, ceza hukukundan aile hukukuna, iş hukukundan ticaret hukukuna kadar geniş bir alanda profesyonel hukuki destek sağlıyoruz.
             </p>
-            <a asp-controller="Contact" asp-action="Index" asp-route-culture="@heroCulture"
+            <a asp-controller="Appointment" asp-action="Index" asp-route-culture="@heroCulture"
                class="btn-accent hero__cta">Randevu Alın</a>
         </div>
     </div>
