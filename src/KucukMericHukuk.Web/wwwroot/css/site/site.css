@@ -155,7 +155,7 @@ a:hover { color: var(--color-accent-text); }
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-1);
 }
 
 .breadcrumb-item {
@@ -167,7 +167,7 @@ a:hover { color: var(--color-accent-text); }
 .breadcrumb-item:not(:first-child)::before {
     content: '\203A';
     color: var(--color-text-muted, #6B6B6B);
-    margin-right: 8px;
+    margin-right: var(--space-1);
     font-weight: 400;
 }
 

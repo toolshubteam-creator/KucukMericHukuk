@@ -31,7 +31,7 @@
 }
 
 .article-detail__meta-sep {
-    margin: 0 8px;
+    margin: 0 var(--space-1);
 }
 
 .article-detail__featured-image-wrap {
@@ -103,7 +103,7 @@
     border-top: 1px solid var(--color-border);
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: var(--space-1);
 }
 
 .article-detail__tag {

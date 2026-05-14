@@ -82,7 +82,7 @@
     height: 48px;
     border: none;
     background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: var(--color-bg-alt);
     font-size: 32px;
     line-height: 1;
     border-radius: 50%;
