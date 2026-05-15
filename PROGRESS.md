@@ -15,8 +15,49 @@
 | 4 | Frontend tasarım & geliştirme | 3 hafta | ✅ Tamamlandı |
 | 5 | SEO, entegrasyon, güvenlik | 1 hafta | ✅ Tamamlandı |
 | 6 | Test, düzeltme, yayına alma | 1 hafta | 🔄 Devam ediyor |
+| 7 | Admin Zenginleştirme (Aktivite Logu + Aboneler + 404 + Redirect + GA4 + Search Console) | 3 hafta | 🔄 Devam ediyor |
 
 **Toplam:** 10 hafta (+2 hafta tampon önerisi)
+
+---
+
+## FAZ 7 — Admin Zenginleştirme — 🔄 DEVAM EDİYOR
+
+**Status:** 🔄 Devam ediyor
+**Başlangıç:** 16.05.2026
+**Hedef:** Admin panele operasyonel zenginleştirme — sunum öncesi tamamlanması istenen modüller. Faz 6 deploy'u (6.26.3-6.26.4) Faz 7 tamamlanıp onay alındıktan sonra Faz 6 + Faz 7 birlikte yapılır.
+
+### Kapsam
+
+DEFERRED'daki "Faz 7 → Admin Zenginleştirme" maddesinin (6.22-keşif raporundan) plan'a dönüşmüş hali. Hafriyat referans projesi keşfedildi: aynı framework ailesi ama farklı mimari (tek-proje, Business katmanı yok, soft-delete/i18n yok) — kod drop-in kopya değil, her özellik Küçükmeriç katmanlarına re-home (~%30 kavram/şema, ~%70 yeniden yazım).
+
+### Alt-Adım Planı
+
+| # | Adım | Bağımlılık | Hafriyat referans | Tahmini |
+|---|---|---|---|---|
+| 7.1 | Aktivite Logu (audit infra — `SaveChangesInterceptor` + `AuditLog`) | — | Scaffold var, interceptor wire edilmemiş; mantık iyi referans | ~2 alt-adım |
+| 7.2 | Aboneler (public abone formu + admin liste + token ile iptal) | — | Var, basit, adapte kolay | ~1-2 alt-adım |
+| 7.3 | 404 Takibi (`NotFoundLog` + middleware + admin liste) | — | YOK, sıfırdan | ~2-3 alt-adım |
+| 7.4 | Redirect modülü (`Redirect` + `SlugHistory` + middleware + 404 ile entegre "tek-tık 301 kur") | 7.3 | Var, iyi referans, middleware mantığı düz adapte | ~2-3 alt-adım |
+| 7.5 | Grup B ortak altyapı (Google.Apis NuGet + credential okuma + `IGoogleApiClient` + admin Site Ayarları → Google entegrasyon tab) | — | YOK, sıfırdan | ~2 alt-adım |
+| 7.6 | GA4 Data API widget (dashboard) — Property ID boş-state, domain gelince configure | 7.5 | YOK | ~2 alt-adım |
+| 7.7 | Search Console API widget (dashboard) — Site URL boş-state | 7.5 | YOK | ~2 alt-adım |
+| 7.8 | Faz 7 kapanış — doc senkron + DEFERRED temizlik + Faz 6 ile birlikte tag `v0.7.0` hazırlığı | tüm | — | ~1 alt-adım |
+
+### Önemli Kararlar
+
+- **Faz 7 paralel başlar, Faz 6 deploy bekler.** Faz 6 develop'ta kod-tamamlandı asılı kalır; Faz 7 tamamlanıp sunum onaylandığında Faz 6 + Faz 7 birlikte deploy edilir (6.26.3-6.26.4).
+- **PageSpeed Insights Faz 7 kapsamı DIŞI** — başlangıç planında vardı, kullanıcı kararıyla çıkarıldı.
+- **Grup B (GA4 + Search Console) domain-bağımsız geliştirilir.** Property ID / Site URL admin panelde boş bırakılabilir, widget "Yapılandırılmamış" boş-state gösterir. Domain hazır olunca `toolshubteam@gmail.com` ile Google Cloud setup yapılır, ID'ler girilir.
+- **Hafriyat klonu kalıcı tutulmuyor** — yapı bilgisi yeterli, gerekirse spot-check.
+- **Sıralama bağımlılık tabanlı:** 7.1 audit infra önce (sonraki adımlar otomatik log'lanır), 7.3-7.4 birlikte (404 → Redirect zinciri), 7.5 Grup B ortak altyapı önce, 7.6-7.7 ona bağlı.
+
+### Faz 7 Sonu Hedefleri
+
+- 8 alt-adım merged
+- Test sayısı 474 → ~520+ (her modül ~5-10 yeni test)
+- DEFERRED.md "Faz 7 → Admin Zenginleştirme" bölümü kapatılır
+- Faz 6 + Faz 7 birlikte deploy (6.26.3) sonrası tag `v0.7.0` + `main` merge
 
 ---
 

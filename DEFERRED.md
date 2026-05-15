@@ -261,7 +261,13 @@
 
 ---
 
-## Faz 7 → Admin Zenginleştirme (yayın sonrası)
+## Faz 7 → Admin Zenginleştirme (plan'a dönüştü — bkz. PROGRESS.md)
+
+> **Bu bölüm artık aktif plan.** PROGRESS.md Faz 7 → Alt-Adım Planı tablosunda
+> 8 alt-adıma bölündü (7.1 Aktivite Logu → 7.8 kapanış). PageSpeed kapsam dışı,
+> Grup B (GA4 + Search Console) domain-bağımsız geliştirilir. Bu bölüm Faz 7
+> sonu (7.8) kapanışta tamamen silinecek; o güne kadar Hafriyat referans envanteri
+> yapılaşırken kaynak olarak burada kalıyor.
 
 > Kaynak: 6.22-keşif turu (Hafriyat panel referans incelemesi). Hafriyat ile
 > Küçükmeriç aynı framework ailesi ama farklı mimari (Hafriyat tek-proje,
