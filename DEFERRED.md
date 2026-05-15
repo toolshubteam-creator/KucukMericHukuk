@@ -247,7 +247,17 @@
   - Denenen fix'ler: CSP `connect-src` genişletme (Bootstrap source map fetch için), `<a href="#">` → `<button type="button">` migration — ikisi de çözmedi
   - Kök sebep belirsiz: muhtemelen Tabler theme + Bootstrap entegrasyon detayı, browser-level event capture problemi, veya başka subtle bir konflikt
   - Geçici çözüm: Sidebar'a Profilim + Çıkış Yap item'ları eklendi (`_AdminSidebar.cshtml`, dropdown bypass) — kullanıcı pratik olarak logout'a erişebilir
-  - Tetik: Faz 7 / UI cleanup turu veya başka bir admin sayfasında benzer dropdown gerektiğinde
+  - **Faz 6.24 (15.05.2026) teşhis turu — kök sebep HÂLÂ belirsiz, ek kanıtlar:**
+    * Bootstrap engine sağlam: `bootstrap.Dropdown.VERSION` 5.3.3, manuel `toggle()` çalışıyor (dropdown açılıyor, `show` class ekleniyor)
+    * Doğal click sırasında toggle element'ine `focus` class'ı geliyor ama `show` eklenmiyor
+    * Document'a kayıtlı 20+ click listener var: Bootstrap `event-handler.js` + `tabler.min.js`
+    * **Hipotez TEST EDİLDİ:** `tabler.min.js` geçici devre dışı bırakıldı → dropdown hâlâ açılmadı. Yani Tabler JS dropdown delegation çakışması DEĞİL.
+    * **Yan kazanım:** Tabler JS olmadan da admin tab geçişi, modal, SweetAlert, sidebar toggle çalışıyor — Bootstrap kendi başına yeterli (gelecekte Tabler JS'i tamamen kaldırma değerlendirme konusu olabilir, ama bu maddenin kapsamı değil)
+  - **Sonraki teşhis turu için ipuçları:**
+    * Bootstrap'in iç delegation'ı (`event-handler.js:91` + `.js:103`) neden `show` eklemiyor — `Dropdown.prototype.toggle()` içinde bir guard mı (örn. `_isShown` state tutarsızlığı, `_parent` null mu)
+    * Browser-level: `pointer-events`, `::before`/`::after` overlay, `z-index` örtüşmesi (Faz 6.24'te adım 10 atlandı, ama adım 9 hiç çalışmadığı için bu yön incelenmedi)
+    * Bootstrap 5.3.3'te bilinen bir bug var mı (issue/changelog tarama)
+  - Tetik: yeni bir admin sayfasında benzer dropdown gerektiğinde, veya cila kalanı turunda
 
 - **Dashboard widget genişletme — kalan widget'lar** (Spec madde 5.1, Faz 7)
   - Faz 6.21'de eklendi: "Son Makaleler" + "Site Özeti" widget'ları (`IDashboardService` + 2 DTO + view card)
