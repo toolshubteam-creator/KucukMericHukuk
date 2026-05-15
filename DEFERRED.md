@@ -181,13 +181,6 @@
     - VEYA `TempPath` bazlı `LocalFileStorageService` variant + test sonrası
       cleanup hook (`IAsyncLifetime`)
 
-- **Production Turnstile key'leri** (Faz 0 / yayın hazırlığı)
-  - Faz 5.6'da appsettings'te demo key'ler (always pass) — `1x00000000000000000000AA` + `1x0000000000000000000000000000000AA`
-  - Müşteri Cloudflare hesabında domain (kucukmerichukuk.av.tr) ekleyip gerçek SiteKey + SecretKey alacak
-  - SecretKey commit edilmez — appsettings.Production.json veya environment variable
-  - README'de prod kurulum adımına eklenmeli (Faz 6)
-  - Tetik: Yayına alma adımı
-
 - **Turnstile JS pin/SRI istisna** (kalıcı not)
   - challenges.cloudflare.com/turnstile/v0/api.js Cloudflare server-maintained, otomatik update
   - SRI hash bozulur (her güncellemede deploy fail), pin yapılmaz (Cloudflare resmi pratiği)
@@ -213,11 +206,11 @@
   - Violation analytics → Sentry/Datadog
   - Tetik: Production CSP tuning
 
-- **HSTS preload list** (Faz 6 / yayın)
-  - Faz 5.7'de HSTS aktif (UseHsts default) ama "preload" directive yok
-  - Browser preload listesine domain eklenirse ilk request bile HTTPS olur
-  - Şart: Domain HTTPS-only, includeSubDomains, max-age >= 1 yıl, hstspreload.org'a kayıt
-  - Tetik: Müşteri canlıya alma sonrası
+- **hstspreload.org submit** (Faz 6.26 deploy adımı)
+  - Kod hazır (Faz 6.25): `AddHsts` → `Preload = true` + `IncludeSubDomains = true` + `MaxAge = 1 yıl` (preload list minimum)
+  - Müşteri yayına çıkıp domain HTTPS-only kesinleşince hstspreload.org'a manuel submit
+  - Şart: Domain HTTPS-only + tüm subdomain'ler HTTPS, geri-alma birkaç ay sürer
+  - Tetik: Production deploy + SSL kesin
 
 - **ContactMessage retention policy** (Faz 6+ / KVKK)
   - Mesajlar süresiz saklanıyor; KVKK uyumluluk için retention (6 ay/1 yıl sonra otomatik anonimleştir veya sil)

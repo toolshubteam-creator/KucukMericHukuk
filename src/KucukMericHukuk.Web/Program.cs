@@ -154,6 +154,16 @@ builder.Services.AddSingleton<IConfigureOptions<SiteInfoOptions>,
 builder.Services.Configure<TurnstileOptions>(
     builder.Configuration.GetSection(TurnstileOptions.SectionName));
 
+// HSTS (Faz 6.25): preload + includeSubDomains + 1 yıl max-age — hstspreload.org minimum.
+// UseHsts() yalnızca non-Development'ta aktif (aşağıda). hstspreload.org submit'i
+// production deploy sonrası manuel adım (DEFERRED).
+builder.Services.AddHsts(options =>
+{
+    options.Preload = true;
+    options.IncludeSubDomains = true;
+    options.MaxAge = TimeSpan.FromDays(365);
+});
+
 // Email (SmtpHost doluysa SmtpEmailSender, boşsa NullEmailSender — dev fallback)
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 var smtpHost = builder.Configuration["EmailSettings:SmtpHost"];
@@ -319,13 +329,18 @@ app.MapAreaControllerRoute(
     areaName: "Admin",
     pattern: "admin/{controller=Admin}/{action=Index}/{id?}");
 
-// Production env'da admin seed credentials zorunlu — eksikse startup fail.
-// Dev'de DbInitializer warn ile devam ediyor; production'da bu kabul edilemez.
+// Production env'da admin seed credentials + Turnstile key'leri zorunlu — eksikse startup fail.
+// Dev'de DbInitializer warn ile devam ediyor + Turnstile demo key'lere düşüyor; production'da bunlar kabul edilemez.
 if (app.Environment.IsProduction())
 {
     var seedOptions = app.Configuration.GetSection(SeedOptions.SectionName).Get<SeedOptions>()
         ?? new SeedOptions();
     seedOptions.ValidateForProduction();
+
+    // Faz 6.25: Turnstile production enforcement — demo key fallback'i YASAK.
+    var turnstileOptions = app.Configuration.GetSection(TurnstileOptions.SectionName).Get<TurnstileOptions>()
+        ?? new TurnstileOptions();
+    turnstileOptions.ValidateForProduction();
 }
 
 // DbInitializer (Testing ortamında çalıştırma — testler izole DB kullanıyor)
