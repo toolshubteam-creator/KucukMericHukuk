@@ -10,6 +10,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+    /// <summary>
+    /// Audit log seti — AuditSaveChangesInterceptor SavingChanges anında bu DbSet üzerinden
+    /// kayıt ekler. Repo'lar üzerinden CRUD YOK (AuditLogRepository readonly).
+    /// </summary>
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
