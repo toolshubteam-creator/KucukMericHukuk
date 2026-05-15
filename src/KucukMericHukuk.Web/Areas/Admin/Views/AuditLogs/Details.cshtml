@@ -1,0 +1,177 @@
+@using System.Text.Json
+@using KucukMericHukuk.Core.Enums
+@model KucukMericHukuk.Core.DTOs.AuditLog.AuditLogDetailDto
+@{
+    ViewData["Title"] = $"Audit #{Model.Id.ToString().Substring(0, 8)}";
+
+    var (badgeCss, badgeLabel) = Model.Action switch
+    {
+        AuditActionType.Created => ("bg-success-lt", "Eklendi"),
+        AuditActionType.Modified => ("bg-info-lt", "Güncellendi"),
+        AuditActionType.Deleted => ("bg-danger-lt", "Silindi"),
+        AuditActionType.Restored => ("bg-warning-lt", "Geri Yüklendi"),
+        _ => ("bg-secondary-lt", Model.Action.ToString())
+    };
+
+    // ChangesJson parse — view-side render için JsonElement'a çevir
+    JsonElement? parsed = null;
+    if (!string.IsNullOrWhiteSpace(Model.ChangesJson))
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(Model.ChangesJson);
+            parsed = doc.RootElement.Clone();
+        }
+        catch
+        {
+            parsed = null;
+        }
+    }
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <nav aria-label="breadcrumbs">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-action="Index" asp-controller="AuditLogs" asp-area="Admin">Aktivite Logu</a>
+                    </li>
+                    <li class="breadcrumb-item active">@Model.EntityName #@Model.EntityId</li>
+                </ol>
+            </nav>
+            <h2 class="page-title">
+                <span class="badge @badgeCss me-2">@badgeLabel</span>
+                @Model.EntityName
+                <small class="text-secondary ms-2">#@Model.EntityId</small>
+            </h2>
+            <div class="text-secondary mt-1">@Model.CreatedAt.ToString("dd MMMM yyyy HH:mm:ss")</div>
+        </div>
+        <div class="col-auto">
+            <a asp-action="Index" asp-controller="AuditLogs" asp-area="Admin" class="btn btn-outline-secondary">
+                <i class="ti ti-arrow-left me-1"></i> Geri
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title mb-0">Değişiklik Detayı</h3></div>
+            <div class="card-body">
+                @if (Model.Action == AuditActionType.Restored)
+                {
+                    <p class="text-secondary mb-0">Kayıt geri yüklendi (soft-delete: <code>IsDeleted</code> false&rarr;true&rarr;false).</p>
+                }
+                else if (parsed is null)
+                {
+                    <p class="text-secondary mb-0">Değişiklik detayı yok.</p>
+                }
+                else if (Model.Action == AuditActionType.Modified)
+                {
+                    @* Modified delta: { field: { old, new } } *@
+                    <div class="table-responsive">
+                        <table class="table table-vcenter card-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:30%">Alan</th>
+                                    <th style="width:35%">Eski Değer</th>
+                                    <th style="width:35%">Yeni Değer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var prop in parsed.Value.EnumerateObject())
+                                {
+                                    string oldVal = "—", newVal = "—";
+                                    if (prop.Value.ValueKind == JsonValueKind.Object)
+                                    {
+                                        if (prop.Value.TryGetProperty("old", out var o))
+                                            oldVal = o.ValueKind == JsonValueKind.Null ? "(null)" : o.ToString();
+                                        if (prop.Value.TryGetProperty("new", out var n))
+                                            newVal = n.ValueKind == JsonValueKind.Null ? "(null)" : n.ToString();
+                                    }
+                                    <tr>
+                                        <td><code>@prop.Name</code></td>
+                                        <td class="text-break"><small>@oldVal</small></td>
+                                        <td class="text-break"><small>@newVal</small></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    @* Created / Deleted: snapshot — flat key-value *@
+                    <div class="table-responsive">
+                        <table class="table table-vcenter card-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:40%">Alan</th>
+                                    <th>Değer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var prop in parsed.Value.EnumerateObject())
+                                {
+                                    var val = prop.Value.ValueKind == JsonValueKind.Null ? "(null)" : prop.Value.ToString();
+                                    <tr>
+                                        <td><code>@prop.Name</code></td>
+                                        <td class="text-break"><small>@val</small></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.ChangesJson))
+        {
+            <div class="card mt-3">
+                <div class="card-header"><h3 class="card-title mb-0">Ham JSON</h3></div>
+                <div class="card-body">
+                    <pre class="mb-0 text-break" style="white-space: pre-wrap;">@Model.ChangesJson</pre>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title mb-0">İşlem Bilgisi</h3></div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Tarih</dt>
+                    <dd class="col-sm-7">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm:ss")</dd>
+
+                    <dt class="col-sm-5">Kullanıcı</dt>
+                    <dd class="col-sm-7">@(Model.UserName ?? "(sistem)")</dd>
+
+                    @if (Model.UserId.HasValue)
+                    {
+                        <dt class="col-sm-5">Kullanıcı ID</dt>
+                        <dd class="col-sm-7">#@Model.UserId</dd>
+                    }
+
+                    <dt class="col-sm-5">Entity</dt>
+                    <dd class="col-sm-7"><code>@Model.EntityName</code></dd>
+
+                    <dt class="col-sm-5">Entity ID</dt>
+                    <dd class="col-sm-7"><code>@Model.EntityId</code></dd>
+
+                    <dt class="col-sm-5">Action</dt>
+                    <dd class="col-sm-7"><span class="badge @badgeCss">@badgeLabel</span></dd>
+
+                    <dt class="col-sm-5">IP Adresi</dt>
+                    <dd class="col-sm-7">@(Model.IpAddress ?? "—")</dd>
+
+                    <dt class="col-sm-5">Audit ID</dt>
+                    <dd class="col-sm-7 text-break"><small>@Model.Id</small></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
