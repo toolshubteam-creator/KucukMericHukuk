@@ -98,6 +98,8 @@ dotnet ef database update --project src/KucukMericHukuk.DataAccess \
 - SiteInfo (telefon, adres, e-posta) `appsettings.json` üzerinden ilk seed'de DB'ye yazılır; sonradan `/admin/site-settings` panelinden müşteri tarafından güncellenir.
 - HTTPS sertifikası reverse proxy (örn. Nginx, IIS, Cloudflare) tarafında sonlanmalıdır; uygulamanın kendisi `app.UseHsts()` ile HSTS header gönderir.
 
+> Tam deploy checklist'i için bkz. [docs/deployment/PRODUCTION_DEPLOY.md](docs/deployment/PRODUCTION_DEPLOY.md) — Natro Windows + IIS odaklı operasyonel rehber.
+
 ## Klasör Yapısı
 
 Detaylı yapı için `CLAUDE.md` dosyasına bakınız.
