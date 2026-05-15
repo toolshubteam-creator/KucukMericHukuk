@@ -68,6 +68,14 @@ Spec Faz 6 ("Test, düzeltme, yayına alma") iki kaynaktan beslendi: spec'in ori
 | 6.15 | Cross-browser test (Chrome/Firefox/Safari/Edge × 6 sayfa, 24/24) + "Randevu Alın" geçici Contact yönlendirme | #31 |
 | 6.16 | SEO meta description deep-dive — 17 sayfa tarandı, fallback logic + entity seed + ~9 test | #32 |
 | 6.17 | CDN self-host (Bootstrap/Tabler/Lucide/Quill/SweetAlert2 → wwwroot/lib) + response compression (brotli/gzip) | #33 |
+| 6.18 | Belge senkronizasyonu — PROGRESS.md Faz 6 bölümü + CLAUDE.md §11 + Genel Plan | #34 |
+| 6.19 | Admin Login Turnstile — ITurnstileVerifier reuse + test bypass + 1 test | #35 |
+| 6.20 | CSP nonce hardening — script-src 'unsafe-inline' kaldırıldı, JSON-LD nonce, inline handler externalize + 2 test | #36 |
+| 6.21 | Dashboard widget genişletme — Son Makaleler + Site Özeti + 3 test | #37 |
+| 6.22 | Randevu modülü (form-tabanlı) — entity + admin + Turnstile + e-posta + 24 test | #38 |
+| 6.23 | Tasarım cila turu (C1-C5) — token DRY + ölü CSS + hard-coded→token + buton + tipografi | #39 |
+| 6.24 | Admin topbar dropdown bug — teşhis turu (kök sebep belirsiz, DEFERRED zenginleştirildi) | — |
+| 6.25 | Production Turnstile enforcement + HSTS preload directive + 6 test | #40 |
 
 ### Altyapı + Admin Tamamlama (6.1 – 6.3)
 
@@ -89,6 +97,10 @@ Kullanıcı yönetimi modülü Identity `UserManager`/`RoleManager` bazlı kurul
 
 Pre-launch audit (Lighthouse 5 sayfa × 2 form factor + static SEO) hiç kod değiştirmeden çalıştırıldı, öncelikli backlog çıkarıldı. 6.14 audit-driven fix'ler bu backlog'u kapattı: static cache headers, Google Fonts self-host, render-blocking CSS/JS defer, color contrast a11y düzeltmesi. Cross-browser test 4 tarayıcı × 6 sayfa = 24/24 geçti; bu turda "Randevu Alın" buton linkleri (Hero + CTA) geçici olarak Contact sayfasına yönlendirildi (Randevu modülü Faz 7'ye DEFERRED). SEO meta description deep-dive'da 17 public sayfa tarandı, 14'ünde 110 karakter altı tespit edildi; MetaTagsHelpers'a fallback logic (explicit → content → site default) + HTML strip/truncate helper eklendi. 6.17'de tüm CDN paketleri `wwwroot/lib` altına self-host edildi (libman), CSP allowlist'ten `cdn.jsdelivr.net` çıkarıldı (Cloudflare Turnstile kaldı); self-host sonrası localhost dev mode uncompressed serve nedeniyle mobil Lighthouse skoru düştüğü için aynı PR'a response compression (brotli + gzip) eklendi ve skorlar baseline'a döndü/üstüne çıktı.
 
+### Yayın Hazırlığı Turu (6.18 – 6.25)
+
+Faz 6'nın geri kalan adımları üç başlık altında ilerledi: belge senkronizasyonu (6.18, sonra 6.26.1'de tekrarlanacak), kalan yayın-blocker güvenlik/UX işleri (6.19 admin login Turnstile, 6.20 CSP nonce hardening), spec'ten kalan özellikler (6.21 dashboard widget, 6.22 Randevu modülü), tasarım cila (6.23 token DRY + buton + tipografi), ve production konfigürasyonu (6.25 Turnstile prod enforcement + HSTS preload). Aradaki 6.24 admin topbar dropdown bug teşhis turu olarak yürütüldü — iki ayrı hipotez (CSP allowlist, button migration, Tabler JS çakışması) kanıtla elendi, kök sebep belirsiz kaldı, sidebar bypass çalıştığı için yayın-blocker değil — DEFERRED'a sonraki seans için ipuçlarıyla zenginleştirilerek bırakıldı. Faz 6.21 keşfinde DEFERRED.md'deki "logging altyapısı var" varsayımı çürüdü (NotFoundLog/ActivityLog/visitor tracking yok); 6.22 öncesi Hafriyat referans projesi incelendi (drop-in kopya imkânsız, ~%30 kavram/%70 yeniden yazım) — bu paket (404 takibi, aktivite logu, aboneler, Google API entegrasyonları, redirect modülü) **Faz 7'ye** taşındı.
+
 ### Önemli Kararlar
 
 - **Faz 6 / Faz 7 ayrımı.** Faz 6 = yayın hazırlığı (minimum viable launch), Faz 7 = post-launch backlog. İçerik-bağımlı (Galeri/Testimonial doluluk) ve YAGNI maddeleri (distributed RateLimit, hreflang, CSP Report-URI) Faz 7'ye bırakıldı — tetikler DEFERRED.md'de açık.
@@ -97,11 +109,15 @@ Pre-launch audit (Lighthouse 5 sayfa × 2 form factor + static SEO) hiç kod de�
 - **Kullanıcı yönetimi Identity bypass.** `UserManager`/`RoleManager` doğrudan kullanıldı — Repository pattern Identity Core için istisna. `IsActive` BaseEntity soft-delete yerine ayrı field.
 - **Production-readiness 3 madde tek blok.** Seed enforcement + SQL Server config + SiteInfo — biri olmadan diğeri eksik kalan "yayın öncesi konfigürasyon" bütünü.
 - **Response compression dev'de de aktif.** Lighthouse audit doğruluğu için + Kestrel direct-serve senaryosunda production güvencesi. BREACH riski static asset için kabul (`EnableForHttps=true`).
-- **PROGRESS.md Faz 6 PR-bazlı kayıt.** Önceki fazlarda commit hash kullanıldı; Faz 6'da PR numarası (#14–#33) tercih edildi — 17 alt-adım + 4 hot-fix için daha okunaklı.
+- **PROGRESS.md Faz 6 PR-bazlı kayıt.** Önceki fazlarda commit hash kullanıldı; Faz 6'da PR numarası (#14–#40) tercih edildi — 25+ alt-adım için daha okunaklı.
+- **Faz 7 paketi netleşti.** Hafriyat keşfi (6.22 öncesi): 404/aktivite/aboneler + GA/GSC/PageSpeed + redirect — drop-in kopya değil, sıfırdan + müşteri-bağımlı. Yayın sonrasına, Faz 7'ye.
+- **Admin topbar dropdown bug DEFERRED'da.** 6.24'te iki hipotez kanıtla elendi. Sidebar bypass çalışıyor, yayın-blocker değil. Sonraki seans için Bootstrap iç delegation + browser-level overlay ipuçları DEFERRED'a yazıldı.
+- **Tasarım cila turu B kararı: ölçülebilir hizalama, öznel iyileştirme YOK.** 6.23'te 21 madde envantere alındı, C1-C5 (token DRY, ölü CSS, hard-coded→token, buton, tipografi) yapıldı; C6 (kart 7.x, responsive 8.1, rgba shadow, kart başlığı 6.3, menü fontu) tasarım niyeti teyidi gerektirdiği için ayrı mini-tura bırakıldı.
+- **Production-only davranışlar manuel teyit edilmez.** 6.19 (Turnstile bypass test config), 6.25 (Turnstile ValidateForProduction, HSTS preload) — dev env'da gözlemlenecek bir şey yok; test + build kanıtladı, gerçek doğrulama 6.26.3 deploy turunda.
 
 ### Test
 
-- Faz 6 başı: 308 PASSED → Faz 6.17 sonu: **438 PASSED** (358 unit + 80 integration; Faz 6'da +130 yeni test)
+- Faz 6 başı: 308 PASSED → Faz 6.17 sonu: 438 PASSED → Faz 6.25 sonu: **474 PASSED** (385 unit + 89 integration; Faz 6.18-6.25'te +36 yeni test, Faz 6 toplam +166)
 - Build: 0 error / 0 warning
 - Lighthouse (6.17 sonrası): Accessibility / Best Practices / SEO her sayfada 100; mobil performans 80-95, masaüstü 99-100
 - Cross-browser: 4 tarayıcı × 6 sayfa = 24/24, console error yok
