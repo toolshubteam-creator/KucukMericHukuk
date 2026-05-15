@@ -1,5 +1,6 @@
 using FluentValidation;
 using KucukMericHukuk.Business.Common;
+using KucukMericHukuk.Business.Helpers;
 using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.DTOs.Common;
 using KucukMericHukuk.Core.DTOs.Tag;
@@ -147,17 +148,19 @@ public class TagService : ITagService
         tag.IsActive = input.IsActive;
         tag.UpdatedAt = DateTime.UtcNow;
 
-        tag.Translations.Clear();
-        foreach (var t in input.Translations)
+        // Faz 7.1.2: Translation diff-based merge (Id + CreatedAt korunur).
+        var incomingTranslations = input.Translations.Select(t => new TagTranslation
         {
-            tag.Translations.Add(new TagTranslation
-            {
-                LanguageCode = t.LanguageCode,
-                Name = t.Name,
-                Slug = t.Slug,
-                CreatedAt = DateTime.UtcNow,
-            });
-        }
+            LanguageCode = t.LanguageCode,
+            Name = t.Name,
+            Slug = t.Slug,
+        }).ToList();
+
+        TranslationMergeHelper.Merge(tag.Translations, incomingTranslations, (target, source) =>
+        {
+            target.Name = source.Name;
+            target.Slug = source.Slug;
+        });
 
         try
         {
