@@ -91,6 +91,11 @@ public static class ErrorCodes
         public const string NotFound = "Appointment.NotFound";
     }
 
+    public static class AuditLog
+    {
+        public const string NotFound = "AuditLog.NotFound";
+    }
+
     public static class SiteSetting
     {
         public const string NotFound = "SiteSetting.NotFound";
