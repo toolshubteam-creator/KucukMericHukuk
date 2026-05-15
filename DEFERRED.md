@@ -282,12 +282,11 @@
     Business servis + admin liste/filtre + "tek-tık 301 kur" akışı
   - Tahmini: ~2-3 alt-adım
 
-- **Aktivite Logu** — Hafriyat'ta scaffold var ama interceptor wire EDİLMEMİŞ (çalışmıyor)
-  - AuditLog entity + SaveChangesInterceptor (Küçükmeriç AppDbContext'e wire) +
-    filtre/pagination + admin liste
-  - Hafriyat interceptor mantığı iyi referans (eski/yeni JSON capture)
-  - Serilog'un da yapılandırılması gerekebilir (şu an referanslı ama config yok)
-  - Tahmini: ~2 alt-adım
+- **✅ Aktivite Logu** — Faz 7.1'de tamamlandı (15.05.2026)
+  - AuditLog entity + AuditSaveChangesInterceptor + ICurrentUserAccessor + admin liste/detay
+  - Ignore listesi: Identity, AuditLog, ContactMessage/Appointment/Subscriber (public formlar)
+  - Modified delta, soft-delete→Deleted, restore→Restored mantığı çalışıyor
+  - 14 yeni test (6 unit + 8 integration), 488 total PASSED
 
 - **Aboneler** — Hafriyat'ta var, çalışıyor, basit (en kolay adapte)
   - Subscriber entity + repo/UoW + Business servis + Result<T> + FluentValidation +
