@@ -1,5 +1,6 @@
 using FluentValidation;
 using KucukMericHukuk.Business.Common;
+using KucukMericHukuk.Business.Helpers;
 using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.DTOs.Common;
 using KucukMericHukuk.Core.DTOs.Faq;
@@ -118,17 +119,21 @@ public class FaqService : IFaqService
         faq.IsActive = input.IsActive;
         faq.UpdatedAt = DateTime.UtcNow;
 
-        faq.Translations.Clear();
-        foreach (var t in input.Translations)
+        // Faz 7.1.2: Translations.Clear()+Add() yerine diff-based merge.
+        // LanguageCode bazlı eşleşme → mevcut translation Id + CreatedAt korunur,
+        // audit log Modified delta olarak görünür (önceki Deleted+Added gürültüsü temizlendi).
+        var incomingTranslations = input.Translations.Select(t => new FaqTranslation
         {
-            faq.Translations.Add(new FaqTranslation
-            {
-                LanguageCode = t.LanguageCode,
-                Question = t.Question.Trim(),
-                Answer = _sanitizer.Sanitize((t.Answer ?? string.Empty).Trim()),
-                CreatedAt = DateTime.UtcNow,
-            });
-        }
+            LanguageCode = t.LanguageCode,
+            Question = t.Question.Trim(),
+            Answer = _sanitizer.Sanitize((t.Answer ?? string.Empty).Trim()),
+        }).ToList();
+
+        TranslationMergeHelper.Merge(faq.Translations, incomingTranslations, (target, source) =>
+        {
+            target.Question = source.Question;
+            target.Answer = source.Answer;
+        });
 
         await _uow.SaveChangesAsync(ct);
         return Result.Success();
