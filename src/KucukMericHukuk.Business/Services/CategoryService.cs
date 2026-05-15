@@ -1,5 +1,6 @@
 using FluentValidation;
 using KucukMericHukuk.Business.Common;
+using KucukMericHukuk.Business.Helpers;
 using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.DTOs.Category;
 using KucukMericHukuk.Core.DTOs.Common;
@@ -193,20 +194,25 @@ public class CategoryService : ICategoryService
         category.DisplayOrder = input.DisplayOrder;
         category.UpdatedAt = DateTime.UtcNow;
 
-        category.Translations.Clear();
-        foreach (var t in input.Translations)
+        // Faz 7.1.2: Translation diff-based merge (Id + CreatedAt korunur).
+        var incomingTranslations = input.Translations.Select(t => new CategoryTranslation
         {
-            category.Translations.Add(new CategoryTranslation
-            {
-                LanguageCode = t.LanguageCode,
-                Name = t.Name,
-                Slug = t.Slug,
-                Description = t.Description,
-                MetaTitle = t.MetaTitle,
-                MetaDescription = t.MetaDescription,
-                CreatedAt = DateTime.UtcNow,
-            });
-        }
+            LanguageCode = t.LanguageCode,
+            Name = t.Name,
+            Slug = t.Slug,
+            Description = t.Description,
+            MetaTitle = t.MetaTitle,
+            MetaDescription = t.MetaDescription,
+        }).ToList();
+
+        TranslationMergeHelper.Merge(category.Translations, incomingTranslations, (target, source) =>
+        {
+            target.Name = source.Name;
+            target.Slug = source.Slug;
+            target.Description = source.Description;
+            target.MetaTitle = source.MetaTitle;
+            target.MetaDescription = source.MetaDescription;
+        });
 
         try
         {
