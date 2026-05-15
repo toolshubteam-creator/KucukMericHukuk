@@ -155,6 +155,31 @@ public class FaqServiceTests : IDisposable
         translations[0].Answer.Should().Be("Yeni cevap");
     }
 
+    [Fact]
+    public async Task UpdateAsync_PreservesTranslationIdAndCreatedAt()
+    {
+        // Faz 7.1.2: diff-based merge mevcut translation Id'sini ve CreatedAt'ini korumalı —
+        // audit log Modified delta olarak görünür, Deleted+Added değil.
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var created = await sut.CreateAsync(BuildValidInput(question: "Eski", answer: "Eski cvp"));
+        var originalTranslationId = context.Set<FaqTranslation>().First(t => t.FaqId == created.Value).Id;
+        var originalCreatedAt = context.Set<FaqTranslation>().First(t => t.FaqId == created.Value).CreatedAt;
+
+        var updateInput = BuildValidInput(question: "Yeni", answer: "Yeni cvp", id: created.Value);
+        var result = await sut.UpdateAsync(updateInput);
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var translation = verify.Set<FaqTranslation>().First(t => t.FaqId == created.Value);
+
+        translation.Id.Should().Be(originalTranslationId, "Translation Id KORUNMALI (diff-merge)");
+        translation.CreatedAt.Should().Be(originalCreatedAt, "Translation CreatedAt KORUNMALI");
+        translation.Question.Should().Be("Yeni");
+        translation.Answer.Should().Be("Yeni cvp");
+    }
+
     // -------------------- DELETE / RESTORE / HARD DELETE --------------------
 
     [Fact]

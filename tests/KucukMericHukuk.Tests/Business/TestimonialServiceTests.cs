@@ -151,6 +151,28 @@ public class TestimonialServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateAsync_PreservesTranslationIdAndCreatedAt()
+    {
+        // Faz 7.1.2: diff-based merge mevcut translation Id ve CreatedAt'i korumalı.
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var created = await sut.CreateAsync(BuildValidInput(content: "Eski yorum icerigi (uzun)."));
+        var originalId = context.Set<TestimonialTranslation>().First(t => t.TestimonialId == created.Value).Id;
+        var originalCreatedAt = context.Set<TestimonialTranslation>().First(t => t.TestimonialId == created.Value).CreatedAt;
+
+        var updateInput = BuildValidInput(content: "Yeni yorum icerigi (guncel).", id: created.Value);
+        var result = await sut.UpdateAsync(updateInput);
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var t = verify.Set<TestimonialTranslation>().First(x => x.TestimonialId == created.Value);
+        t.Id.Should().Be(originalId, "Translation Id KORUNMALI (diff-merge)");
+        t.CreatedAt.Should().Be(originalCreatedAt);
+        t.Content.Should().Be("Yeni yorum icerigi (guncel).");
+    }
+
+    [Fact]
     public async Task DeleteAsync_SoftDeletes()
     {
         await using var context = _factory.CreateContext();

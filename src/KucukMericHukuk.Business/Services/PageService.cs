@@ -1,5 +1,6 @@
 using FluentValidation;
 using KucukMericHukuk.Business.Common;
+using KucukMericHukuk.Business.Helpers;
 using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.DTOs.Common;
 using KucukMericHukuk.Core.DTOs.Page;
@@ -196,20 +197,25 @@ public class PageService : IPageService
         page.DisplayOrder = input.DisplayOrder;
         page.UpdatedAt = DateTime.UtcNow;
 
-        page.Translations.Clear();
-        foreach (var t in input.Translations)
+        // Faz 7.1.2: Translation diff-based merge (Id + CreatedAt korunur).
+        var incomingTranslations = input.Translations.Select(t => new PageTranslation
         {
-            page.Translations.Add(new PageTranslation
-            {
-                LanguageCode = t.LanguageCode,
-                Title = t.Title,
-                Slug = t.Slug,
-                Content = _sanitizer.Sanitize(t.Content),
-                MetaTitle = t.MetaTitle,
-                MetaDescription = t.MetaDescription,
-                CreatedAt = DateTime.UtcNow,
-            });
-        }
+            LanguageCode = t.LanguageCode,
+            Title = t.Title,
+            Slug = t.Slug,
+            Content = _sanitizer.Sanitize(t.Content),
+            MetaTitle = t.MetaTitle,
+            MetaDescription = t.MetaDescription,
+        }).ToList();
+
+        TranslationMergeHelper.Merge(page.Translations, incomingTranslations, (target, source) =>
+        {
+            target.Title = source.Title;
+            target.Slug = source.Slug;
+            target.Content = source.Content;
+            target.MetaTitle = source.MetaTitle;
+            target.MetaDescription = source.MetaDescription;
+        });
 
         try
         {

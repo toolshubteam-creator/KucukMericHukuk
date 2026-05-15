@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using FluentValidation;
 using KucukMericHukuk.Business.Common;
+using KucukMericHukuk.Business.Helpers;
 using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.DTOs.Article;
 using KucukMericHukuk.Core.DTOs.Common;
@@ -270,9 +271,17 @@ public class ArticleService : IArticleService
         }
         article.Status = input.Status;
 
-        article.Translations.Clear();
-        foreach (var t in translationsResult.Value)
-            article.Translations.Add(t);
+        // Faz 7.1.2: Translation diff-based merge (Id + CreatedAt korunur).
+        TranslationMergeHelper.Merge(article.Translations, translationsResult.Value, (target, source) =>
+        {
+            target.Title = source.Title;
+            target.Slug = source.Slug;
+            target.Excerpt = source.Excerpt;
+            target.Content = source.Content;
+            target.ReadingTimeMinutes = source.ReadingTimeMinutes;
+            target.MetaTitle = source.MetaTitle;
+            target.MetaDescription = source.MetaDescription;
+        });
 
         article.Tags.Clear();
         if (input.TagIds.Count > 0)

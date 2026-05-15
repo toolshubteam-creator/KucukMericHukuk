@@ -1,5 +1,6 @@
 using FluentValidation;
 using KucukMericHukuk.Business.Common;
+using KucukMericHukuk.Business.Helpers;
 using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.DTOs.Common;
 using KucukMericHukuk.Core.DTOs.Service;
@@ -180,21 +181,27 @@ public class ServiceService : IServiceService
         svc.DisplayOrder = input.DisplayOrder;
         svc.UpdatedAt = DateTime.UtcNow;
 
-        svc.Translations.Clear();
-        foreach (var t in input.Translations)
+        // Faz 7.1.2: Translation diff-based merge (Id + CreatedAt korunur).
+        var incomingTranslations = input.Translations.Select(t => new ServiceTranslation
         {
-            svc.Translations.Add(new ServiceTranslation
-            {
-                LanguageCode = t.LanguageCode,
-                Name = t.Name,
-                Slug = t.Slug,
-                ShortDescription = t.ShortDescription,
-                FullDescription = _sanitizer.Sanitize(t.FullDescription),
-                MetaTitle = t.MetaTitle,
-                MetaDescription = t.MetaDescription,
-                CreatedAt = DateTime.UtcNow,
-            });
-        }
+            LanguageCode = t.LanguageCode,
+            Name = t.Name,
+            Slug = t.Slug,
+            ShortDescription = t.ShortDescription,
+            FullDescription = _sanitizer.Sanitize(t.FullDescription),
+            MetaTitle = t.MetaTitle,
+            MetaDescription = t.MetaDescription,
+        }).ToList();
+
+        TranslationMergeHelper.Merge(svc.Translations, incomingTranslations, (target, source) =>
+        {
+            target.Name = source.Name;
+            target.Slug = source.Slug;
+            target.ShortDescription = source.ShortDescription;
+            target.FullDescription = source.FullDescription;
+            target.MetaTitle = source.MetaTitle;
+            target.MetaDescription = source.MetaDescription;
+        });
 
         svc.Attorneys.Clear();
         if (input.AttorneyIds != null && input.AttorneyIds.Count > 0)

@@ -400,6 +400,28 @@ public class ArticleServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateAsync_PreservesTranslationIdAndCreatedAt()
+    {
+        // Faz 7.1.2: diff-based merge mevcut translation Id'sini ve CreatedAt'ini korumalı.
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var created = await sut.CreateAsync(BuildValidInput());
+        var originalId = context.Set<ArticleTranslation>().First(t => t.ArticleId == created.Value).Id;
+        var originalCreatedAt = context.Set<ArticleTranslation>().First(t => t.ArticleId == created.Value).CreatedAt;
+
+        // Içerik değiştir, slug aynı kal
+        var updateInput = BuildValidInput(id: created.Value, content: "<p>Yenilenmiş içerik buraya gelir, en az 10 karakter olmalı.</p>");
+        var result = await sut.UpdateAsync(updateInput);
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var t = verify.Set<ArticleTranslation>().First(x => x.ArticleId == created.Value);
+        t.Id.Should().Be(originalId, "Translation Id KORUNMALI (diff-merge)");
+        t.CreatedAt.Should().Be(originalCreatedAt, "Translation CreatedAt KORUNMALI");
+    }
+
+    [Fact]
     public async Task UpdateAsync_PublishedToDraft_ShouldKeepPublishedAt()
     {
         await using var context = _factory.CreateContext();

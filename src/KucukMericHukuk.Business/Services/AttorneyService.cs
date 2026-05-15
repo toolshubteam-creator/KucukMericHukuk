@@ -1,5 +1,6 @@
 using FluentValidation;
 using KucukMericHukuk.Business.Common;
+using KucukMericHukuk.Business.Helpers;
 using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.DTOs.Attorney;
 using KucukMericHukuk.Core.DTOs.Common;
@@ -176,11 +177,20 @@ public class AttorneyService : IAttorneyService
         attorney.ProfileImageUrl = input.ProfileImageUrl;
         attorney.UpdatedAt = DateTime.UtcNow;
 
-        attorney.Translations.Clear();
-        foreach (var t in input.Translations)
+        // Faz 7.1.2: Translation diff-based merge (Id + CreatedAt korunur).
+        var incomingTranslations = input.Translations.Select(BuildTranslation).ToList();
+        TranslationMergeHelper.Merge(attorney.Translations, incomingTranslations, (target, source) =>
         {
-            attorney.Translations.Add(BuildTranslation(t));
-        }
+            target.FullName = source.FullName;
+            target.Title = source.Title;
+            target.Slug = source.Slug;
+            target.ShortBio = source.ShortBio;
+            target.FullBio = source.FullBio;
+            target.Education = source.Education;
+            target.Publications = source.Publications;
+            target.MetaTitle = source.MetaTitle;
+            target.MetaDescription = source.MetaDescription;
+        });
 
         attorney.Services.Clear();
         if (input.ServiceIds != null && input.ServiceIds.Count > 0)

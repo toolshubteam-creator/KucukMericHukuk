@@ -1,5 +1,6 @@
 using FluentValidation;
 using KucukMericHukuk.Business.Common;
+using KucukMericHukuk.Business.Helpers;
 using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.DTOs.Common;
 using KucukMericHukuk.Core.DTOs.Testimonial;
@@ -141,17 +142,19 @@ public class TestimonialService : ITestimonialService
         entity.IsFeatured = input.IsFeatured;
         entity.UpdatedAt = DateTime.UtcNow;
 
-        // Translation full-replace (Faq pattern — DEFERRED'da diff-based refactor var)
-        entity.Translations.Clear();
-        foreach (var t in input.Translations)
+        // Faz 7.1.2: Translation diff-based merge (Id + CreatedAt korunur).
+        // Önceki "full-replace (Faq pattern)" yorumu: DEFERRED'daki "Translation full-replace
+        // stratejisi" maddesi Faz 7.1.2'de kapatıldı, helper'a geçildi.
+        var incomingTranslations = input.Translations.Select(t => new TestimonialTranslation
         {
-            entity.Translations.Add(new TestimonialTranslation
-            {
-                LanguageCode = t.LanguageCode,
-                Content = t.Content.Trim(),
-                CreatedAt = DateTime.UtcNow,
-            });
-        }
+            LanguageCode = t.LanguageCode,
+            Content = t.Content.Trim(),
+        }).ToList();
+
+        TranslationMergeHelper.Merge(entity.Translations, incomingTranslations, (target, source) =>
+        {
+            target.Content = source.Content;
+        });
 
         await _uow.SaveChangesAsync(ct);
         return Result.Success();
