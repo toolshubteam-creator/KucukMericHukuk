@@ -383,6 +383,28 @@ public class AttorneyServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateAsync_PreservesTranslationIdAndCreatedAt()
+    {
+        // Faz 7.1.2: diff-based merge mevcut translation Id ve CreatedAt'i korumalı.
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var created = await sut.CreateAsync(BuildValidInput(fullName: "Eski Av"));
+        var originalId = context.Set<AttorneyTranslation>().First(t => t.AttorneyId == created.Value).Id;
+        var originalCreatedAt = context.Set<AttorneyTranslation>().First(t => t.AttorneyId == created.Value).CreatedAt;
+
+        var update = BuildValidInput(fullName: "Yeni Av", id: created.Value);
+        var result = await sut.UpdateAsync(update);
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var t = verify.Set<AttorneyTranslation>().First(x => x.AttorneyId == created.Value);
+        t.Id.Should().Be(originalId, "Translation Id KORUNMALI (diff-merge)");
+        t.CreatedAt.Should().Be(originalCreatedAt);
+        t.FullName.Should().Be("Yeni Av");
+    }
+
+    [Fact]
     public async Task UpdateAsync_NoId_ShouldFail()
     {
         await using var context = _factory.CreateContext();
