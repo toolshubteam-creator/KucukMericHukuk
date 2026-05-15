@@ -1,0 +1,185 @@
+@using KucukMericHukuk.Core.DTOs.AuditLog
+@using KucukMericHukuk.Core.Enums
+@using KucukMericHukuk.Web.Areas.Admin.ViewModels.Shared
+@model KucukMericHukuk.Core.DTOs.Common.PagedResult<KucukMericHukuk.Core.DTOs.AuditLog.AuditLogListDto>
+@{
+    ViewData["Title"] = "Aktivite Logu";
+    var query = ViewBag.Query as AuditLogQueryDto ?? new AuditLogQueryDto();
+
+    var paginationVm = new PaginationViewModel
+    {
+        PageNumber = Model.PageNumber,
+        TotalPages = Model.TotalPages,
+        HasPrevious = Model.HasPrevious,
+        HasNext = Model.HasNext,
+        GetPageUrl = pageNum => Url.Action("Index", "AuditLogs", new
+        {
+            area = "Admin",
+            keyword = query.Keyword,
+            userId = query.UserId,
+            entityName = query.EntityName,
+            action = query.Action.HasValue ? ((int)query.Action.Value).ToString() : null,
+            page = pageNum,
+            pageSize = query.PageSize,
+            startDate = query.StartDate?.ToString("yyyy-MM-dd"),
+            endDate = query.EndDate?.ToString("yyyy-MM-dd")
+        }) ?? "#"
+    };
+
+    var actionOptions = new (int? Value, string Label)[]
+    {
+        (null, "Hepsi"),
+        ((int)AuditActionType.Created, "Eklendi"),
+        ((int)AuditActionType.Modified, "Güncellendi"),
+        ((int)AuditActionType.Deleted, "Silindi"),
+        ((int)AuditActionType.Restored, "Geri Yüklendi")
+    };
+}
+
+@functions {
+    static (string Css, string Label) ActionBadge(AuditActionType action) => action switch
+    {
+        AuditActionType.Created => ("bg-success-lt", "Eklendi"),
+        AuditActionType.Modified => ("bg-info-lt", "Güncellendi"),
+        AuditActionType.Deleted => ("bg-danger-lt", "Silindi"),
+        AuditActionType.Restored => ("bg-warning-lt", "Geri Yüklendi"),
+        _ => ("bg-secondary-lt", action.ToString())
+    };
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">Aktivite Logu</h2>
+            <div class="text-secondary">Toplam @Model.TotalCount kayıt</div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+
+<div class="card mt-3">
+    <div class="card-body border-bottom">
+        <form asp-action="Index" asp-controller="AuditLogs" asp-area="Admin" method="get">
+            <div class="row g-2 align-items-center">
+                <div class="col-md">
+                    <input type="search" name="keyword" value="@query.Keyword"
+                           class="form-control" placeholder="Entity, kullanıcı veya entity ID içinde ara..." />
+                </div>
+                <div class="col-md-auto">
+                    <input type="text" name="entityName" value="@query.EntityName"
+                           class="form-control" placeholder="Entity (örn. Article)" />
+                </div>
+                <div class="col-md-auto">
+                    <select name="action" class="form-select">
+                        @foreach (var (val, label) in actionOptions)
+                        {
+                            var current = query.Action.HasValue ? (int?)query.Action.Value : null;
+                            if (current == val)
+                            {
+                                <option value="@(val?.ToString())" selected>@label</option>
+                            }
+                            else
+                            {
+                                <option value="@(val?.ToString())">@label</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="row g-2 align-items-center mt-2">
+                <div class="col-md-auto">
+                    <label for="startDate" class="form-label small mb-0">Başlangıç</label>
+                    <input type="date" id="startDate" name="startDate"
+                           value="@(query.StartDate?.ToString("yyyy-MM-dd"))"
+                           class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-auto">
+                    <label for="endDate" class="form-label small mb-0">Bitiş</label>
+                    <input type="date" id="endDate" name="endDate"
+                           value="@(query.EndDate?.ToString("yyyy-MM-dd"))"
+                           class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-auto align-self-end">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="ti ti-search me-1"></i> Ara
+                    </button>
+                    <a asp-action="Index" asp-controller="AuditLogs" asp-area="Admin"
+                       class="btn btn-outline-secondary">Temizle</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">Audit kaydı bulunamadı</p>
+            <p class="empty-subtitle text-secondary">
+                @if (!string.IsNullOrWhiteSpace(query.Keyword) || !string.IsNullOrWhiteSpace(query.EntityName) || query.Action.HasValue)
+                {
+                    <text>Filtre kriterleriyle eşleşen kayıt yok.</text>
+                }
+                else
+                {
+                    <text>Henüz audit kaydı oluşmamış. Admin panelden bir CRUD işlemi yapıldığında otomatik kayıt başlayacak.</text>
+                }
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter">
+                <thead>
+                    <tr>
+                        <th style="width:170px">Tarih</th>
+                        <th style="width:200px">Kullanıcı</th>
+                        <th style="width:160px">Entity</th>
+                        <th style="width:120px">Entity ID</th>
+                        <th style="width:140px">Action</th>
+                        <th class="w-1">Detay</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.Items)
+                    {
+                        var (badgeCss, badgeLabel) = ActionBadge(a.Action);
+                        <tr>
+                            <td>@a.CreatedAt.ToString("dd.MM.yyyy HH:mm:ss")</td>
+                            <td>
+                                <div>@(a.UserName ?? "(sistem)")</div>
+                                @if (a.UserId.HasValue)
+                                {
+                                    <small class="text-secondary">#@a.UserId</small>
+                                }
+                            </td>
+                            <td><code>@a.EntityName</code></td>
+                            <td><small class="text-secondary">@a.EntityId</small></td>
+                            <td><span class="badge @badgeCss">@badgeLabel</span></td>
+                            <td>
+                                <a asp-action="Details" asp-controller="AuditLogs" asp-area="Admin"
+                                   asp-route-id="@a.Id" class="btn btn-sm btn-outline-secondary"
+                                   title="Detay"><i class="ti ti-eye"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                <strong>@((Model.PageNumber - 1) * Model.PageSize + 1)</strong> -
+                <strong>@Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)</strong>
+                arası, toplam <strong>@Model.TotalCount</strong> kayıt
+            </p>
+            <div class="ms-auto">
+                <partial name="_Pagination" model="paginationVm" />
+            </div>
+        </div>
+    }
+</div>

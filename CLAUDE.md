@@ -417,7 +417,7 @@ Integration test'lerde `IntegrationTestFactory` `SecurePolicy.SameAsRequest`'e i
 - ✅ **Faz 4 — Frontend (Tasarım & Geliştirme)** tamamlandı (09.05.2026, tag `v0.4.0`): 17 public sayfa + responsive + SEO temelleri + KVKK uyumlu iletişim formu + custom 404, Faq + ContactMessage entity, 231/231 test PASSED (208 birim + 23 integration)
 - ✅ **Faz 5 — SEO, Güvenlik, Admin Geri Dönüşleri** tamamlandı (11.05.2026, tag `v0.5.0`): meta tag + JSON-LD + sitemap + breadcrumb, CDN SRI + Turnstile + RateLimit + global exception middleware + security headers, Faq admin CRUD + ContactMessages liste UI, 275/275 test PASSED (246 birim + 29 integration)
 - 🔄 **Faz 6 — Test, Düzeltme, Yayına Hazırlık** devam ediyor (6.1–6.25 tamam, 474/474 test, 6.26 deploy bekliyor)
-- 🔄 **Faz 7 — Admin Zenginleştirme** devam ediyor (8 alt-adım planlandı, kod henüz başlamadı)
+- 🔄 **Faz 7 — Admin Zenginleştirme** devam ediyor (7.1 Aktivite Logu tamam, 7.2-7.8 sırada)
 
 Faz tamamlama detayları için `PROGRESS.md` dosyasına bakınız.
 

@@ -8,6 +8,7 @@ using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.Entities.Identity;
 using KucukMericHukuk.DataAccess;
 using KucukMericHukuk.DataAccess.Context;
+using KucukMericHukuk.DataAccess.Interceptors;
 using KucukMericHukuk.Core.Interfaces;
 using KucukMericHukuk.Infrastructure;
 using KucukMericHukuk.Infrastructure.Email;
@@ -28,10 +29,17 @@ using Microsoft.Extensions.Options;
 var builder = WebApplication.CreateBuilder(args);
 
 // DbContext (Testing ortamında entegrasyon testleri kendi provider'ını ekliyor)
+// Faz 7.1: IHttpContextAccessor + ICurrentUserAccessor — AuditSaveChangesInterceptor user + IP almak için.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<KucukMericHukuk.Core.Interfaces.ICurrentUserAccessor,
+    KucukMericHukuk.Web.Infrastructure.HttpCurrentUserAccessor>();
+
 if (!builder.Environment.IsEnvironment("Testing"))
 {
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+        options
+            .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+            .AddInterceptors(sp.GetRequiredService<AuditSaveChangesInterceptor>()));
 }
 
 // Identity
