@@ -115,13 +115,6 @@
     reject + Result.Failure)
   - Faz 5 kapsamında, üretim öncesi audit'te değerlendirilir
 
-- **Translation full-replace stratejisi gözden geçirme**
-  - Şu an Update'te `Translations.Clear() + Add(...)` pattern, audit
-    trail bozar (Translation Id'leri yenilenir, CreatedAt güncellenir)
-  - Faz 2.10c'de değerlendirildi, Faz 5 audit aşamasına ertelendi
-  - Çözüm: Diff-based update (LanguageCode bazlı find/update/delete/add)
-  - 5 service etkilenir, kapsamlı test gerekir
-
 - **Pre-commit hook: AddFluentValidationAutoValidation çağrı kontrolü**
   - 2.4a kararı bypass edilmesin
   - Husky/shell script ile commit öncesi DTO'larda FluentValidator
