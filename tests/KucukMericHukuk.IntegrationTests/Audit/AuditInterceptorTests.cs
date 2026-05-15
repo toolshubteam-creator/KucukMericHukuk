@@ -62,6 +62,18 @@ public class AuditInterceptorTests : IClassFixture<IntegrationTestFactory>
 
         audit.ChangesJson.Should().NotBeNullOrEmpty();
         audit.ChangesJson.Should().Contain("AuthorInitials");
+
+        // Faz 7.1-fix2: snapshot içindeki "Id" alanı da DB-generated gerçek değer olmalı,
+        // SavingChanges sırasındaki temp ID (0 / negatif) DEĞİL.
+        var snapshotIdInJson = ExtractIdFromJson(audit.ChangesJson!);
+        snapshotIdInJson.Should().Be(testimonialId, "ChangesJson içindeki Id alanı post-save gerçek değer olmalı");
+        snapshotIdInJson.Should().BePositive();
+    }
+
+    private static int ExtractIdFromJson(string json)
+    {
+        using var doc = System.Text.Json.JsonDocument.Parse(json);
+        return doc.RootElement.GetProperty("Id").GetInt32();
     }
 
     [Fact]
@@ -95,6 +107,53 @@ public class AuditInterceptorTests : IClassFixture<IntegrationTestFactory>
 
         auditEntityIds.Should().BeEquivalentTo(expectedIds, "her audit row gerçek entity Id'sini içermeli");
         auditEntityIds.Should().OnlyContain(id => id > 0, "hiçbir audit temp/negative ID içermemeli");
+
+        // Faz 7.1-fix2: her snapshot içindeki "Id" alanı da pozitif/gerçek değer
+        var snapshotIds = audits.Select(a => ExtractIdFromJson(a.ChangesJson!)).OrderBy(x => x).ToList();
+        snapshotIds.Should().BeEquivalentTo(expectedIds, "her ChangesJson içindeki Id alanı post-save gerçek değer olmalı");
+        snapshotIds.Should().OnlyContain(id => id > 0);
+    }
+
+    [Fact]
+    public async Task ModifyEntity_ChangesJsonDeltaUntouchedByPkPatch()
+    {
+        // Faz 7.1-fix2: PK patch sadece Created için çalışır; Modified delta'nın
+        // alan yapısı bozulmamalı (PK delta'da zaten yok, ama defansif test).
+        await ClearAuditLogsAsync();
+
+        int id;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var t = new Testimonial { AuthorInitials = "P.T.", AuthorRole = "Müvekkil", IsActive = true };
+            db.Set<Testimonial>().Add(t);
+            await db.SaveChangesAsync();
+            id = t.Id;
+        }
+
+        await ClearAuditLogsAsync();
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var t = await db.Set<Testimonial>().FirstAsync(x => x.Id == id);
+            t.AuthorRole = "Eski Müvekkil";
+            await db.SaveChangesAsync();
+        }
+
+        using var verifyScope = _factory.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var audit = await verifyDb.AuditLogs
+            .Where(a => a.EntityName == "Testimonial" && a.Action == AuditActionType.Modified)
+            .FirstAsync();
+
+        // Modified delta yapısı: { AuthorRole: { old, new } }
+        using var doc = System.Text.Json.JsonDocument.Parse(audit.ChangesJson!);
+        doc.RootElement.TryGetProperty("AuthorRole", out var roleNode).Should().BeTrue();
+        roleNode.TryGetProperty("old", out _).Should().BeTrue();
+        roleNode.TryGetProperty("new", out _).Should().BeTrue();
+        // PK delta'da olmamalı (Modified'da PK değişmiyor)
+        doc.RootElement.TryGetProperty("Id", out _).Should().BeFalse("Modified delta PK içermez, patch dokunmamalı");
     }
 
     [Fact]

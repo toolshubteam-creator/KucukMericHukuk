@@ -1,5 +1,6 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Enums;
 using KucukMericHukuk.Core.Interfaces;
@@ -246,6 +247,13 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
             // veya entity instance'ından okuyabilir — defansif null check.
             var entityId = TryGetEntityId(p.Entry) ?? string.Empty;
 
+            // Faz 7.1-fix2: Created snapshot SavingChanges'te alındı; PK alanı henüz temp değer
+            // (örn. 0 ya da negatif int). DB-generated gerçek PK ile patch et.
+            // Modified/Deleted/Restored snapshot'larında PK zaten gerçek değer, dokunulmaz.
+            var changesJson = p.Action == AuditActionType.Created
+                ? PatchPkInJson(p.ChangesJson, p.Entry)
+                : p.ChangesJson;
+
             audits.Add(new AuditLog
             {
                 Id = Guid.NewGuid(),
@@ -254,12 +262,57 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
                 EntityName = p.Entry.Entity.GetType().Name,
                 EntityId = entityId,
                 Action = p.Action,
-                ChangesJson = p.ChangesJson,
+                ChangesJson = changesJson,
                 IpAddress = ipAddress,
                 CreatedAt = now
             });
         }
         return audits;
+    }
+
+    /// <summary>
+    /// Created snapshot içindeki PK alan(lar)ını DB-generated gerçek değerle değiştirir.
+    /// Parse/serialize hatası → defansif: orijinal JSON döner (regresyon yapmaz).
+    /// Türkçe karakter encoding'i <see cref="JsonOpts"/> ile korunur.
+    /// </summary>
+    private string? PatchPkInJson(string? json, EntityEntry entry)
+    {
+        if (string.IsNullOrEmpty(json)) return json;
+        var pk = entry.Metadata.FindPrimaryKey();
+        if (pk is null || pk.Properties.Count == 0) return json;
+
+        try
+        {
+            if (JsonNode.Parse(json) is not JsonObject obj) return json;
+
+            foreach (var pkProp in pk.Properties)
+            {
+                var name = pkProp.Name;
+                if (!obj.ContainsKey(name)) continue;
+
+                object? realValue;
+                try
+                {
+                    realValue = entry.Property(name).CurrentValue;
+                }
+                catch
+                {
+                    var clrProp = entry.Entity.GetType().GetProperty(name);
+                    realValue = clrProp?.GetValue(entry.Entity);
+                }
+
+                obj[name] = realValue is null
+                    ? null
+                    : JsonSerializer.SerializeToNode(realValue, JsonOpts);
+            }
+
+            return obj.ToJsonString(JsonOpts);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "AuditSaveChangesInterceptor: ChangesJson PK patch failed — orijinal snapshot korunuyor");
+            return json;
+        }
     }
 
     private static AuditActionType? TryDetectSoftDeleteTransition(EntityEntry entry)
