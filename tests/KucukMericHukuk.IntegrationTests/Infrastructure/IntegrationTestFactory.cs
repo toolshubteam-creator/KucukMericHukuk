@@ -53,7 +53,13 @@ public class IntegrationTestFactory : WebApplicationFactory<Program>
             _connection = new SqliteConnection("Filename=:memory:");
             _connection.Open();
 
-            services.AddDbContext<AppDbContext>(options => options.UseSqlite(_connection));
+            // Faz 7.1: AuditSaveChangesInterceptor production wire-up gibi test'te de bağlanır
+            // — audit integration testlerinin (AuditInterceptorTests) gerçek interceptor akışını
+            // doğrulayabilmesi için. Diğer testler üzerinde yan etki: audit kayıtları üretilir
+            // ama assertion yok, performans etkisi marjinal.
+            services.AddDbContext<AppDbContext>((sp, options) =>
+                options.UseSqlite(_connection)
+                       .AddInterceptors(sp.GetRequiredService<KucukMericHukuk.DataAccess.Interceptors.AuditSaveChangesInterceptor>()));
 
             // Production'da Cookie.SecurePolicy=Always (HTTPS-only). WebApplicationFactory
             // HTTP üzerinden test eder → cookie subsequent request'lerde gönderilmez,

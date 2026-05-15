@@ -1,3 +1,4 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Enums;
@@ -38,6 +39,13 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
     private static readonly HashSet<string> IgnoredFieldNames = new(StringComparer.Ordinal)
     {
         "CreatedAt", "UpdatedAt", "DeletedAt"
+    };
+
+    // Türkçe karakterler (Ö, ü vb.) JSON'da \uXXXX escape edilmeden saklanır — admin Details
+    // sayfası "Ham JSON" bloğunda okunabilir kalsın diye. Render güvenli (HtmlEncode + <pre>).
+    private static readonly JsonSerializerOptions JsonOpts = new()
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
     private readonly ICurrentUserAccessor _currentUser;
@@ -154,7 +162,7 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
                     var delta = BuildDelta(entry);
                     if (delta.Count == 0) continue;  // sadece ignored field (UpdatedAt vb.) değişmiş
                     action = AuditActionType.Modified;
-                    changesJson = JsonSerializer.Serialize(delta);
+                    changesJson = JsonSerializer.Serialize(delta, JsonOpts);
                     break;
 
                 default:
@@ -243,7 +251,7 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
             if (IgnoredFieldNames.Contains(prop.Metadata.Name)) continue;
             dict[prop.Metadata.Name] = prop.CurrentValue;
         }
-        return JsonSerializer.Serialize(dict);
+        return JsonSerializer.Serialize(dict, JsonOpts);
     }
 
     private static string SerializeOriginalValues(EntityEntry entry)
@@ -254,7 +262,7 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
             if (IgnoredFieldNames.Contains(prop.Metadata.Name)) continue;
             dict[prop.Metadata.Name] = prop.OriginalValue;
         }
-        return JsonSerializer.Serialize(dict);
+        return JsonSerializer.Serialize(dict, JsonOpts);
     }
 
     private static Dictionary<string, object> BuildDelta(EntityEntry entry)
