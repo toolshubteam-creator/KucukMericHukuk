@@ -53,9 +53,48 @@ public class AuditInterceptorTests : IClassFixture<IntegrationTestFactory>
 
         audit.Should().NotBeNull();
         audit!.Action.Should().Be(AuditActionType.Created);
-        audit.EntityId.Should().Be(testimonialId.ToString(), "SavedChanges fixup gerçek ID'yi yazmalı");
+        audit.EntityId.Should().Be(testimonialId.ToString(), "SavedChanges'te gerçek DB ID yazılmalı (capture/commit pattern)");
+
+        // Faz 7.1-fix: EntityId temp negatif değer DEĞİL — gerçek pozitif DB ID
+        var parsedId = int.Parse(audit.EntityId);
+        parsedId.Should().BePositive("EF Core SQLite/SQL Server temp ID'leri (0 veya negatif) audit'e SIZMAMALI");
+        parsedId.Should().Be(testimonialId);
+
         audit.ChangesJson.Should().NotBeNullOrEmpty();
         audit.ChangesJson.Should().Contain("AuthorInitials");
+    }
+
+    [Fact]
+    public async Task CreateMultipleEntities_AllAuditLogsHaveRealIds()
+    {
+        // Faz 7.1-fix: tek SaveChanges'te birden fazla entity Add edilirse hepsinin
+        // audit EntityId'si gerçek/pozitif olmalı — temp negative ID sızmamalı.
+        await ClearAuditLogsAsync();
+
+        var createdIds = new List<int>();
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var t1 = new Testimonial { AuthorInitials = "M.1", AuthorRole = "Müvekkil", IsActive = true };
+            var t2 = new Testimonial { AuthorInitials = "M.2", AuthorRole = "Müvekkil", IsActive = true };
+            var t3 = new Testimonial { AuthorInitials = "M.3", AuthorRole = "Müvekkil", IsActive = true };
+            db.Set<Testimonial>().AddRange(t1, t2, t3);
+            await db.SaveChangesAsync();
+            createdIds.AddRange(new[] { t1.Id, t2.Id, t3.Id });
+        }
+
+        using var verifyScope = _factory.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var audits = await verifyDb.AuditLogs
+            .Where(a => a.EntityName == "Testimonial" && a.Action == AuditActionType.Created)
+            .ToListAsync();
+
+        audits.Should().HaveCount(3);
+        var auditEntityIds = audits.Select(a => int.Parse(a.EntityId)).OrderBy(x => x).ToList();
+        var expectedIds = createdIds.OrderBy(x => x).ToList();
+
+        auditEntityIds.Should().BeEquivalentTo(expectedIds, "her audit row gerçek entity Id'sini içermeli");
+        auditEntityIds.Should().OnlyContain(id => id > 0, "hiçbir audit temp/negative ID içermemeli");
     }
 
     [Fact]

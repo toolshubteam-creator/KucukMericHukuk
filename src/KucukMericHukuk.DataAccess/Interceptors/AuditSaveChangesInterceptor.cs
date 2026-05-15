@@ -17,8 +17,15 @@ namespace KucukMericHukuk.DataAccess.Interceptors;
 /// Added/Modified/Deleted state geçişleri AuditLog tablosuna işlenir. Defansif: audit
 /// hatası asıl SaveChanges'i kırmaz — log only.
 ///
-/// Scoped service: bir request = bir DbContext = bir interceptor instance, instance field
-/// thread-safe (DbContext zaten tek thread'lik async-flow).
+/// Faz 7.1-fix: Audit kaydı CAPTURE/COMMIT pattern ile iki fazlı.
+///   • SavingChanges  → değişiklikleri yakala, JSON'u hesapla, _pending listesine al (DB'ye yazma yok)
+///   • SavedChanges   → entry.Id artık gerçek değer; AuditLog satırlarını oluştur + AddRange + ikinci SaveChanges
+/// Avantaj: audit satırları INSERT edildiğinde EntityId zaten gerçek değer (önceki impl: insert + post-save UPDATE).
+/// İkinci SaveChanges interceptor'ı yeniden tetikler ama AuditLog ignore listesinde, sonsuz döngü yok.
+///
+/// Atomicity notu: audit insert ayrı transaction. Asıl save committed sonra audit insert fail olursa
+/// audit kaybı tolere edilir (log only); kullanıcının işlemi etkilenmez.
+/// Scoped service: bir request = bir DbContext = bir interceptor instance, _pending field thread-safe.
 /// </summary>
 public class AuditSaveChangesInterceptor : SaveChangesInterceptor
 {
@@ -51,9 +58,13 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
     private readonly ICurrentUserAccessor _currentUser;
     private readonly ILogger<AuditSaveChangesInterceptor> _logger;
 
-    // Added entity'lerde PK store-generated olduğu için SavingChanges anında EntityId bilinmiyor (örn. int IDENTITY).
-    // SavedChanges hook'unda real ID'lere göre fixup yapılır.
-    private readonly List<(EntityEntry Entry, AuditLog Audit)> _pendingAddedAudits = new();
+    /// <summary>SavingChanges aşamasında yakalanan, SavedChanges'te commit edilecek geçici audit veri.</summary>
+    private record PendingAudit(
+        EntityEntry Entry,
+        AuditActionType Action,
+        string? ChangesJson);
+
+    private readonly List<PendingAudit> _pending = new();
 
     public AuditSaveChangesInterceptor(
         ICurrentUserAccessor currentUser,
@@ -63,10 +74,12 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
         _logger = logger;
     }
 
+    // -------------------- SAVING (capture) --------------------
+
     public override InterceptionResult<int> SavingChanges(
         DbContextEventData eventData, InterceptionResult<int> result)
     {
-        TryWriteAuditEntries(eventData.Context);
+        TryCaptureChanges(eventData.Context);
         return base.SavingChanges(eventData, result);
     }
 
@@ -74,53 +87,49 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
         DbContextEventData eventData, InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
-        TryWriteAuditEntries(eventData.Context);
+        TryCaptureChanges(eventData.Context);
         return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
+    // -------------------- SAVED (commit) --------------------
+
     public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
     {
-        TryFixupAddedEntityIds(eventData.Context);
+        TryCommitAudit(eventData.Context);
         return base.SavedChanges(eventData, result);
     }
 
-    public override ValueTask<int> SavedChangesAsync(
+    public override async ValueTask<int> SavedChangesAsync(
         SaveChangesCompletedEventData eventData, int result,
         CancellationToken cancellationToken = default)
     {
-        TryFixupAddedEntityIds(eventData.Context);
-        return base.SavedChangesAsync(eventData, result, cancellationToken);
+        await TryCommitAuditAsync(eventData.Context, cancellationToken);
+        return await base.SavedChangesAsync(eventData, result, cancellationToken);
     }
 
     // -------------------- internal --------------------
 
-    private void TryWriteAuditEntries(DbContext? context)
+    private void TryCaptureChanges(DbContext? context)
     {
+        _pending.Clear();
         if (context is not AppDbContext db) return;
-        _pendingAddedAudits.Clear();
         try
         {
-            WriteAuditEntries(db);
+            CaptureChanges(db);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "AuditSaveChangesInterceptor (SavingChanges) exception — audit kaybedildi, asıl işlem devam ediyor");
+            _logger.LogError(ex, "AuditSaveChangesInterceptor capture exception — audit kaybedildi, asıl işlem devam ediyor");
+            _pending.Clear();
         }
     }
 
-    private void WriteAuditEntries(AppDbContext context)
+    private void CaptureChanges(AppDbContext context)
     {
-        var userId = TryGetUserId();
-        var userName = TryGetUserName();
-        var ipAddress = TryGetIpAddress();
-        var now = DateTime.UtcNow;
-
-        // Materialize — başka entity (AuditLog) Add edince ChangeTracker değişir.
+        // Materialize — başka entity Add edince ChangeTracker değişir.
         var entries = context.ChangeTracker.Entries()
             .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
             .ToList();
-
-        var auditsToAdd = new List<AuditLog>();
 
         foreach (var entry in entries)
         {
@@ -134,16 +143,19 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
             {
                 case EntityState.Added:
                     action = AuditActionType.Created;
+                    // Snapshot SavingChanges'te alınır — PK alanı temp değer (örn. 0 ya da negatif int)
+                    // içerebilir, ama AuditLog.EntityId kolonu SavedChanges'te gerçek ID ile dolar.
                     changesJson = SerializeCurrentValues(entry);
                     break;
 
                 case EntityState.Deleted:
+                    // Hard delete — entry SavedChanges sonrası Detached, snapshot ŞİMDİ alınmalı.
                     action = AuditActionType.Deleted;
                     changesJson = SerializeOriginalValues(entry);
                     break;
 
                 case EntityState.Modified:
-                    // Soft-delete transition: IsDeleted false→true → "Deleted", true→false → "Restored"
+                    // Soft-delete: IsDeleted false→true → "Deleted", true→false → "Restored"
                     var softDeleteAction = TryDetectSoftDeleteTransition(entry);
                     if (softDeleteAction is AuditActionType.Deleted)
                     {
@@ -158,7 +170,8 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
                         break;
                     }
 
-                    // Normal Modified — delta sadece değişen alanlar
+                    // Normal Modified — delta sadece değişen alanlar.
+                    // Delta OriginalValues gerektirir; SavingChanges'te hesaplanmalı (post-save'de OriginalValues = CurrentValues).
                     var delta = BuildDelta(entry);
                     if (delta.Count == 0) continue;  // sadece ignored field (UpdatedAt vb.) değişmiş
                     action = AuditActionType.Modified;
@@ -169,33 +182,84 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
                     continue;
             }
 
-            var entityIdAtSavingTime = TryGetEntityId(entry) ?? string.Empty;
-            var audit = new AuditLog
+            _pending.Add(new PendingAudit(entry, action, changesJson));
+        }
+    }
+
+    private void TryCommitAudit(DbContext? context)
+    {
+        if (_pending.Count == 0) return;
+        if (context is not AppDbContext db) return;
+
+        try
+        {
+            var audits = BuildAuditLogsFromPending();
+            _pending.Clear();
+            if (audits.Count == 0) return;
+
+            db.AuditLogs.AddRange(audits);
+            db.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "AuditSaveChangesInterceptor commit failed — audit kayıtları yazılamadı, asıl işlem etkilenmedi");
+            _pending.Clear();
+        }
+    }
+
+    private async ValueTask TryCommitAuditAsync(DbContext? context, CancellationToken ct)
+    {
+        if (_pending.Count == 0) return;
+        if (context is not AppDbContext db) return;
+
+        try
+        {
+            var audits = BuildAuditLogsFromPending();
+            _pending.Clear();
+            if (audits.Count == 0) return;
+
+            db.AuditLogs.AddRange(audits);
+            await db.SaveChangesAsync(ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "AuditSaveChangesInterceptor commit (async) failed — audit kayıtları yazılamadı, asıl işlem etkilenmedi");
+            _pending.Clear();
+        }
+    }
+
+    /// <summary>
+    /// SavedChanges aşamasında çağrılır — Added entry'lerin EntityId'si artık DB-generated gerçek değer.
+    /// Bu yüzden audit objesini ŞİMDİ inşa ederiz, EntityId temp olmayan değeri yansıtır.
+    /// </summary>
+    private List<AuditLog> BuildAuditLogsFromPending()
+    {
+        var userId = _currentUser.UserId;
+        var userName = _currentUser.UserName;
+        var ipAddress = _currentUser.IpAddress;
+        var now = DateTime.UtcNow;
+
+        var audits = new List<AuditLog>(_pending.Count);
+        foreach (var p in _pending)
+        {
+            // Detached entry (hard delete sonrası) için TryGetEntityId hâlâ OriginalValues'tan
+            // veya entity instance'ından okuyabilir — defansif null check.
+            var entityId = TryGetEntityId(p.Entry) ?? string.Empty;
+
+            audits.Add(new AuditLog
             {
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 UserName = userName,
-                EntityName = entityTypeName,
-                EntityId = entityIdAtSavingTime,
-                Action = action,
-                ChangesJson = changesJson,
+                EntityName = p.Entry.Entity.GetType().Name,
+                EntityId = entityId,
+                Action = p.Action,
+                ChangesJson = p.ChangesJson,
                 IpAddress = ipAddress,
                 CreatedAt = now
-            };
-
-            auditsToAdd.Add(audit);
-
-            // Added state'te PK henüz store-generated değil — SavedChanges'ta fixup
-            if (entry.State == EntityState.Added)
-            {
-                _pendingAddedAudits.Add((entry, audit));
-            }
+            });
         }
-
-        if (auditsToAdd.Count > 0)
-        {
-            context.AuditLogs.AddRange(auditsToAdd);
-        }
+        return audits;
     }
 
     private static AuditActionType? TryDetectSoftDeleteTransition(EntityEntry entry)
@@ -210,37 +274,23 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
         return null;
     }
 
-    private void TryFixupAddedEntityIds(DbContext? context)
-    {
-        if (_pendingAddedAudits.Count == 0) return;
-        if (context is not AppDbContext db) return;
-
-        try
-        {
-            foreach (var (entry, audit) in _pendingAddedAudits)
-            {
-                var realId = TryGetEntityId(entry);
-                if (!string.IsNullOrEmpty(realId)) audit.EntityId = realId;
-            }
-            _pendingAddedAudits.Clear();
-            // Sadece AuditLog.EntityId değişti — bu update bir kez daha SavingChanges'i tetikler,
-            // ama AuditLog ignore listesinde olduğu için yeni audit üretilmez (sonsuz döngü yok).
-            db.SaveChanges();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "AuditSaveChangesInterceptor post-save EntityId fixup failed — Added audit kayıtları placeholder ID ile kaldı");
-            _pendingAddedAudits.Clear();
-        }
-    }
-
     private static string? TryGetEntityId(EntityEntry entry)
     {
         var key = entry.Metadata.FindPrimaryKey();
         if (key is null || key.Properties.Count == 0) return null;
         var pkProp = key.Properties[0];
-        var value = entry.Property(pkProp.Name).CurrentValue;
-        return value?.ToString();
+        try
+        {
+            var value = entry.Property(pkProp.Name).CurrentValue;
+            return value?.ToString();
+        }
+        catch
+        {
+            // Detached entry (örn. hard delete sonrası) Property erişimi fırlatabilir;
+            // entity instance'ından reflection ile fallback.
+            var clrProp = entry.Entity.GetType().GetProperty(pkProp.Name);
+            return clrProp?.GetValue(entry.Entity)?.ToString();
+        }
     }
 
     private static string SerializeCurrentValues(EntityEntry entry)
@@ -281,8 +331,4 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
         }
         return delta;
     }
-
-    private int? TryGetUserId() => _currentUser.UserId;
-    private string? TryGetUserName() => _currentUser.UserName;
-    private string? TryGetIpAddress() => _currentUser.IpAddress;
 }
