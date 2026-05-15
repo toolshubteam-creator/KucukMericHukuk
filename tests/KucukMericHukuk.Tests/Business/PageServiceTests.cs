@@ -199,6 +199,28 @@ public class PageServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task UpdateAsync_PreservesTranslationIdAndCreatedAt()
+    {
+        // Faz 7.1.2: diff-based merge mevcut translation Id ve CreatedAt'i korumalı.
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var createResult = await sut.CreateAsync(BuildValidInput());
+        var originalId = context.Set<PageTranslation>().First(t => t.PageId == createResult.Value).Id;
+        var originalCreatedAt = context.Set<PageTranslation>().First(t => t.PageId == createResult.Value).CreatedAt;
+
+        var updateInput = BuildValidInput(pageKey: "hakkimizda", title: "Yeni Başlık", id: createResult.Value);
+        var result = await sut.UpdateAsync(updateInput);
+        result.IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var t = verify.Set<PageTranslation>().First(x => x.PageId == createResult.Value);
+        t.Id.Should().Be(originalId, "Translation Id KORUNMALI (diff-merge)");
+        t.CreatedAt.Should().Be(originalCreatedAt);
+        t.Title.Should().Be("Yeni Başlık");
+    }
+
+    [Fact]
     public async Task UpdateAsync_NoId_ShouldFail()
     {
         await using var context = _factory.CreateContext();
