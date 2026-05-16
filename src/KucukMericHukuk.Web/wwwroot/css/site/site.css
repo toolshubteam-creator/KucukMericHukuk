@@ -130,7 +130,7 @@ a:hover { color: var(--color-accent-text); }
     margin-top: var(--space-5);
 }
 .subscribe-band__inner {
-    max-width: 640px;
+    max-width: 880px;
     margin-inline: auto;
     text-align: center;
 }
@@ -145,6 +145,7 @@ a:hover { color: var(--color-accent-text); }
 }
 .subscribe-band__row {
     display: flex;
+    align-items: center;
     gap: var(--space-1);
     margin-bottom: var(--space-2);
 }
@@ -161,8 +162,7 @@ a:hover { color: var(--color-accent-text); }
     margin-bottom: var(--space-2);
 }
 .subscribe-band__turnstile {
-    display: flex;
-    justify-content: center;
+    flex: 0 0 300px;
 }
 .subscribe-band__message {
     margin-top: var(--space-2);
@@ -191,12 +191,18 @@ a:hover { color: var(--color-accent-text); }
     height: 1px;
     overflow: hidden;
 }
-@media (max-width: 576px) {
+@media (max-width: 768px) {
     .subscribe-band__row {
         flex-direction: column;
+        align-items: stretch;
     }
     .subscribe-band__submit {
         width: 100%;
+    }
+    .subscribe-band__turnstile {
+        flex: 0 0 auto;
+        display: flex;
+        justify-content: center;
     }
 }
 
