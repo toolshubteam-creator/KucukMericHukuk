@@ -35,6 +35,7 @@
         @RenderBody()
     </main>
 
+    <partial name="_SubscribeBand" />
     <partial name="_SiteFooter" />
 
     <partial name="_CookieConsent" />
@@ -47,6 +48,7 @@
     <script defer src="~/lib/lucide/dist/umd/lucide.min.js" asp-append-version="true"></script>
     <script defer src="~/js/site/site.js" asp-append-version="true"></script>
     <script defer src="~/js/site/cookie-consent.js" asp-append-version="true"></script>
+    <script defer src="~/js/site/subscribe-form.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -27,6 +27,7 @@ public static class DependencyInjection
         services.AddScoped<ITestimonialRepository, TestimonialRepository>();
         services.AddScoped<IAppointmentRepository, AppointmentRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<ISubscriberRepository, SubscriberRepository>();
 
         // Faz 7.1: AuditSaveChangesInterceptor — Program.cs'te AddDbContext .AddInterceptors(sp.GetRequiredService<...>()) ile bağlanır.
         services.AddScoped<KucukMericHukuk.DataAccess.Interceptors.AuditSaveChangesInterceptor>();

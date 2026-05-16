@@ -281,10 +281,10 @@
   - Modified delta, soft-delete→Deleted, restore→Restored mantığı çalışıyor
   - 14 yeni test (6 unit + 8 integration), 488 total PASSED
 
-- **Aboneler** — Hafriyat'ta var, çalışıyor, basit (en kolay adapte)
-  - Subscriber entity + repo/UoW + Business servis + Result<T> + FluentValidation +
-    public abone formu (Turnstile/honeypot pattern) + admin liste + token ile iptal
-  - Tahmini: ~1-2 alt-adım
+- **Aboneler** — Kısmi tamamlandı (Faz 7.2a, 16.05.2026)
+  - ✅ 7.2a: Subscriber entity + repo/UoW + Business servis + Result<T> + FluentValidation +
+    public abone formu (footer, Turnstile/honeypot/KVKK/rate-limit) + admin liste/sil + token ile iptal
+  - Kalan 7.2b: bülten gönderimi (makale yayınlanınca admin onaylı abone bildirimi, mail şablonu, batch)
 
 ### Grup B — Dış API entegrasyonu (Hafriyat'ta HİÇ YOK — sıfırdan + müşteri-bağımlı)
 
@@ -311,6 +311,29 @@
   Küçükmeriç zaten eşdeğer/üstün — yapılacak bir şey yok
 - Tetik: Faz 6 tamamlanıp site yayına çıktıktan sonra; Faz 7 başında bu
   bölüm sıralı alt-adım planına dönüştürülür
+
+---
+
+## Route Dili Tutarsızlığı (TR/EN karışık)
+
+- **Sorun:** Public route'lar çoğunlukla İngilizce (`/Contact`, `/Appointment`, `/Articles`, `/Services`, `/Attorneys`, `/Pages`...) ama Referanslar + Galeri Türkçe route kullanıyor. Kullanıcı `/tr-TR/` kültüründe ama URL segmentleri dil karışık — tutarsız.
+- **ÖNCE KEŞİF GEREK:** neden 2 sayfa TR diğerleri EN — kasıt mı (örn. SEO için belirli sayfalar TR) yoksa tutarsızlık mı (Faz 4 routing kararı). DEFERRED'da veya kod yorumunda kasıt notu olabilir — kontrol edilmeli.
+- **SEO etkisi:** Route değişirse eski URL'ler kırılır → 301 redirect gerekir. Faz 7.4 Redirect modülü ile entegre düşünülmeli (canonical URL'ler + slug history).
+- **Tahmini:** önce keşif (~30 dk), sonra karar — kapsam keşfe bağlı. Tüm İngilizce'ye/Türkçe'ye taşıma ise ~5-10 dosya + 301 mapping.
+- **Tetik:** 7.2b sonrası ayrı keşif adımı (veya kullanıcı önceliklendirir).
+
+---
+
+## Turnstile JS Tek Yükleme (Centralize) — Faz 7.2a-fix'ten ertelendi
+
+- **Sorun:** Turnstile JS şu an 3 farklı yerden yükleniyor:
+  - `Views/Contact/Index.cshtml` (@section Scripts)
+  - `Views/Appointment/Index.cshtml` (@section Scripts)
+  - `Views/Shared/_SubscribeBand.cshtml` (her public sayfada render)
+- Cloudflare `api.js` idempotent (`window.turnstile` set ediyor, double-init yok) ama **network request duplicate** — Contact/Appointment sayfalarında 2 kez yüklenme
+- **Çözüm:** `_PublicLayout` body sonunda conditional (TurnstileOptions.Enabled) tek yükleme; Contact/Appointment + _SubscribeBand'dan @section Scripts/inline script kaldır
+- **Tahmini:** ~4 dosya edit, ~10 satır, 1 PR (~30 dk)
+- **Tetik:** 7.2a-fix sonrası ayrı küçük refactor (veya Faz 6.23 cila kalan turuyla birlikte)
 
 ---
 
