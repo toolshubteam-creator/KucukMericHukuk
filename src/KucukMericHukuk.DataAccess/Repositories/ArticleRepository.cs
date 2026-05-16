@@ -176,4 +176,16 @@ public class ArticleRepository : GenericRepository<Article>, IArticleRepository
             .OrderByDescending(a => a.PublishedAt)
             .ToListAsync(ct);
     }
+
+    public async Task<IReadOnlyList<Article>> GetPendingNewsletterArticlesAsync(
+        string languageCode, CancellationToken ct = default)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Include(a => a.Translations.Where(t => t.LanguageCode == languageCode))
+            .Where(a => a.Status == ArticleStatus.Published
+                     && a.NewsletterSentAt == null)
+            .OrderByDescending(a => a.PublishedAt)
+            .ToListAsync(ct);
+    }
 }
