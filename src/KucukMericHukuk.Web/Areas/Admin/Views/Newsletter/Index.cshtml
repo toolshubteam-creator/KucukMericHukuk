@@ -103,6 +103,7 @@
                         <th style="width:160px">Gönderilen / Toplam</th>
                         <th style="width:180px">Başlama</th>
                         <th style="width:180px">Tamamlanma</th>
+                        <th class="w-1">İşlem</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -130,6 +131,33 @@
                         <td>@j.SentCount / @j.TotalRecipients @if (j.FailedCount > 0) { <text>(<span class="text-danger">@j.FailedCount hata</span>)</text> }</td>
                         <td>@(j.StartedAt?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
                         <td>@(j.CompletedAt?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
+                        <td>
+                            @if (j.Status == NewsletterJobStatus.Pending)
+                            {
+                                <form asp-action="SendJob" asp-controller="Newsletter" asp-area="Admin"
+                                      asp-route-jobId="@j.Id" method="post" class="d-inline"
+                                      data-confirm="Bu bülten gönderilsin mi? @j.TotalRecipients aktif aboneye e-posta atılacak."
+                                      data-confirm-title="Bülteni Gönder"
+                                      data-confirm-button="Gönder">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-accent" title="Gönder">
+                                        <i class="ti ti-send"></i> Gönder
+                                    </button>
+                                </form>
+                            }
+                            else if (j.Status == NewsletterJobStatus.Failed && !string.IsNullOrWhiteSpace(j.ErrorSummary))
+                            {
+                                <span class="text-danger small" title="@j.ErrorSummary">
+                                    <i class="ti ti-alert-circle"></i> Detay
+                                </span>
+                            }
+                            else if (j.Status == NewsletterJobStatus.Sending)
+                            {
+                                <span class="text-info small">
+                                    <i class="ti ti-loader"></i> İşleniyor
+                                </span>
+                            }
+                        </td>
                     </tr>
                 }
                 </tbody>

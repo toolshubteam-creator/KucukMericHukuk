@@ -14,4 +14,7 @@ public class NewsletterJobListDto
     public DateTime? StartedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>Faz 7.2b-2: Failed job için ilk N abone hatası özeti — UI tooltip/details.</summary>
+    public string? ErrorSummary { get; set; }
 }

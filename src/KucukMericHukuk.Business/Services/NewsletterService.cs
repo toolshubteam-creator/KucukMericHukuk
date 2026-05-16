@@ -327,7 +327,8 @@ public class NewsletterService : INewsletterService
         FailedCount = job.FailedCount,
         StartedAt = job.StartedAt,
         CompletedAt = job.CompletedAt,
-        CreatedAt = job.CreatedAt
+        CreatedAt = job.CreatedAt,
+        ErrorSummary = job.ErrorSummary
     };
 
     private static NewsletterJobDetailDto MapToDetailDto(NewsletterJob job) => new()
