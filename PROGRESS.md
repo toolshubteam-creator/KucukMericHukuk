@@ -38,7 +38,8 @@ DEFERRED'daki "Faz 7 → Admin Zenginleştirme" maddesinin (6.22-keşif raporund
 | ✅ 7.1 | Aktivite Logu (audit infra — `SaveChangesInterceptor` + `AuditLog`) — tamamlandı | — | Scaffold var, interceptor wire edilmemiş; mantık iyi referans | ~2 alt-adım |
 | ✅ 7.1.2 | Translation diff-based merge — `Translations.Clear()+Add()` anti-pattern 8 servisten kalktı; ortak `TranslationMergeHelper`; DEFERRED "Translation full-replace" maddesi kapatıldı | — | — | ~1 alt-adım |
 | ✅ 7.2a | Abone altyapısı (Subscriber entity + public footer formu + token iptal + admin liste; bülten gönderimi 7.2b'de) — UX fix uygulandı (AJAX content negotiation + subscribe bant + sade footer); fix2 — turnstile normal mode + bant dikey sıkılaştırma; route dili tutarsızlığı DEFERRED'a | — | — | ~1 alt-adım |
-| 7.2b | Bülten gönderimi (makale yayınlanınca admin onaylı abone bildirimi) | 7.2a | — | ~1 alt-adım |
+| ✅ 7.2b-1 | Bülten altyapısı (NewsletterJob entity + Article.NewsletterSentAt flag + mail HTML şablonu + admin "Bülten" modülü: bekleyen liste + gönderim geçmişi + önizleme; migration backfill mevcut makaleleri "gönderildi" sayar; gönderim 7.2b-2'de) | 7.2a | — | ~1 alt-adım |
+| 7.2b-2 | Bülten gönderim motoru (Pending job batch processor + SMTP rate limit + sonuç raporu) | 7.2b-1 | — | ~1-2 alt-adım |
 | 7.3 | 404 Takibi (`NotFoundLog` + middleware + admin liste) | — | YOK, sıfırdan | ~2-3 alt-adım |
 | 7.4 | Redirect modülü (`Redirect` + `SlugHistory` + middleware + 404 ile entegre "tek-tık 301 kur") | 7.3 | Var, iyi referans, middleware mantığı düz adapte | ~2-3 alt-adım |
 | 7.5 | Grup B ortak altyapı (Google.Apis NuGet + credential okuma + `IGoogleApiClient` + admin Site Ayarları → Google entegrasyon tab) | — | YOK, sıfırdan | ~2 alt-adım |

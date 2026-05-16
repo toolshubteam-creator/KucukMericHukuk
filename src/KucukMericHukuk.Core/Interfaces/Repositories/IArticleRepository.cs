@@ -37,4 +37,10 @@ public interface IArticleRepository : IGenericRepository<Article>
     /// Translation include eder (Slug için), pagination YOK.
     /// </summary>
     Task<IReadOnlyList<Article>> GetAllPublishedForSitemapAsync(string languageCode, CancellationToken ct = default);
+
+    /// <summary>
+    /// Faz 7.2b-1: Bülten bekleyen makaleler — Status=Published AND NewsletterSentAt IS NULL.
+    /// Translation include eder (Title + Slug için), CreatedAt DESC sıralı.
+    /// </summary>
+    Task<IReadOnlyList<Article>> GetPendingNewsletterArticlesAsync(string languageCode, CancellationToken ct = default);
 }

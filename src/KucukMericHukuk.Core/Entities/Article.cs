@@ -22,6 +22,12 @@ public class Article : BaseEntity, ITranslatable<ArticleTranslation>
     public int ViewCount { get; set; }
     public bool IsFeatured { get; set; }
 
+    /// <summary>
+    /// Faz 7.2b-1: NULL → bülten henüz gönderilmedi (Published + NULL = pending).
+    /// Dolu → bülten gönderildi (NewsletterJob Completed sırasında set edilir).
+    /// </summary>
+    public DateTime? NewsletterSentAt { get; set; }
+
     public ICollection<ArticleTranslation> Translations { get; set; } = new List<ArticleTranslation>();
     public ICollection<Tag> Tags { get; set; } = new List<Tag>();
 }
