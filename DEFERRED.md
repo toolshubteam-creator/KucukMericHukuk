@@ -324,6 +324,17 @@
 
 ---
 
+## SmtpEmailSender Connection Reuse (Bülten Optimizasyonu) — Faz 7.2b-2'den ertelendi
+
+- **Sorun:** Mevcut `SmtpEmailSender.SendAsync` her çağrıda yeni `SmtpClient` açıp `ConnectAsync` + `AuthenticateAsync` + `SendAsync` + `DisconnectAsync` yapıyor. Her email için ayrı TCP + TLS handshake.
+- **Etki:** Küçük abone listesi (≤100) için kabul edilebilir; büyük listede (1000+) her mail başına ~500ms+ overhead → toplam gönderim süresi orantısız büyür, SMTP sunucusu rate limit'lerini zorlar.
+- **Çözüm:** `IEmailBatchSender` arayüzü — tek connection açar, MailKit `SendAsync` pipelining ile abone başına mesaj gönderir, batch sonu disconnect. `NewsletterService.ProcessJobAsync` batch context'inde bu sender'ı kullanır.
+- **Tahmini:** ~1 PR, Infrastructure/Email (yeni sender + IDisposable lifecycle) + ProcessJobAsync entegrasyonu + test (mock batch context).
+- **Tetik:** Abone listesi 200+ büyüdüğünde veya performans turu. Şu an aktif abone ~4 — sorun yok.
+- **Kaynak:** 7.2b-2 raporu (Claude Code işaretledi)
+
+---
+
 ## Turnstile JS Tek Yükleme (Centralize) — Faz 7.2a-fix'ten ertelendi
 
 - **Sorun:** Turnstile JS şu an 3 farklı yerden yükleniyor:
