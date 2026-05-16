@@ -1,4 +1,6 @@
 using System.Net;
+using System.Net.Http.Headers;
+using System.Text.Json;
 using FluentAssertions;
 using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Enums;
@@ -143,6 +145,120 @@ public class SubscribersTests : IClassFixture<IntegrationTestFactory>
 
         var html = await response.Content.ReadAsStringAsync();
         html.Should().Contain("admin-list@test.local");
+    }
+
+    // ───────────── Faz 7.2a-fix: AJAX content negotiation ─────────────
+
+    [Fact]
+    public async Task PostSubscribe_AcceptJson_NewEmail_ReturnsJsonSuccess()
+    {
+        await ClearSubscribersAsync();
+
+        var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            HandleCookies = true,
+            AllowAutoRedirect = false
+        });
+
+        var token = await TestHelpers.GetAntiForgeryTokenAsync(client, "/tr-TR/");
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/tr-TR/Subscriber/Subscribe")
+        {
+            Content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("Email", "ajax-new@test.local"),
+                new KeyValuePair<string, string>("KvkkConsent", "true"),
+                new KeyValuePair<string, string>("__RequestVerificationToken", token),
+            })
+        };
+        request.Headers.Accept.Clear();
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+        var response = await client.SendAsync(request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
+
+        var body = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(body);
+        doc.RootElement.GetProperty("success").GetBoolean().Should().BeTrue();
+        doc.RootElement.GetProperty("message").GetString().Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public async Task PostSubscribe_AcceptJson_DuplicateActive_ReturnsJsonFailure()
+    {
+        await ClearSubscribersAsync();
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            db.Set<Subscriber>().Add(new Subscriber
+            {
+                Email = "ajax-duplicate@test.local",
+                Status = SubscriberStatus.Active,
+                UnsubscribeToken = Guid.NewGuid(),
+                KvkkConsent = true,
+                SubscribedAt = DateTime.UtcNow
+            });
+            await db.SaveChangesAsync();
+        }
+
+        var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            HandleCookies = true,
+            AllowAutoRedirect = false
+        });
+
+        var token = await TestHelpers.GetAntiForgeryTokenAsync(client, "/tr-TR/");
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/tr-TR/Subscriber/Subscribe")
+        {
+            Content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("Email", "ajax-duplicate@test.local"),
+                new KeyValuePair<string, string>("KvkkConsent", "true"),
+                new KeyValuePair<string, string>("__RequestVerificationToken", token),
+            })
+        };
+        request.Headers.Accept.Clear();
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+        var response = await client.SendAsync(request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
+
+        var body = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(body);
+        doc.RootElement.GetProperty("success").GetBoolean().Should().BeFalse();
+        doc.RootElement.GetProperty("message").GetString().Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public async Task PostSubscribe_NoAcceptJson_StillRedirects()
+    {
+        // Fallback (JS-disabled) — Accept header'da application/json yoksa eski POST-redirect calismali
+        await ClearSubscribersAsync();
+
+        var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            HandleCookies = true,
+            AllowAutoRedirect = false
+        });
+
+        var token = await TestHelpers.GetAntiForgeryTokenAsync(client, "/tr-TR/");
+
+        var formData = new FormUrlEncodedContent(new[]
+        {
+            new KeyValuePair<string, string>("Email", "fallback@test.local"),
+            new KeyValuePair<string, string>("KvkkConsent", "true"),
+            new KeyValuePair<string, string>("__RequestVerificationToken", token),
+        });
+
+        var response = await client.PostAsync("/tr-TR/Subscriber/Subscribe", formData);
+
+        response.StatusCode.Should().BeOneOf(HttpStatusCode.Redirect, HttpStatusCode.Found);
     }
 
     [Fact]

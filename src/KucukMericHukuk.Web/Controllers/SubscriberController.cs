@@ -8,6 +8,11 @@ namespace KucukMericHukuk.Web.Controllers;
 
 public class SubscriberController : Controller
 {
+    private const string TurnstileFailedMessage =
+        "Bot doğrulaması başarısız oldu. Lütfen sayfayı yenileyip tekrar deneyin.";
+    private const string SubscribeFailedMessage = "Abonelik kaydı yapılamadı.";
+    private const string SubscribeSuccessMessage = "Aboneliğiniz alındı. Teşekkür ederiz.";
+
     private readonly ISubscriberService _subscriberService;
     private readonly ITurnstileVerifier _turnstile;
 
@@ -24,13 +29,13 @@ public class SubscriberController : Controller
     public async Task<IActionResult> Subscribe(SubscriberFormViewModel vm, string? returnUrl, CancellationToken ct)
     {
         var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+        var wantsJson = WantsJsonResponse();
 
         var remoteIp = HttpContext.Connection.RemoteIpAddress?.ToString();
         var turnstileOk = await _turnstile.VerifyAsync(vm.TurnstileToken, remoteIp, ct);
         if (!turnstileOk)
         {
-            TempData["SubscribeError"] = "Bot doğrulaması başarısız oldu. Lütfen sayfayı yenileyip tekrar deneyin.";
-            return RedirectToSafeReturn(returnUrl, culture);
+            return Respond(wantsJson, success: false, message: TurnstileFailedMessage, returnUrl, culture);
         }
 
         var dto = new SubscriberFormDto
@@ -45,12 +50,11 @@ public class SubscriberController : Controller
         var result = await _subscriberService.SubscribeAsync(dto, ct);
         if (result.IsFailure)
         {
-            TempData["SubscribeError"] = result.FirstError?.Message ?? "Abonelik kaydı yapılamadı.";
-            return RedirectToSafeReturn(returnUrl, culture);
+            var message = result.FirstError?.Message ?? SubscribeFailedMessage;
+            return Respond(wantsJson, success: false, message, returnUrl, culture);
         }
 
-        TempData["SubscribeSuccess"] = "Aboneliğiniz alındı. Teşekkür ederiz.";
-        return RedirectToSafeReturn(returnUrl, culture);
+        return Respond(wantsJson, success: true, message: SubscribeSuccessMessage, returnUrl, culture);
     }
 
     [HttpGet]
@@ -63,6 +67,32 @@ public class SubscriberController : Controller
             ? "Aboneliğiniz iptal edildi."
             : result.FirstError?.Message ?? "Geçersiz iptal bağlantısı.";
         return View();
+    }
+
+    private bool WantsJsonResponse()
+    {
+        // Faz 7.2a-fix: AJAX submit Accept: application/json gönderir → JSON dön.
+        // Header yoksa veya text/html önceliğindeyse fallback POST-redirect (JS-disabled progressive enhancement).
+        var accept = Request.Headers["Accept"].ToString();
+        return !string.IsNullOrEmpty(accept) && accept.Contains("application/json", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private IActionResult Respond(bool wantsJson, bool success, string message, string? returnUrl, string culture)
+    {
+        if (wantsJson)
+        {
+            return Json(new { success, message });
+        }
+
+        if (success)
+        {
+            TempData["SubscribeSuccess"] = message;
+        }
+        else
+        {
+            TempData["SubscribeError"] = message;
+        }
+        return RedirectToSafeReturn(returnUrl, culture);
     }
 
     private IActionResult RedirectToSafeReturn(string? returnUrl, string culture)
