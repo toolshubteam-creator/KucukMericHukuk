@@ -198,6 +198,12 @@ else
 // Mapster + Business services
 builder.Services.AddBusiness();
 
+// Faz 7.2b-2: Newsletter dispatcher — Task.Run + IServiceScopeFactory ile arka plan job processing.
+// Singleton — her Dispatch çağrısı kendi scope'unu yaratıp NewsletterService resolve eder.
+builder.Services.AddSingleton<
+    KucukMericHukuk.Core.Interfaces.Services.INewsletterDispatcher,
+    KucukMericHukuk.Web.Infrastructure.NewsletterDispatcher>();
+
 // Web katmanindaki Mapster IRegister'lari (PageFormMappingConfig vb.) GlobalSettings'e ekle
 builder.Services.AddWebMappings();
 
