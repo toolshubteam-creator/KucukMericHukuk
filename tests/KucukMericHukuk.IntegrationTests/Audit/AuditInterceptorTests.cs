@@ -348,6 +348,55 @@ public class AuditInterceptorTests : IClassFixture<IntegrationTestFactory>
     }
 
     [Fact]
+    public async Task ArticleWithTags_JoinRows_NotAudited()
+    {
+        // Faz 7.1-fix: EF Core M:N skip navigation (Article.Tags ↔ Tag.Articles) UsingEntity("ArticleTags")
+        // ile shared-type entity (Dictionary<string,object> property bag) yaratır.
+        // Eski impl: entry.Entity.GetType().Name → "Dictionary`2" çöp audit.
+        // Yeni impl: HasSharedClrType dallandırması → "ArticleTags" → IgnoredEntityNames'te → audit OLUŞMAZ.
+        // Article ve ArticleTranslation normal audit'lenmeli (kullanıcı-domain).
+        await ClearAuditLogsAsync();
+
+        int tagId;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var tag = new Tag { /* slug konfigde required değil — basit Tag */ };
+            db.Set<Tag>().Add(tag);
+            await db.SaveChangesAsync();
+            tagId = tag.Id;
+        }
+
+        await ClearAuditLogsAsync();
+
+        // Article + Tag eşleme (M:N join row üretir)
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var existingTag = await db.Set<Tag>().FirstAsync(t => t.Id == tagId);
+            var article = new Article
+            {
+                Status = ArticleStatus.Draft,
+                CreatedAt = DateTime.UtcNow,
+                Tags = new List<Tag> { existingTag }
+            };
+            db.Set<Article>().Add(article);
+            await db.SaveChangesAsync();
+        }
+
+        using var verifyScope = _factory.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var dictAudits = await verifyDb.AuditLogs
+            .Where(a => a.EntityName == "Dictionary`2" || a.EntityName == "ArticleTags")
+            .CountAsync();
+        dictAudits.Should().Be(0, "M:N join row'lari (shared-type) audit ignore listesinde — Dictionary`2 ve ArticleTags olmamali");
+
+        var articleAudits = await verifyDb.AuditLogs.Where(a => a.EntityName == "Article").CountAsync();
+        articleAudits.Should().Be(1, "Normal Article entity'si audit'lenmeli (Created)");
+    }
+
+    [Fact]
     public async Task ModifyOnlyAuditFields_NoAuditCreated()
     {
         await ClearAuditLogsAsync();

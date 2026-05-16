@@ -41,7 +41,14 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
         // Public form girişleri (kendi tablolarında zaten kayıtlı):
         "ContactMessage", "ContactMessageReply", "Appointment",
         "Subscriber",                     // Faz 7.2a
-        "NewsletterJob"                   // Faz 7.2b-1 — job sistem üretir, ContactMessage gibi
+        "NewsletterJob",                  // Faz 7.2b-1 — job sistem üretir, ContactMessage gibi
+        // Faz 7.1-fix — M:N join shared-type entity'ler, kullanıcı-domain değil.
+        // EF Core UsingEntity("ArticleTags"/"AttorneyServices") ile property bag (Dictionary<string,object>)
+        // olarak yaratılır; join row değişiklikleri parent entity audit'inde bağlamla yer almıyor
+        // ama kullanıcıya gösterildiğinde sadece gürültü ("ArticleTags Created" = ne demek?).
+        // İhtiyaç olursa buradan çıkarılır — tek satır.
+        "ArticleTags",
+        "AttorneyServices"
     };
 
     // Delta'da gürültü oluşturan audit alanları — yalnız bunlar değişmişse log oluşturulmaz.
@@ -135,7 +142,13 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
 
         foreach (var entry in entries)
         {
-            var entityTypeName = entry.Entity.GetType().Name;
+            // Faz 7.1-fix: shared-type entity (UsingEntity("ArticleTags") gibi M:N join) için
+            // entry.Entity.GetType() = Dictionary<string,object> → ".Name" = "Dictionary`2" çöp.
+            // HasSharedClrType true ise EF'in explicit verdiği ad ("ArticleTags") kullanılır.
+            // Normal entity'lerde ClrType.Name kısa ad ("Article") döner — eski davranışla aynı.
+            var entityTypeName = entry.Metadata.HasSharedClrType
+                ? entry.Metadata.Name
+                : entry.Metadata.ClrType.Name;
             if (IgnoredEntityNames.Contains(entityTypeName)) continue;
 
             AuditActionType action;
