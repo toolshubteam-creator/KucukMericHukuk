@@ -91,6 +91,13 @@ public static class ErrorCodes
         public const string NotFound = "Appointment.NotFound";
     }
 
+    public static class Subscriber
+    {
+        public const string NotFound = "Subscriber.NotFound";
+        public const string AlreadySubscribed = "Subscriber.AlreadySubscribed";
+        public const string InvalidToken = "Subscriber.InvalidToken";
+    }
+
     public static class AuditLog
     {
         public const string NotFound = "AuditLog.NotFound";
