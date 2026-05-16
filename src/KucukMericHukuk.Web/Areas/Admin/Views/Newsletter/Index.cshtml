@@ -1,0 +1,139 @@
+@using KucukMericHukuk.Core.DTOs.Newsletter
+@using KucukMericHukuk.Core.Enums
+@model KucukMericHukuk.Web.Areas.Admin.ViewModels.Newsletter.NewsletterIndexViewModel
+@{
+    ViewData["Title"] = "Bülten";
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">Bülten</h2>
+            <div class="text-secondary">Bülten bekleyen makaleler ve gönderim geçmişi</div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string okMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@okMsg</div>
+}
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+
+<div class="alert alert-info mt-3" role="alert">
+    <strong>Not:</strong> Bu modül bülten kayıtlarını <em>oluşturur</em> (Pending). Asıl gönderim Faz 7.2b-2 batch işleyici tarafından yapılacak.
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3 class="card-title">Bülten Bekleyen Makaleler (@Model.Pending.Count)</h3>
+    </div>
+    @if (Model.Pending.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">Bekleyen makale yok</p>
+            <p class="empty-subtitle text-secondary">Tüm yayınlanmış makaleler için bülten kaydı oluşturulmuş veya gönderilmiş.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter">
+                <thead>
+                    <tr>
+                        <th>Başlık</th>
+                        <th style="width:180px">Yayın tarihi</th>
+                        <th style="width:160px">Aktif abone</th>
+                        <th class="w-1">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var p in Model.Pending)
+                {
+                    <tr>
+                        <td>@p.Title</td>
+                        <td>@(p.PublishedAt?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
+                        <td><span class="badge bg-info-lt">@p.ActiveSubscriberCount</span></td>
+                        <td>
+                            <a asp-action="Preview" asp-controller="Newsletter" asp-area="Admin"
+                               asp-route-articleId="@p.Id" target="_blank"
+                               class="btn btn-sm btn-outline-secondary" title="Önizle">
+                                <i class="ti ti-eye"></i> Önizle
+                            </a>
+                            <form asp-action="CreateJob" asp-controller="Newsletter" asp-area="Admin"
+                                  asp-route-articleId="@p.Id" method="post" class="d-inline"
+                                  data-confirm="Bu makale için bülten kaydı oluşturulsun mu? (Gerçek gönderim 7.2b-2 ile aktifleşecek.)"
+                                  data-confirm-title="Bülten Oluştur"
+                                  data-confirm-button="Oluştur">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-accent" title="Bülten Oluştur">
+                                    <i class="ti ti-mail-forward"></i> Bülten Oluştur (sıraya al)
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h3 class="card-title">Gönderim Geçmişi</h3>
+    </div>
+    @if (Model.History.Items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">Henüz bülten kaydı yok</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter">
+                <thead>
+                    <tr>
+                        <th>Makale</th>
+                        <th style="width:140px">Durum</th>
+                        <th style="width:160px">Gönderilen / Toplam</th>
+                        <th style="width:180px">Başlama</th>
+                        <th style="width:180px">Tamamlanma</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var j in Model.History.Items)
+                {
+                    <tr>
+                        <td>@j.ArticleTitle</td>
+                        <td>
+                            @switch (j.Status)
+                            {
+                                case NewsletterJobStatus.Pending:
+                                    <span class="badge bg-warning-lt">Bekliyor</span>
+                                    break;
+                                case NewsletterJobStatus.Sending:
+                                    <span class="badge bg-info-lt">Gönderiliyor</span>
+                                    break;
+                                case NewsletterJobStatus.Completed:
+                                    <span class="badge bg-success-lt">Tamamlandı</span>
+                                    break;
+                                case NewsletterJobStatus.Failed:
+                                    <span class="badge bg-danger-lt">Başarısız</span>
+                                    break;
+                            }
+                        </td>
+                        <td>@j.SentCount / @j.TotalRecipients @if (j.FailedCount > 0) { <text>(<span class="text-danger">@j.FailedCount hata</span>)</text> }</td>
+                        <td>@(j.StartedAt?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
+                        <td>@(j.CompletedAt?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

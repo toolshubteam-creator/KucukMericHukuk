@@ -115,6 +115,14 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link @Html.IsActiveController("Newsletter")" asp-action="Index" asp-controller="Newsletter" asp-area="Admin">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-mail-forward"></i>
+                            </span>
+                            <span class="nav-link-title">Bülten</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link @Html.IsActiveController("Testimonials")" asp-action="Index" asp-controller="Testimonials" asp-area="Admin">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <i class="ti ti-star"></i>
