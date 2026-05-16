@@ -281,12 +281,10 @@
   - Modified delta, soft-delete→Deleted, restore→Restored mantığı çalışıyor
   - 14 yeni test (6 unit + 8 integration), 488 total PASSED
 
-- **Aboneler** — Kısmi tamamlandı (Faz 7.2a + 7.2b-1, 16.05.2026)
-  - ✅ 7.2a: Subscriber entity + repo/UoW + Business servis + Result<T> + FluentValidation +
-    public abone formu (footer, Turnstile/honeypot/KVKK/rate-limit) + admin liste/sil + token ile iptal
-  - ✅ 7.2b-1: NewsletterJob entity + Article.NewsletterSentAt flag + mail HTML şablonu +
-    admin "Bülten" modülü (bekleyen liste + önizleme + Pending job oluşturma)
-  - Kalan 7.2b-2: bülten gönderim motoru (Pending job batch processor + SMTP rate limit + sonuç raporu)
+- **✅ Aboneler+Bülten** — Tam tamamlandı (Faz 7.2a + 7.2b-1 + 7.2b-2, 16.05.2026)
+  - 7.2a: Subscriber entity + public abone formu (footer band, Turnstile/honeypot/KVKK/rate-limit) + admin liste/sil + token ile iptal
+  - 7.2b-1: NewsletterJob entity + Article.NewsletterSentAt flag + mail HTML şablonu + admin "Bülten" modülü (bekleyen liste + önizleme + Pending job oluşturma)
+  - 7.2b-2: NewsletterService.ProcessJobAsync batch motor + NewsletterDispatcher (Task.Run + IServiceScopeFactory) + admin "Gönder" buton + SMTP rate limit + abone-bazlı hata toleransı + Article.NewsletterSentAt Completed'da set, Failed'da set ETMEZ
 
 ### Grup B — Dış API entegrasyonu (Hafriyat'ta HİÇ YOK — sıfırdan + müşteri-bağımlı)
 
