@@ -136,7 +136,7 @@
                             {
                                 <form asp-action="SendJob" asp-controller="Newsletter" asp-area="Admin"
                                       asp-route-jobId="@j.Id" method="post" class="d-inline"
-                                      data-confirm="Bu bülten gönderilsin mi? @j.TotalRecipients aktif aboneye e-posta atılacak."
+                                      data-confirm="Bu bülten gönderilsin mi? @j.LiveActiveSubscriberCount aktif aboneye e-posta atılacak."
                                       data-confirm-title="Bülteni Gönder"
                                       data-confirm-button="Gönder">
                                     @Html.AntiForgeryToken()

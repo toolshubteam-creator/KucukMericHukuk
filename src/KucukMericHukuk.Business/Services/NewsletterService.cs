@@ -69,7 +69,17 @@ public class NewsletterService : INewsletterService
 
         var paged = await _uow.NewsletterJobs.GetHistoryPagedAsync(page, pageSize, ct);
 
-        var dtos = paged.Items.Select(MapToListDto).ToList();
+        // Faz 7.2b-2-fix: Tek seferlik canlı aktif abone snapshot — tüm satırlara aynı değer.
+        // Confirm modalı Pending job için TotalRecipients=0 çelişkisini bu alandan okur.
+        var liveActive = await _uow.Subscribers.CountAsync(
+            s => s.Status == SubscriberStatus.Active, ct);
+
+        var dtos = paged.Items.Select(j =>
+        {
+            var dto = MapToListDto(j);
+            dto.LiveActiveSubscriberCount = liveActive;
+            return dto;
+        }).ToList();
 
         var result = new PagedResult<NewsletterJobListDto>(
             dtos, paged.TotalCount, paged.PageNumber, paged.PageSize);

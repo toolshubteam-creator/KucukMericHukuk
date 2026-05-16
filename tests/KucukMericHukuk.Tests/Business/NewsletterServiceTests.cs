@@ -214,6 +214,51 @@ public class NewsletterServiceTests : IDisposable
         result.FirstError!.Code.Should().Be(ErrorCodes.Newsletter.ActiveJobExists);
     }
 
+    // -------------------- Faz 7.2b-2-fix: GetJobHistory LiveActiveSubscriberCount --------------------
+
+    [Fact]
+    public async Task GetJobHistoryAsync_PendingJob_LiveActiveSubscriberCountReflectsCurrentActive()
+    {
+        // 7.2b-2-fix: Pending job'un TotalRecipients=0 olmasi UI'da "0 abone" celiskisine yol acmis;
+        // ListDto.LiveActiveSubscriberCount canli aktif abone sayisini gosterir (confirm modal kullanir).
+        await using var ctx = _factory.CreateContext();
+
+        // 4 aktif + 2 unsubscribed
+        await SeedActiveSubscribersAsync(ctx, 4);
+        for (var i = 0; i < 2; i++)
+        {
+            ctx.Set<Subscriber>().Add(new Subscriber
+            {
+                Email = $"unsub{i}@test.local",
+                Status = SubscriberStatus.Unsubscribed,
+                UnsubscribeToken = Guid.NewGuid(),
+                UnsubscribedAt = DateTime.UtcNow.AddDays(-1),
+                KvkkConsent = true,
+                SubscribedAt = DateTime.UtcNow.AddDays(-30)
+            });
+        }
+
+        var articleId = await SeedAsync(ctx, BuildArticle("Test"));
+        ctx.Set<NewsletterJob>().Add(new NewsletterJob
+        {
+            ArticleId = articleId,
+            Status = NewsletterJobStatus.Pending,
+            TotalRecipients = 0 // Pending'de 0 (kasitli — ProcessJob Sending'de set eder)
+        });
+        await ctx.SaveChangesAsync();
+
+        var sut = CreateSut(ctx);
+        var result = await sut.GetJobHistoryAsync(1, 20);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Items.Should().HaveCount(1);
+
+        var dto = result.Value.Items[0];
+        dto.TotalRecipients.Should().Be(0, "Pending job'da TotalRecipients dokunulmamis kalmali");
+        dto.LiveActiveSubscriberCount.Should().Be(4,
+            "LiveActiveSubscriberCount canli Active abone sayisini yansitmali (4 active + 2 unsubscribed = 4)");
+    }
+
     [Fact]
     public async Task CreateJobAsync_PreviousCompletedJobForSameArticle_DoesNotBlock()
     {
