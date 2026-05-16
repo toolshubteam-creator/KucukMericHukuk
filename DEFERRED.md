@@ -314,6 +314,16 @@
 
 ---
 
+## Route Dili Tutarsızlığı (TR/EN karışık)
+
+- **Sorun:** Public route'lar çoğunlukla İngilizce (`/Contact`, `/Appointment`, `/Articles`, `/Services`, `/Attorneys`, `/Pages`...) ama Referanslar + Galeri Türkçe route kullanıyor. Kullanıcı `/tr-TR/` kültüründe ama URL segmentleri dil karışık — tutarsız.
+- **ÖNCE KEŞİF GEREK:** neden 2 sayfa TR diğerleri EN — kasıt mı (örn. SEO için belirli sayfalar TR) yoksa tutarsızlık mı (Faz 4 routing kararı). DEFERRED'da veya kod yorumunda kasıt notu olabilir — kontrol edilmeli.
+- **SEO etkisi:** Route değişirse eski URL'ler kırılır → 301 redirect gerekir. Faz 7.4 Redirect modülü ile entegre düşünülmeli (canonical URL'ler + slug history).
+- **Tahmini:** önce keşif (~30 dk), sonra karar — kapsam keşfe bağlı. Tüm İngilizce'ye/Türkçe'ye taşıma ise ~5-10 dosya + 301 mapping.
+- **Tetik:** 7.2b sonrası ayrı keşif adımı (veya kullanıcı önceliklendirir).
+
+---
+
 ## Turnstile JS Tek Yükleme (Centralize) — Faz 7.2a-fix'ten ertelendi
 
 - **Sorun:** Turnstile JS şu an 3 farklı yerden yükleniyor:
