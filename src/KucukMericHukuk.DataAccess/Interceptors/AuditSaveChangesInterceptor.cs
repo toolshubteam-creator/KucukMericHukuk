@@ -40,7 +40,8 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
         "IdentityUserLogin", "IdentityUserToken",
         // Public form girişleri (kendi tablolarında zaten kayıtlı):
         "ContactMessage", "ContactMessageReply", "Appointment",
-        "Subscriber"                      // Faz 7.2'de eklenecek; pre-emptive ignore
+        "Subscriber",                     // Faz 7.2a
+        "NewsletterJob"                   // Faz 7.2b-1 — job sistem üretir, ContactMessage gibi
     };
 
     // Delta'da gürültü oluşturan audit alanları — yalnız bunlar değişmişse log oluşturulmaz.

@@ -25,6 +25,7 @@ public class UnitOfWork : IUnitOfWork
     private IAppointmentRepository? _appointments;
     private IAuditLogRepository? _auditLogs;
     private ISubscriberRepository? _subscribers;
+    private INewsletterJobRepository? _newsletterJobs;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -45,6 +46,7 @@ public class UnitOfWork : IUnitOfWork
     public IAppointmentRepository Appointments => _appointments ??= new AppointmentRepository(_context);
     public IAuditLogRepository AuditLogs => _auditLogs ??= new AuditLogRepository(_context);
     public ISubscriberRepository Subscribers => _subscribers ??= new SubscriberRepository(_context);
+    public INewsletterJobRepository NewsletterJobs => _newsletterJobs ??= new NewsletterJobRepository(_context);
 
     public Task<int> SaveChangesAsync(CancellationToken ct = default)
         => _context.SaveChangesAsync(ct);
