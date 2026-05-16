@@ -314,6 +314,19 @@
 
 ---
 
+## Turnstile JS Tek Yükleme (Centralize) — Faz 7.2a-fix'ten ertelendi
+
+- **Sorun:** Turnstile JS şu an 3 farklı yerden yükleniyor:
+  - `Views/Contact/Index.cshtml` (@section Scripts)
+  - `Views/Appointment/Index.cshtml` (@section Scripts)
+  - `Views/Shared/_SubscribeBand.cshtml` (her public sayfada render)
+- Cloudflare `api.js` idempotent (`window.turnstile` set ediyor, double-init yok) ama **network request duplicate** — Contact/Appointment sayfalarında 2 kez yüklenme
+- **Çözüm:** `_PublicLayout` body sonunda conditional (TurnstileOptions.Enabled) tek yükleme; Contact/Appointment + _SubscribeBand'dan @section Scripts/inline script kaldır
+- **Tahmini:** ~4 dosya edit, ~10 satır, 1 PR (~30 dk)
+- **Tetik:** 7.2a-fix sonrası ayrı küçük refactor (veya Faz 6.23 cila kalan turuyla birlikte)
+
+---
+
 ## Belirsiz Zamanlama
 
 - **Soft-delete + Slug çakışması**
