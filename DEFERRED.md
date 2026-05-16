@@ -281,10 +281,10 @@
   - Modified delta, soft-delete→Deleted, restore→Restored mantığı çalışıyor
   - 14 yeni test (6 unit + 8 integration), 488 total PASSED
 
-- **Aboneler** — Hafriyat'ta var, çalışıyor, basit (en kolay adapte)
-  - Subscriber entity + repo/UoW + Business servis + Result<T> + FluentValidation +
-    public abone formu (Turnstile/honeypot pattern) + admin liste + token ile iptal
-  - Tahmini: ~1-2 alt-adım
+- **Aboneler** — Kısmi tamamlandı (Faz 7.2a, 16.05.2026)
+  - ✅ 7.2a: Subscriber entity + repo/UoW + Business servis + Result<T> + FluentValidation +
+    public abone formu (footer, Turnstile/honeypot/KVKK/rate-limit) + admin liste/sil + token ile iptal
+  - Kalan 7.2b: bülten gönderimi (makale yayınlanınca admin onaylı abone bildirimi, mail şablonu, batch)
 
 ### Grup B — Dış API entegrasyonu (Hafriyat'ta HİÇ YOK — sıfırdan + müşteri-bağımlı)
 
