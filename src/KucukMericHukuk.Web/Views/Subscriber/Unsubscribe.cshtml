@@ -1,0 +1,22 @@
+@{
+    Layout = "_BareLayout";
+    ViewData["Title"] = "Abonelik İptali";
+
+    var succeeded = (bool?)ViewData["UnsubscribeSucceeded"] ?? false;
+    var message = (string?)ViewData["UnsubscribeMessage"] ?? string.Empty;
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+}
+
+<section class="section-public">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6 text-center">
+                <h1 class="mt-5 mb-3">@(succeeded ? "Abonelik iptal edildi" : "Bağlantı geçersiz")</h1>
+                <p class="lead mb-4">@message</p>
+                <a asp-controller="Home" asp-action="Index" asp-route-culture="@culture" class="btn btn-accent">
+                    Ana sayfaya dön
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

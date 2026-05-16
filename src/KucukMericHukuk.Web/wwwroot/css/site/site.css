@@ -123,6 +123,20 @@ a:hover { color: var(--color-accent-text); }
 .site-footer a { color: var(--color-accent-light); }
 .site-footer a:hover { color: var(--color-accent); }
 
+/* --- Faz 7.2a: Footer abone formu --- */
+.footer-subscribe .form-control {
+    background-color: var(--color-bg-alt);
+    color: var(--color-text);
+}
+.subscribe-form__honeypot {
+    position: absolute;
+    left: -10000px;
+    top: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
 /* --- Helper utilities (custom, kıt kullanım) --- */
 .container-narrow { max-width: 800px; margin-inline: auto; }
 .text-accent { color: var(--color-accent-text); }

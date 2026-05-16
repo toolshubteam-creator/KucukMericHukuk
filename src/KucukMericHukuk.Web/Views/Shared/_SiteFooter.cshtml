@@ -1,15 +1,90 @@
 @* Faz 4.6: footer alt linkler (KVKK, Çerez, Kullanım)
-   Faz 6.12-fix: SiteInfo bilgileri (Telephone/Email/Address) admin /site-settings'ten render edilir *@
+   Faz 6.12-fix: SiteInfo bilgileri (Telephone/Email/Address) admin /site-settings'ten render edilir
+   Faz 7.2a: Bülten abone formu (footer üst bloğunda) *@
 @inject Microsoft.Extensions.Options.IOptionsSnapshot<KucukMericHukuk.Core.Common.SiteInfoOptions> SiteInfo
+@inject Microsoft.Extensions.Options.IOptions<KucukMericHukuk.Core.Common.TurnstileOptions> TurnstileOptions
 @{
     var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
     var site = SiteInfo.Value;
     var addressLine = string.Join(" / ",
         new[] { site.AddressLocality, site.AddressRegion }
             .Where(s => !string.IsNullOrWhiteSpace(s)));
+
+    var turnstileSiteKey = TurnstileOptions.Value.SiteKey;
+    var turnstileEnabled = TurnstileOptions.Value.Enabled;
+    var subscribeSuccess = Context.Request.HttpContext.Items["__SubscribeSuccess"] as string
+        ?? (TempData.Peek("SubscribeSuccess") as string);
+    var subscribeError = Context.Request.HttpContext.Items["__SubscribeError"] as string
+        ?? (TempData.Peek("SubscribeError") as string);
+    // TempData okuma "Peek" — başka partial'lar da okuyabilir; ana consume bir kez yapılır:
+    if (TempData.ContainsKey("SubscribeSuccess")) { TempData.Remove("SubscribeSuccess"); }
+    if (TempData.ContainsKey("SubscribeError")) { TempData.Remove("SubscribeError"); }
+
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
 }
 <footer class="site-footer">
     <div class="container">
+        <section class="footer-subscribe mb-4 pb-4 border-bottom">
+            <div class="row align-items-center">
+                <div class="col-md-5">
+                    <h2 class="h5 mb-1">Bülten aboneliği</h2>
+                    <p class="mb-0 small text-muted">Yeni makaleler ve duyurular için e-posta listemize katılın.</p>
+                </div>
+                <div class="col-md-7">
+                    @if (!string.IsNullOrEmpty(subscribeSuccess))
+                    {
+                        <div class="alert alert-success py-2 mb-2" role="alert">@subscribeSuccess</div>
+                    }
+                    @if (!string.IsNullOrEmpty(subscribeError))
+                    {
+                        <div class="alert alert-danger py-2 mb-2" role="alert">@subscribeError</div>
+                    }
+
+                    <form method="post"
+                          asp-controller="Subscriber"
+                          asp-action="Subscribe"
+                          asp-route-culture="@culture"
+                          asp-route-returnUrl="@returnUrl"
+                          class="subscribe-form"
+                          novalidate>
+                        @Html.AntiForgeryToken()
+
+                        <div class="subscribe-form__honeypot" aria-hidden="true">
+                            <label for="Subscriber_Website">Website (boş bırakın)</label>
+                            <input type="text" name="Website" id="Subscriber_Website" tabindex="-1" autocomplete="off" />
+                        </div>
+
+                        <div class="input-group mb-2">
+                            <input type="email" name="Email" class="form-control"
+                                   placeholder="E-posta adresiniz" required autocomplete="email" />
+                            <button type="submit" class="btn btn-accent">Abone ol</button>
+                        </div>
+
+                        <div class="form-check small mb-2">
+                            <input type="checkbox" name="KvkkConsent" value="true" id="Subscriber_KvkkConsent"
+                                   class="form-check-input" required />
+                            <input type="hidden" name="KvkkConsent" value="false" />
+                            <label class="form-check-label" for="Subscriber_KvkkConsent">
+                                <a asp-controller="Pages" asp-action="Detail"
+                                   asp-route-culture="@culture" asp-route-slug="aydinlatma"
+                                   target="_blank" class="text-decoration-underline">Aydınlatma metnini</a>
+                                okudum, onaylıyorum.
+                            </label>
+                        </div>
+
+                        @if (turnstileEnabled)
+                        {
+                            <div class="cf-turnstile mb-2"
+                                 data-sitekey="@turnstileSiteKey"
+                                 data-response-field-name="TurnstileToken"
+                                 data-theme="light"
+                                 data-size="compact"></div>
+                        }
+                    </form>
+                </div>
+            </div>
+        </section>
+
         <div class="row">
             <div class="col-md-6">
                 <p class="mb-1"><strong>@site.Name</strong></p>
@@ -42,4 +117,11 @@
             </div>
         </div>
     </div>
+
+    @if (turnstileEnabled)
+    {
+        @* Turnstile JS — Cloudflare maintained, idempotent loader. Diğer sayfalardaki @@section Scripts
+           içinde de yüklenebilir; window.turnstile mevcutsa Cloudflare API double-init etmez. *@
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    }
 </footer>
