@@ -11,6 +11,9 @@
 *.sln.docstates
 *.env
 
+# Build cache (msbuild language server)
+*.lscache
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

@@ -98,6 +98,15 @@ public static class ErrorCodes
         public const string InvalidToken = "Subscriber.InvalidToken";
     }
 
+    public static class Newsletter
+    {
+        public const string ArticleNotFound = "Newsletter.ArticleNotFound";
+        public const string ArticleNotPublished = "Newsletter.ArticleNotPublished";
+        public const string AlreadySent = "Newsletter.AlreadySent";
+        public const string ActiveJobExists = "Newsletter.ActiveJobExists";
+        public const string JobNotFound = "Newsletter.JobNotFound";
+    }
+
     public static class AuditLog
     {
         public const string NotFound = "AuditLog.NotFound";
