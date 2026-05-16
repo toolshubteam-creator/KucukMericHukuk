@@ -1,0 +1,190 @@
+@using KucukMericHukuk.Core.DTOs.Subscriber
+@using KucukMericHukuk.Core.Enums
+@using KucukMericHukuk.Web.Areas.Admin.ViewModels.Shared
+@model KucukMericHukuk.Core.DTOs.Common.PagedResult<KucukMericHukuk.Core.DTOs.Subscriber.SubscriberListDto>
+@{
+    ViewData["Title"] = "Aboneler";
+    var query = ViewBag.Query as SubscriberQueryDto ?? new SubscriberQueryDto();
+
+    var paginationVm = new PaginationViewModel
+    {
+        PageNumber = Model.PageNumber,
+        TotalPages = Model.TotalPages,
+        HasPrevious = Model.HasPrevious,
+        HasNext = Model.HasNext,
+        GetPageUrl = pageNum => Url.Action("Index", "Subscribers", new
+        {
+            area = "Admin",
+            keyword = query.Keyword,
+            status = query.Status.HasValue ? (int?)query.Status.Value : null,
+            page = pageNum,
+            pageSize = query.PageSize,
+            includeDeleted = query.IncludeDeleted,
+            startDate = query.StartDate?.ToString("yyyy-MM-dd"),
+            endDate = query.EndDate?.ToString("yyyy-MM-dd")
+        }) ?? "#"
+    };
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">Aboneler</h2>
+            <div class="text-secondary">Toplam @Model.TotalCount kayıt</div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] is string okMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@okMsg</div>
+}
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+
+<div class="card mt-3">
+    <div class="card-body border-bottom">
+        <form asp-action="Index" asp-controller="Subscribers" asp-area="Admin" method="get">
+            <div class="row g-2 align-items-center">
+                <div class="col-md">
+                    <input type="search" name="keyword" value="@query.Keyword"
+                           class="form-control" placeholder="E-posta içinde ara..." />
+                </div>
+                <div class="col-md-auto">
+                    <select name="status" class="form-select">
+                        <option value="" selected="@(!query.Status.HasValue)">Tüm statüler</option>
+                        <option value="@((int)SubscriberStatus.Active)" selected="@(query.Status == SubscriberStatus.Active)">Aktif</option>
+                        <option value="@((int)SubscriberStatus.Unsubscribed)" selected="@(query.Status == SubscriberStatus.Unsubscribed)">İptal etti</option>
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <label class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox"
+                               name="includeDeleted" value="true"
+                               @(query.IncludeDeleted ? "checked" : "") />
+                        <span class="form-check-label">Silinmişleri göster</span>
+                    </label>
+                </div>
+            </div>
+            <div class="row g-2 align-items-center mt-2">
+                <div class="col-md-auto">
+                    <label for="startDate" class="form-label small mb-0">Başlangıç</label>
+                    <input type="date" id="startDate" name="startDate"
+                           value="@(query.StartDate?.ToString("yyyy-MM-dd"))"
+                           class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-auto">
+                    <label for="endDate" class="form-label small mb-0">Bitiş</label>
+                    <input type="date" id="endDate" name="endDate"
+                           value="@(query.EndDate?.ToString("yyyy-MM-dd"))"
+                           class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-auto align-self-end">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="ti ti-search me-1"></i> Ara
+                    </button>
+                    <a asp-action="Index" asp-controller="Subscribers" asp-area="Admin"
+                       class="btn btn-outline-secondary">Temizle</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">Abone bulunamadı</p>
+            <p class="empty-subtitle text-secondary">
+                @if (!string.IsNullOrWhiteSpace(query.Keyword))
+                {
+                    <text>"@query.Keyword" araması için sonuç yok.</text>
+                }
+                else
+                {
+                    <text>Henüz hiç abone kaydı yok.</text>
+                }
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter">
+                <thead>
+                    <tr>
+                        <th style="width:180px">Abone tarihi</th>
+                        <th>E-posta</th>
+                        <th style="width:140px">Durum</th>
+                        <th style="width:180px">İptal tarihi</th>
+                        <th class="w-1">Eylemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.Items)
+                    {
+                        var rowClass = s.IsDeleted ? "text-muted" : "";
+                        <tr class="@rowClass">
+                            <td>@s.SubscribedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@s.Email</td>
+                            <td>
+                                @if (s.IsDeleted)
+                                {
+                                    <span class="badge bg-danger-lt">Silinmiş</span>
+                                }
+                                else if (s.Status == SubscriberStatus.Active)
+                                {
+                                    <span class="badge bg-success-lt">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-lt">İptal etti</span>
+                                }
+                            </td>
+                            <td>
+                                @(s.UnsubscribedAt?.ToString("dd.MM.yyyy HH:mm") ?? "-")
+                            </td>
+                            <td>
+                                @if (!s.IsDeleted)
+                                {
+                                    <form asp-action="Delete" asp-controller="Subscribers" asp-area="Admin"
+                                          asp-route-id="@s.Id" method="post" class="d-inline"
+                                          data-confirm="Bu abone kaydını silmek istediğinizden emin misiniz? Daha sonra geri yükleyebilirsiniz."
+                                          data-confirm-title="Aboneyi Sil"
+                                          data-confirm-button="Sil">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Restore" asp-controller="Subscribers" asp-area="Admin"
+                                          asp-route-id="@s.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Geri Yükle">
+                                            <i class="ti ti-restore"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                <strong>@((Model.PageNumber - 1) * Model.PageSize + 1)</strong> -
+                <strong>@Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)</strong>
+                arası, toplam <strong>@Model.TotalCount</strong> kayıt
+            </p>
+            <div class="ms-auto">
+                <partial name="_Pagination" model="paginationVm" />
+            </div>
+        </div>
+    }
+</div>
