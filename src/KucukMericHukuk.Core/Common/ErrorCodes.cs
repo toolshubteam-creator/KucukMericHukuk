@@ -105,6 +105,9 @@ public static class ErrorCodes
         public const string AlreadySent = "Newsletter.AlreadySent";
         public const string ActiveJobExists = "Newsletter.ActiveJobExists";
         public const string JobNotFound = "Newsletter.JobNotFound";
+        public const string JobNotPending = "Newsletter.JobNotPending";
+        public const string JobAlreadyProcessing = "Newsletter.JobAlreadyProcessing";
+        public const string NoActiveSubscribers = "Newsletter.NoActiveSubscribers";
     }
 
     public static class AuditLog

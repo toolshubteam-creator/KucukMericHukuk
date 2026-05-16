@@ -281,12 +281,10 @@
   - Modified delta, soft-delete→Deleted, restore→Restored mantığı çalışıyor
   - 14 yeni test (6 unit + 8 integration), 488 total PASSED
 
-- **Aboneler** — Kısmi tamamlandı (Faz 7.2a + 7.2b-1, 16.05.2026)
-  - ✅ 7.2a: Subscriber entity + repo/UoW + Business servis + Result<T> + FluentValidation +
-    public abone formu (footer, Turnstile/honeypot/KVKK/rate-limit) + admin liste/sil + token ile iptal
-  - ✅ 7.2b-1: NewsletterJob entity + Article.NewsletterSentAt flag + mail HTML şablonu +
-    admin "Bülten" modülü (bekleyen liste + önizleme + Pending job oluşturma)
-  - Kalan 7.2b-2: bülten gönderim motoru (Pending job batch processor + SMTP rate limit + sonuç raporu)
+- **✅ Aboneler+Bülten** — Tam tamamlandı (Faz 7.2a + 7.2b-1 + 7.2b-2, 16.05.2026)
+  - 7.2a: Subscriber entity + public abone formu (footer band, Turnstile/honeypot/KVKK/rate-limit) + admin liste/sil + token ile iptal
+  - 7.2b-1: NewsletterJob entity + Article.NewsletterSentAt flag + mail HTML şablonu + admin "Bülten" modülü (bekleyen liste + önizleme + Pending job oluşturma)
+  - 7.2b-2: NewsletterService.ProcessJobAsync batch motor + NewsletterDispatcher (Task.Run + IServiceScopeFactory) + admin "Gönder" buton + SMTP rate limit + abone-bazlı hata toleransı + Article.NewsletterSentAt Completed'da set, Failed'da set ETMEZ
 
 ### Grup B — Dış API entegrasyonu (Hafriyat'ta HİÇ YOK — sıfırdan + müşteri-bağımlı)
 
@@ -323,6 +321,17 @@
 - **SEO etkisi:** Route değişirse eski URL'ler kırılır → 301 redirect gerekir. Faz 7.4 Redirect modülü ile entegre düşünülmeli (canonical URL'ler + slug history).
 - **Tahmini:** önce keşif (~30 dk), sonra karar — kapsam keşfe bağlı. Tüm İngilizce'ye/Türkçe'ye taşıma ise ~5-10 dosya + 301 mapping.
 - **Tetik:** 7.2b sonrası ayrı keşif adımı (veya kullanıcı önceliklendirir).
+
+---
+
+## SmtpEmailSender Connection Reuse (Bülten Optimizasyonu) — Faz 7.2b-2'den ertelendi
+
+- **Sorun:** Mevcut `SmtpEmailSender.SendAsync` her çağrıda yeni `SmtpClient` açıp `ConnectAsync` + `AuthenticateAsync` + `SendAsync` + `DisconnectAsync` yapıyor. Her email için ayrı TCP + TLS handshake.
+- **Etki:** Küçük abone listesi (≤100) için kabul edilebilir; büyük listede (1000+) her mail başına ~500ms+ overhead → toplam gönderim süresi orantısız büyür, SMTP sunucusu rate limit'lerini zorlar.
+- **Çözüm:** `IEmailBatchSender` arayüzü — tek connection açar, MailKit `SendAsync` pipelining ile abone başına mesaj gönderir, batch sonu disconnect. `NewsletterService.ProcessJobAsync` batch context'inde bu sender'ı kullanır.
+- **Tahmini:** ~1 PR, Infrastructure/Email (yeni sender + IDisposable lifecycle) + ProcessJobAsync entegrasyonu + test (mock batch context).
+- **Tetik:** Abone listesi 200+ büyüdüğünde veya performans turu. Şu an aktif abone ~4 — sorun yok.
+- **Kaynak:** 7.2b-2 raporu (Claude Code işaretledi)
 
 ---
 
