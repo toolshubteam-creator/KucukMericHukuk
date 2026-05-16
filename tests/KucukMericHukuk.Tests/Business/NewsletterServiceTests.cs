@@ -5,6 +5,7 @@ using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Enums;
 using KucukMericHukuk.Core.Constants;
+using KucukMericHukuk.Core.Interfaces;
 using KucukMericHukuk.DataAccess.Context;
 using KucukMericHukuk.DataAccess.UnitOfWork;
 using KucukMericHukuk.Tests.Infrastructure;
@@ -12,6 +13,7 @@ using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 
 namespace KucukMericHukuk.Tests.Business;
 
@@ -26,10 +28,20 @@ public class NewsletterServiceTests : IDisposable
         _mapper = new Mapper(new TypeAdapterConfig());
     }
 
-    private NewsletterService CreateSut(AppDbContext context)
+    private NewsletterService CreateSut(AppDbContext context, IEmailSender? emailSender = null)
     {
         var uow = new UnitOfWork(context);
-        return new NewsletterService(uow, _mapper, NullLogger<NewsletterService>.Instance);
+        var siteInfo = new OptionsSnapshotStub<SiteInfoOptions>(new SiteInfoOptions
+        {
+            Name = "Test Site",
+            BaseUrl = "https://test.local"
+        });
+        return new NewsletterService(
+            uow,
+            _mapper,
+            emailSender ?? new Mock<IEmailSender>().Object,
+            siteInfo,
+            NullLogger<NewsletterService>.Instance);
     }
 
     private static Article BuildArticle(
