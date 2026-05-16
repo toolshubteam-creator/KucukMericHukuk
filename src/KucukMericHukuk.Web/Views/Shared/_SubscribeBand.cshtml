@@ -1,0 +1,84 @@
+@* Faz 7.2a-fix: Subscribe band — footer ÖNCESİ, tam genişlik krem zemin.
+   AJAX submit (subscribe-form.js) inline mesaj, JS-pasif fallback POST-redirect. *@
+@inject Microsoft.Extensions.Options.IOptions<KucukMericHukuk.Core.Common.TurnstileOptions> TurnstileOptions
+@{
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+    var turnstileSiteKey = TurnstileOptions.Value.SiteKey;
+    var turnstileEnabled = TurnstileOptions.Value.Enabled;
+
+    // JS-pasif (fallback) yolda controller TempData ile alert düşer — fallback için inline render.
+    var fallbackSuccess = TempData["SubscribeSuccess"] as string;
+    var fallbackError = TempData["SubscribeError"] as string;
+    if (TempData.ContainsKey("SubscribeSuccess")) { TempData.Remove("SubscribeSuccess"); }
+    if (TempData.ContainsKey("SubscribeError")) { TempData.Remove("SubscribeError"); }
+
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+<section class="subscribe-band">
+    <div class="container">
+        <div class="subscribe-band__inner">
+            <h2 class="subscribe-band__title">Bültene Abone Olun</h2>
+            <p class="subscribe-band__lead">Yeni makaleler ve hukuki güncellemeler için e-posta listemize katılın.</p>
+
+            <form method="post"
+                  asp-controller="Subscriber"
+                  asp-action="Subscribe"
+                  asp-route-culture="@culture"
+                  asp-route-returnUrl="@returnUrl"
+                  class="subscribe-band__form"
+                  data-subscribe-form
+                  novalidate>
+                @Html.AntiForgeryToken()
+
+                <div class="subscribe-band__honeypot" aria-hidden="true">
+                    <label for="Subscriber_Website">Website (boş bırakın)</label>
+                    <input type="text" name="Website" id="Subscriber_Website" tabindex="-1" autocomplete="off" />
+                </div>
+
+                <div class="subscribe-band__row">
+                    <input type="email" name="Email" class="form-control subscribe-band__email"
+                           placeholder="E-posta adresiniz" required autocomplete="email"
+                           aria-label="E-posta adresiniz" />
+                    <button type="submit" class="btn btn-accent subscribe-band__submit">Abone Ol</button>
+                </div>
+
+                <div class="form-check small subscribe-band__consent">
+                    <input type="checkbox" name="KvkkConsent" value="true" id="Subscriber_KvkkConsent"
+                           class="form-check-input" required />
+                    <input type="hidden" name="KvkkConsent" value="false" />
+                    <label class="form-check-label" for="Subscriber_KvkkConsent">
+                        <a asp-controller="Pages" asp-action="Detail"
+                           asp-route-culture="@culture" asp-route-slug="aydinlatma"
+                           target="_blank" class="text-decoration-underline">Aydınlatma metnini</a>
+                        okudum, onaylıyorum.
+                    </label>
+                </div>
+
+                @if (turnstileEnabled)
+                {
+                    <div class="cf-turnstile subscribe-band__turnstile"
+                         data-sitekey="@turnstileSiteKey"
+                         data-response-field-name="TurnstileToken"
+                         data-theme="light"
+                         data-size="compact"></div>
+                }
+
+                @* Inline mesaj alani — JS AJAX cevabini buraya yazar; JS-pasif fallback'te
+                   TempData mesaji ayni element icinde render edilir (server tarafi). *@
+                <div class="subscribe-band__message @(fallbackSuccess != null ? "subscribe-band__message--success" : (fallbackError != null ? "subscribe-band__message--error" : ""))"
+                     role="status" aria-live="polite"
+                     data-subscribe-message
+                     @(fallbackSuccess == null && fallbackError == null ? "hidden" : "")>
+                    @(fallbackSuccess ?? fallbackError)
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (turnstileEnabled)
+    {
+        @* Turnstile JS — Cloudflare maintained, idempotent loader. DEFERRED Faz 7.2a-fix: tek noktadan
+           yukleme (_PublicLayout) ileride centralize edilecek (Turnstile centralize maddesi). *@
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    }
+</section>
