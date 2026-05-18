@@ -41,7 +41,7 @@ DEFERRED'daki "Faz 7 → Admin Zenginleştirme" maddesinin (6.22-keşif raporund
 | ✅ 7.2b-1 | Bülten altyapısı (NewsletterJob entity + Article.NewsletterSentAt flag + mail HTML şablonu + admin "Bülten" modülü: bekleyen liste + gönderim geçmişi + önizleme; migration backfill mevcut makaleleri "gönderildi" sayar; gönderim 7.2b-2'de) | 7.2a | — | ~1 alt-adım |
 | ✅ 7.2b-2 | Bülten gönderim motoru (NewsletterService.ProcessJobAsync + NewsletterDispatcher Task.Run + abone-bazlı try/catch + SMTP rate limit her 10 mailde 1500ms + Article.NewsletterSentAt set Completed, Failed'da SET ETMEZ) | 7.2b-1 | — | ~1 alt-adım |
 | ✅ 7.3 | 404 Takibi — Tam tamamlandı (Faz 7.3.1 + 7.3.2a + 7.3.2b, 18.05.2026) | — | YOK, sıfırdan | ~3 alt-adım |
-| 🔄 7.4 | Redirect modülü — 7.4.1 + 7.4.2 + 7.4.3a ✅ (18.05.2026); 7.4.3b (404 köprü) + 7.4.4 (kapanış) kaldı | 7.3 | Var, iyi referans, middleware mantığı düz adapte | ~2-3 alt-adım |
+| 🔄 7.4 | Redirect modülü — 7.4.1 + 7.4.2 + 7.4.3a + 7.4.3b ✅ (18.05.2026); 7.4.4 (kapanış) kaldı | 7.3 | Var, iyi referans, middleware mantığı düz adapte | ~2-3 alt-adım |
 | 7.5 | Grup B ortak altyapı (Google.Apis NuGet + credential okuma + `IGoogleApiClient` + admin Site Ayarları → Google entegrasyon tab) | — | YOK, sıfırdan | ~2 alt-adım |
 | 7.6 | GA4 Data API widget (dashboard) — Property ID boş-state, domain gelince configure | 7.5 | YOK | ~2 alt-adım |
 | 7.7 | Search Console API widget (dashboard) — Site URL boş-state | 7.5 | YOK | ~2 alt-adım |
