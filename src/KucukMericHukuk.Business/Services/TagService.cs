@@ -17,17 +17,20 @@ public class TagService : ITagService
 {
     private readonly IUnitOfWork _uow;
     private readonly ISlugService _slugService;
+    private readonly ISlugHistoryService _slugHistory;
     private readonly IMapper _mapper;
     private readonly IValidator<TagInputDto> _validator;
 
     public TagService(
         IUnitOfWork uow,
         ISlugService slugService,
+        ISlugHistoryService slugHistory,
         IMapper mapper,
         IValidator<TagInputDto> validator)
     {
         _uow = uow;
         _slugService = slugService;
+        _slugHistory = slugHistory;
         _mapper = mapper;
         _validator = validator;
     }
@@ -156,11 +159,25 @@ public class TagService : ITagService
             Slug = t.Slug,
         }).ToList();
 
+        // Faz 7.4.3a: slug-change snapshot.
+        var oldSlugsByLang = tag.Translations
+            .ToDictionary(t => t.LanguageCode, t => t.Slug, StringComparer.OrdinalIgnoreCase);
+
         TranslationMergeHelper.Merge(tag.Translations, incomingTranslations, (target, source) =>
         {
             target.Name = source.Name;
             target.Slug = source.Slug;
         });
+
+        foreach (var translation in tag.Translations)
+        {
+            if (oldSlugsByLang.TryGetValue(translation.LanguageCode, out var oldSlug))
+            {
+                await _slugHistory.RecordIfChangedAsync(
+                    SluggedEntityType.Tag, tag.Id, translation.LanguageCode,
+                    oldSlug, translation.Slug, ct);
+            }
+        }
 
         try
         {

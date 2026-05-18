@@ -39,8 +39,9 @@ public class PageServiceTests : IDisposable
     {
         var uow = new UnitOfWork(context);
         var slugService = new SlugService(uow);
+        var slugHistoryService = new SlugHistoryService(uow);
         var sanitizer = new HtmlSanitizerService();
-        return new PageService(uow, slugService, _mapper, _validator, sanitizer);
+        return new PageService(uow, slugService, slugHistoryService, _mapper, _validator, sanitizer);
     }
 
     private static PageInputDto BuildValidInput(
@@ -218,6 +219,25 @@ public class PageServiceTests : IDisposable
         t.Id.Should().Be(originalId, "Translation Id KORUNMALI (diff-merge)");
         t.CreatedAt.Should().Be(originalCreatedAt);
         t.Title.Should().Be("Yeni Başlık");
+    }
+
+    /// <summary>Faz 7.4.3a — Page slug-change SlugHistory satırı üretmeli.</summary>
+    [Fact]
+    public async Task UpdateAsync_SlugChanged_RecordsSlugHistory()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var createResult = await sut.CreateAsync(BuildValidInput(slug: "eski-sayfa"));
+        var updateInput = BuildValidInput(slug: "yeni-sayfa", id: createResult.Value);
+        (await sut.UpdateAsync(updateInput)).IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var histories = await verify.SlugHistories.AsNoTracking().ToListAsync();
+        histories.Should().HaveCount(1);
+        histories[0].EntityType.Should().Be(SluggedEntityType.Page);
+        histories[0].EntityId.Should().Be(createResult.Value);
+        histories[0].OldSlug.Should().Be("eski-sayfa");
     }
 
     [Fact]
