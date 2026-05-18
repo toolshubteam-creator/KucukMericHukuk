@@ -27,6 +27,9 @@ public class RedirectRepository : IRedirectRepository
         => _dbSet.AsNoTracking().FirstOrDefaultAsync(
             r => r.IsActive && r.FromPath == fromPath, ct);
 
+    public Task<Redirect?> GetByFromPathAnyAsync(string fromPath, CancellationToken ct = default)
+        => _dbSet.AsNoTracking().FirstOrDefaultAsync(r => r.FromPath == fromPath, ct);
+
     /// <summary>
     /// Atomik ExecuteUpdate: HitCount++ + LastHitAt=now. AuditSaveChangesInterceptor
     /// görmez (raw SQL UPDATE, ChangeTracker dışı) → admin "Aktivite Logu" gürültü

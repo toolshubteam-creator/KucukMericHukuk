@@ -1,0 +1,49 @@
+@model KucukMericHukuk.Core.DTOs.Redirect.RedirectFormDto
+
+<form asp-action="@(Model.Id.HasValue ? "Edit" : "Create")"
+      asp-controller="Redirects" asp-area="Admin"
+      asp-route-id="@Model.Id"
+      method="post"
+      data-redirect-form
+      data-check-cycle-url="@Url.Action("CheckCycle", "Redirects", new { area = "Admin" })"
+      data-exclude-id="@(Model.Id?.ToString() ?? "")">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+    <div class="mb-3">
+        <label asp-for="FromPath" class="form-label">Kaynak URL (FromPath)</label>
+        <input asp-for="FromPath" class="form-control" placeholder="/tr-TR/eski-link" data-from-path />
+        <small class="text-secondary">Kullanıcının ziyaret edeceği eski URL (path bölümü).</small>
+        <span asp-validation-for="FromPath" class="text-danger d-block"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ToPath" class="form-label">Hedef URL (ToPath)</label>
+        <input asp-for="ToPath" class="form-control" placeholder="/tr-TR/yeni-link" data-to-path />
+        <small class="text-secondary">Yönlendirilecek yeni URL.</small>
+        <span asp-validation-for="ToPath" class="text-danger d-block"></span>
+        <div data-cycle-warning class="alert alert-warning mt-2 d-none" role="alert"></div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="StatusCode" class="form-label">Durum Kodu</label>
+        <select asp-for="StatusCode" class="form-select">
+            <option value="301">301 — Kalıcı yönlendirme (SEO transfer)</option>
+            <option value="302">302 — Geçici yönlendirme</option>
+        </select>
+        <span asp-validation-for="StatusCode" class="text-danger d-block"></span>
+    </div>
+
+    <div class="mb-3 form-check">
+        <input asp-for="IsActive" class="form-check-input" />
+        <label asp-for="IsActive" class="form-check-label">Aktif</label>
+        <small class="text-secondary d-block">Pasif yönlendirmeler middleware tarafından atlanır.</small>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+        <a asp-action="Index" asp-controller="Redirects" asp-area="Admin" class="btn btn-outline-secondary">İptal</a>
+    </div>
+</form>

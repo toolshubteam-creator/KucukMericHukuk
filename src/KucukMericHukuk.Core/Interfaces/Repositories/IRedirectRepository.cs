@@ -17,6 +17,12 @@ public interface IRedirectRepository
     Task<Redirect?> GetByFromPathAsync(string fromPath, CancellationToken ct = default);
 
     /// <summary>
+    /// FromPath tam eşleşmeli kayıt (IsActive filter UYGULANMAZ). Insert-time
+    /// cycle validation için: aktif+pasif tüm kayıtlar zincirde sayılır.
+    /// </summary>
+    Task<Redirect?> GetByFromPathAnyAsync(string fromPath, CancellationToken ct = default);
+
+    /// <summary>
     /// Atomik HitCount++ + LastHitAt=now (ExecuteUpdate). Race-safe, audit'e düşmez
     /// (NotFoundLog.RecordHitAsync pattern). Etkilenen satır varsa true.
     /// </summary>
