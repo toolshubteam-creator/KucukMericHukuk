@@ -19,6 +19,7 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
     IAuditLogRepository AuditLogs { get; }
     ISubscriberRepository Subscribers { get; }
     INewsletterJobRepository NewsletterJobs { get; }
+    INotFoundLogRepository NotFoundLogs { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 

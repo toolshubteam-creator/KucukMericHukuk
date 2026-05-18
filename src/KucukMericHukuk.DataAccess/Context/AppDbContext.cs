@@ -16,6 +16,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     /// </summary>
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
+    /// <summary>
+    /// 404 hit aggregate seti (Faz 7.3.1) — NotFoundLoggingMiddleware (Faz 7.3.2)
+    /// her 404'te NotFoundLogRepository.RecordHitAsync üzerinden upsert eder.
+    /// </summary>
+    public DbSet<NotFoundLog> NotFoundLogs => Set<NotFoundLog>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
