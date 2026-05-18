@@ -1,0 +1,190 @@
+@using KucukMericHukuk.Core.DTOs.NotFoundLog
+@using KucukMericHukuk.Web.Areas.Admin.ViewModels.Shared
+@model KucukMericHukuk.Core.DTOs.Common.PagedResult<KucukMericHukuk.Core.DTOs.NotFoundLog.NotFoundLogListDto>
+@{
+    ViewData["Title"] = "404 Kayıtları";
+    var query = ViewBag.Query as NotFoundLogQueryDto ?? new NotFoundLogQueryDto();
+
+    var paginationVm = new PaginationViewModel
+    {
+        PageNumber = Model.PageNumber,
+        TotalPages = Model.TotalPages,
+        HasPrevious = Model.HasPrevious,
+        HasNext = Model.HasNext,
+        GetPageUrl = pageNum => Url.Action("Index", "NotFoundLogs", new
+        {
+            area = "Admin",
+            keyword = query.Keyword,
+            sort = query.Sort,
+            page = pageNum,
+            pageSize = query.PageSize,
+            startDate = query.StartDate?.ToString("yyyy-MM-dd"),
+            endDate = query.EndDate?.ToString("yyyy-MM-dd")
+        }) ?? "#"
+    };
+
+    var sortOptions = new (string? Value, string Label)[]
+    {
+        (null,     "En çok kırılan (varsayılan)"),
+        ("recent", "Son görülme")
+    };
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">404 Kayıtları</h2>
+            <div class="text-secondary">Toplam @Model.TotalCount kırık URL</div>
+        </div>
+        @if (Model.TotalCount > 0)
+        {
+            <div class="col-auto">
+                <form asp-action="PurgeAll" asp-controller="NotFoundLogs" asp-area="Admin" method="post"
+                      data-confirm="Tüm 404 kayıtları kalıcı olarak silinecek. Bu işlem geri alınamaz."
+                      data-confirm-title="Tüm kayıtları temizle?"
+                      data-confirm-button="Evet, hepsini sil"
+                      data-confirm-variant="danger"
+                      class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="ti ti-trash me-1"></i> Tümünü Temizle
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+</div>
+
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+@if (TempData["Success"] is string okMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@okMsg</div>
+}
+
+<div class="card mt-3">
+    <div class="card-body border-bottom">
+        <form asp-action="Index" asp-controller="NotFoundLogs" asp-area="Admin" method="get">
+            <div class="row g-2 align-items-center">
+                <div class="col-md">
+                    <input type="search" name="keyword" value="@query.Keyword"
+                           class="form-control" placeholder="URL içinde ara..." />
+                </div>
+                <div class="col-md-auto">
+                    <select name="sort" class="form-select">
+                        @foreach (var (val, label) in sortOptions)
+                        {
+                            var current = string.IsNullOrEmpty(query.Sort) ? null : query.Sort;
+                            if (current == val)
+                            {
+                                <option value="@val" selected>@label</option>
+                            }
+                            else
+                            {
+                                <option value="@val">@label</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="row g-2 align-items-center mt-2">
+                <div class="col-md-auto">
+                    <label for="startDate" class="form-label small mb-0">Başlangıç</label>
+                    <input type="date" id="startDate" name="startDate"
+                           value="@(query.StartDate?.ToString("yyyy-MM-dd"))"
+                           class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-auto">
+                    <label for="endDate" class="form-label small mb-0">Bitiş</label>
+                    <input type="date" id="endDate" name="endDate"
+                           value="@(query.EndDate?.ToString("yyyy-MM-dd"))"
+                           class="form-control form-control-sm" />
+                </div>
+                <div class="col-md-auto align-self-end">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="ti ti-search me-1"></i> Ara
+                    </button>
+                    <a asp-action="Index" asp-controller="NotFoundLogs" asp-area="Admin"
+                       class="btn btn-outline-secondary">Sıfırla</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">404 kaydı yok</p>
+            <p class="empty-subtitle text-secondary">
+                @if (!string.IsNullOrWhiteSpace(query.Keyword) || query.StartDate.HasValue || query.EndDate.HasValue)
+                {
+                    <text>Filtre kriterleriyle eşleşen kayıt yok.</text>
+                }
+                else
+                {
+                    <text>Henüz 404 hit alınmadı. Ziyaretçi kırık bir URL'e gittiğinde otomatik kayıt başlayacak.</text>
+                }
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter">
+                <thead>
+                    <tr>
+                        <th>URL</th>
+                        <th style="width:110px">Hit</th>
+                        <th style="width:170px">İlk görülme</th>
+                        <th style="width:170px">Son görülme</th>
+                        <th class="w-1">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var n in Model.Items)
+                    {
+                        <tr>
+                            <td>
+                                <code class="text-break">@n.Url</code>
+                                @if (!string.IsNullOrEmpty(n.Referer))
+                                {
+                                    <div><small class="text-secondary">Referer: @n.Referer</small></div>
+                                }
+                            </td>
+                            <td><span class="badge bg-danger-lt">@n.HitCount</span></td>
+                            <td>@n.FirstSeenAt.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@n.LastSeenAt.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                <form asp-action="PurgeOne" asp-controller="NotFoundLogs" asp-area="Admin"
+                                      asp-route-id="@n.Id" method="post"
+                                      data-confirm="Bu kayıt silinecek. Devam edilsin mi?"
+                                      data-confirm-title="Kaydı sil?"
+                                      data-confirm-button="Evet, sil"
+                                      data-confirm-variant="danger"
+                                      class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
+                                        <i class="ti ti-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                <strong>@((Model.PageNumber - 1) * Model.PageSize + 1)</strong> -
+                <strong>@Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)</strong>
+                arası, toplam <strong>@Model.TotalCount</strong> kayıt
+            </p>
+            <div class="ms-auto">
+                <partial name="_Pagination" model="paginationVm" />
+            </div>
+        </div>
+    }
+</div>
