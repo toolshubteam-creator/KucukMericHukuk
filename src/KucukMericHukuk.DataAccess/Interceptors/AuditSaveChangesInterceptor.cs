@@ -43,6 +43,7 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
         "Subscriber",                     // Faz 7.2a
         "NewsletterJob",                  // Faz 7.2b-1 — job sistem üretir, ContactMessage gibi
         "NotFoundLog",                    // Faz 7.3.1 — 404 log sistem uretir, ContactMessage/Subscriber gibi
+        "SlugHistory",                    // Faz 7.4.1 — slug izi sistem uretir, NotFoundLog gibi (Redirect EKLENMEZ, admin CRUD denetlenir)
         // Faz 7.1-fix — M:N join shared-type entity'ler, kullanıcı-domain değil.
         // EF Core UsingEntity("ArticleTags"/"AttorneyServices") ile property bag (Dictionary<string,object>)
         // olarak yaratılır; join row değişiklikleri parent entity audit'inde bağlamla yer almıyor

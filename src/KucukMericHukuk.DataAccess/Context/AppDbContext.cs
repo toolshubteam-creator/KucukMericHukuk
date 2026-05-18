@@ -22,6 +22,19 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     /// </summary>
     public DbSet<NotFoundLog> NotFoundLogs => Set<NotFoundLog>();
 
+    /// <summary>
+    /// Manuel URL yönlendirme seti (Faz 7.4.1). RedirectMiddleware (Faz 7.4.2)
+    /// FromPath lookup yapar; admin CRUD ile yönetilir.
+    /// </summary>
+    public DbSet<Redirect> Redirects => Set<Redirect>();
+
+    /// <summary>
+    /// Slug değişim izi (Faz 7.4.1) — 6 servis update (Faz 7.4.3) slug değişince
+    /// otomatik kayıt eder; RedirectMiddleware (Faz 7.4.2) eski slug'ı güncele
+    /// yönlendirir.
+    /// </summary>
+    public DbSet<SlugHistory> SlugHistories => Set<SlugHistory>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

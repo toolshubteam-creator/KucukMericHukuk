@@ -27,6 +27,8 @@ public class UnitOfWork : IUnitOfWork
     private ISubscriberRepository? _subscribers;
     private INewsletterJobRepository? _newsletterJobs;
     private INotFoundLogRepository? _notFoundLogs;
+    private IRedirectRepository? _redirects;
+    private ISlugHistoryRepository? _slugHistories;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -49,6 +51,8 @@ public class UnitOfWork : IUnitOfWork
     public ISubscriberRepository Subscribers => _subscribers ??= new SubscriberRepository(_context);
     public INewsletterJobRepository NewsletterJobs => _newsletterJobs ??= new NewsletterJobRepository(_context);
     public INotFoundLogRepository NotFoundLogs => _notFoundLogs ??= new NotFoundLogRepository(_context);
+    public IRedirectRepository Redirects => _redirects ??= new RedirectRepository(_context);
+    public ISlugHistoryRepository SlugHistories => _slugHistories ??= new SlugHistoryRepository(_context);
 
     public Task<int> SaveChangesAsync(CancellationToken ct = default)
         => _context.SaveChangesAsync(ct);

@@ -1,14 +1,6 @@
-namespace KucukMericHukuk.Core.Interfaces.Services;
+using KucukMericHukuk.Core.Common;
 
-public enum SluggedEntityType
-{
-    Page,
-    Service,
-    Attorney,
-    Category,
-    Tag,
-    Article
-}
+namespace KucukMericHukuk.Core.Interfaces.Services;
 
 public interface ISlugService
 {

@@ -30,6 +30,8 @@ public static class DependencyInjection
         services.AddScoped<ISubscriberRepository, SubscriberRepository>();
         services.AddScoped<INewsletterJobRepository, NewsletterJobRepository>();
         services.AddScoped<INotFoundLogRepository, NotFoundLogRepository>();
+        services.AddScoped<IRedirectRepository, RedirectRepository>();
+        services.AddScoped<ISlugHistoryRepository, SlugHistoryRepository>();
 
         // Faz 7.1: AuditSaveChangesInterceptor — Program.cs'te AddDbContext .AddInterceptors(sp.GetRequiredService<...>()) ile bağlanır.
         services.AddScoped<KucukMericHukuk.DataAccess.Interceptors.AuditSaveChangesInterceptor>();
