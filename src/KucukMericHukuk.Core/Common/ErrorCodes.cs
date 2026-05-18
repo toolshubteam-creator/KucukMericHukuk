@@ -120,6 +120,14 @@ public static class ErrorCodes
         public const string NotFound = "NotFoundLog.NotFound";
     }
 
+    public static class Redirect
+    {
+        public const string NotFound = "Redirect.NotFound";
+        public const string DuplicateFromPath = "Redirect.DuplicateFromPath";
+        public const string SelfRedirect = "Redirect.SelfRedirect";
+        public const string CycleDetected = "Redirect.CycleDetected";
+    }
+
     public static class SiteSetting
     {
         public const string NotFound = "SiteSetting.NotFound";
