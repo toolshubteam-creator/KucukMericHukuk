@@ -38,8 +38,9 @@ public class ArticleServicePublicTests : IDisposable
     {
         var uow = new UnitOfWork(context);
         var slugService = new SlugService(uow);
+        var slugHistoryService = new SlugHistoryService(uow);
         var sanitizer = new HtmlSanitizerService();
-        return new ArticleService(uow, slugService, _mapper, _validator, sanitizer);
+        return new ArticleService(uow, slugService, slugHistoryService, _mapper, _validator, sanitizer);
     }
 
     private static int SeedArticle(
