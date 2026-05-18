@@ -17,6 +17,7 @@ public class ServiceService : IServiceService
 {
     private readonly IUnitOfWork _uow;
     private readonly ISlugService _slugService;
+    private readonly ISlugHistoryService _slugHistory;
     private readonly IMapper _mapper;
     private readonly IValidator<ServiceInputDto> _validator;
     private readonly IHtmlSanitizerService _sanitizer;
@@ -24,12 +25,14 @@ public class ServiceService : IServiceService
     public ServiceService(
         IUnitOfWork uow,
         ISlugService slugService,
+        ISlugHistoryService slugHistory,
         IMapper mapper,
         IValidator<ServiceInputDto> validator,
         IHtmlSanitizerService sanitizer)
     {
         _uow = uow;
         _slugService = slugService;
+        _slugHistory = slugHistory;
         _mapper = mapper;
         _validator = validator;
         _sanitizer = sanitizer;
@@ -193,6 +196,10 @@ public class ServiceService : IServiceService
             MetaDescription = t.MetaDescription,
         }).ToList();
 
+        // Faz 7.4.3a: slug-change snapshot.
+        var oldSlugsByLang = svc.Translations
+            .ToDictionary(t => t.LanguageCode, t => t.Slug, StringComparer.OrdinalIgnoreCase);
+
         TranslationMergeHelper.Merge(svc.Translations, incomingTranslations, (target, source) =>
         {
             target.Name = source.Name;
@@ -202,6 +209,16 @@ public class ServiceService : IServiceService
             target.MetaTitle = source.MetaTitle;
             target.MetaDescription = source.MetaDescription;
         });
+
+        foreach (var translation in svc.Translations)
+        {
+            if (oldSlugsByLang.TryGetValue(translation.LanguageCode, out var oldSlug))
+            {
+                await _slugHistory.RecordIfChangedAsync(
+                    SluggedEntityType.Service, svc.Id, translation.LanguageCode,
+                    oldSlug, translation.Slug, ct);
+            }
+        }
 
         svc.Attorneys.Clear();
         if (input.AttorneyIds != null && input.AttorneyIds.Count > 0)

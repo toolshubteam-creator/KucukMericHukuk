@@ -17,6 +17,7 @@ public class AttorneyService : IAttorneyService
 {
     private readonly IUnitOfWork _uow;
     private readonly ISlugService _slugService;
+    private readonly ISlugHistoryService _slugHistory;
     private readonly IMapper _mapper;
     private readonly IValidator<AttorneyInputDto> _validator;
     private readonly IHtmlSanitizerService _sanitizer;
@@ -24,12 +25,14 @@ public class AttorneyService : IAttorneyService
     public AttorneyService(
         IUnitOfWork uow,
         ISlugService slugService,
+        ISlugHistoryService slugHistory,
         IMapper mapper,
         IValidator<AttorneyInputDto> validator,
         IHtmlSanitizerService sanitizer)
     {
         _uow = uow;
         _slugService = slugService;
+        _slugHistory = slugHistory;
         _mapper = mapper;
         _validator = validator;
         _sanitizer = sanitizer;
@@ -179,6 +182,11 @@ public class AttorneyService : IAttorneyService
 
         // Faz 7.1.2: Translation diff-based merge (Id + CreatedAt korunur).
         var incomingTranslations = input.Translations.Select(BuildTranslation).ToList();
+
+        // Faz 7.4.3a: slug-change snapshot.
+        var oldSlugsByLang = attorney.Translations
+            .ToDictionary(t => t.LanguageCode, t => t.Slug, StringComparer.OrdinalIgnoreCase);
+
         TranslationMergeHelper.Merge(attorney.Translations, incomingTranslations, (target, source) =>
         {
             target.FullName = source.FullName;
@@ -191,6 +199,16 @@ public class AttorneyService : IAttorneyService
             target.MetaTitle = source.MetaTitle;
             target.MetaDescription = source.MetaDescription;
         });
+
+        foreach (var translation in attorney.Translations)
+        {
+            if (oldSlugsByLang.TryGetValue(translation.LanguageCode, out var oldSlug))
+            {
+                await _slugHistory.RecordIfChangedAsync(
+                    SluggedEntityType.Attorney, attorney.Id, translation.LanguageCode,
+                    oldSlug, translation.Slug, ct);
+            }
+        }
 
         attorney.Services.Clear();
         if (input.ServiceIds != null && input.ServiceIds.Count > 0)

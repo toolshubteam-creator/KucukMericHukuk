@@ -38,7 +38,8 @@ public class CategoryServiceTests : IDisposable
     {
         var uow = new UnitOfWork(context);
         var slugService = new SlugService(uow);
-        return new CategoryService(uow, slugService, _mapper, _validator);
+        var slugHistoryService = new SlugHistoryService(uow);
+        return new CategoryService(uow, slugService, slugHistoryService, _mapper, _validator);
     }
 
     private static CategoryInputDto BuildValidInput(

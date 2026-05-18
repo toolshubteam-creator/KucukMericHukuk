@@ -22,6 +22,7 @@ public class ArticleService : IArticleService
 
     private readonly IUnitOfWork _uow;
     private readonly ISlugService _slugService;
+    private readonly ISlugHistoryService _slugHistory;
     private readonly IMapper _mapper;
     private readonly IValidator<ArticleInputDto> _validator;
     private readonly IHtmlSanitizerService _sanitizer;
@@ -29,12 +30,14 @@ public class ArticleService : IArticleService
     public ArticleService(
         IUnitOfWork uow,
         ISlugService slugService,
+        ISlugHistoryService slugHistory,
         IMapper mapper,
         IValidator<ArticleInputDto> validator,
         IHtmlSanitizerService sanitizer)
     {
         _uow = uow;
         _slugService = slugService;
+        _slugHistory = slugHistory;
         _mapper = mapper;
         _validator = validator;
         _sanitizer = sanitizer;
@@ -271,6 +274,12 @@ public class ArticleService : IArticleService
         }
         article.Status = input.Status;
 
+        // Faz 7.4.3a: slug-change yakala — merge ÖNCESİ snapshot (merge target.Slug
+        // overwrite eder; sonra okursak yenisini görürüz, kaçar). TranslationMergeHelper
+        // imzasına dokunmadan (6 servis ortak helper), servis-içi snapshot kullanılır.
+        var oldSlugsByLang = article.Translations
+            .ToDictionary(t => t.LanguageCode, t => t.Slug, StringComparer.OrdinalIgnoreCase);
+
         // Faz 7.1.2: Translation diff-based merge (Id + CreatedAt korunur).
         TranslationMergeHelper.Merge(article.Translations, translationsResult.Value, (target, source) =>
         {
@@ -282,6 +291,18 @@ public class ArticleService : IArticleService
             target.MetaTitle = source.MetaTitle;
             target.MetaDescription = source.MetaDescription;
         });
+
+        // Faz 7.4.3a: merge sonrası slug değişimi → SlugHistory satırı (caller SaveChanges
+        // atomik commit eder; AddAsync sadece ChangeTracker'a kuyrukluyor).
+        foreach (var translation in article.Translations)
+        {
+            if (oldSlugsByLang.TryGetValue(translation.LanguageCode, out var oldSlug))
+            {
+                await _slugHistory.RecordIfChangedAsync(
+                    SluggedEntityType.Article, article.Id, translation.LanguageCode,
+                    oldSlug, translation.Slug, ct);
+            }
+        }
 
         article.Tags.Clear();
         if (input.TagIds.Count > 0)

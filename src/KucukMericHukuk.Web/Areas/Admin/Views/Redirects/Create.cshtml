@@ -1,0 +1,16 @@
+@model KucukMericHukuk.Core.DTOs.Redirect.RedirectFormDto
+@{
+    ViewData["Title"] = "Yeni Yönlendirme";
+}
+
+<div class="page-header"><h2 class="page-title">Yeni Yönlendirme</h2></div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <partial name="_Form" model="Model" />
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/admin/redirects-form.js" asp-append-version="true" nonce="@Context.Items["csp-nonce"]"></script>
+}

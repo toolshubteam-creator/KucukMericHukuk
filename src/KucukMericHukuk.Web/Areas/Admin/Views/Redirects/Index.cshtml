@@ -1,0 +1,236 @@
+@using KucukMericHukuk.Core.DTOs.Redirect
+@using KucukMericHukuk.Web.Areas.Admin.ViewModels.Shared
+@model KucukMericHukuk.Core.DTOs.Common.PagedResult<KucukMericHukuk.Core.DTOs.Redirect.RedirectListDto>
+@{
+    ViewData["Title"] = "Yönlendirmeler";
+    var query = ViewBag.Query as RedirectQueryDto ?? new RedirectQueryDto();
+
+    var paginationVm = new PaginationViewModel
+    {
+        PageNumber = Model.PageNumber,
+        TotalPages = Model.TotalPages,
+        HasPrevious = Model.HasPrevious,
+        HasNext = Model.HasNext,
+        GetPageUrl = pageNum => Url.Action("Index", "Redirects", new
+        {
+            area = "Admin",
+            keyword = query.Keyword,
+            isActive = query.IsActive,
+            source = query.Source,
+            page = pageNum,
+            pageSize = query.PageSize
+        }) ?? "#"
+    };
+}
+
+<div class="page-header d-print-none">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">Yönlendirmeler</h2>
+            <div class="text-secondary">Toplam @Model.TotalCount yönlendirme</div>
+        </div>
+        <div class="col-auto">
+            <a class="btn btn-primary" asp-action="Create" asp-controller="Redirects" asp-area="Admin">
+                <i class="ti ti-plus me-1"></i> Yeni Yönlendirme
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Error"] is string errMsg)
+{
+    <div class="alert alert-danger mt-3" role="alert">@errMsg</div>
+}
+@if (TempData["Success"] is string okMsg)
+{
+    <div class="alert alert-success mt-3" role="alert">@okMsg</div>
+}
+
+<div class="card mt-3">
+    <div class="card-body border-bottom">
+        <form asp-action="Index" asp-controller="Redirects" asp-area="Admin" method="get">
+            <div class="row g-2 align-items-center">
+                <div class="col-md">
+                    <input type="search" name="keyword" value="@query.Keyword"
+                           class="form-control" placeholder="URL içinde ara..." />
+                </div>
+                <div class="col-md-auto">
+                    <select name="source" class="form-select">
+                        <option value="" selected="@(!query.Source.HasValue)">Hepsi</option>
+                        <option value="Manual" selected="@(query.Source == RedirectSource.Manual)">Manuel</option>
+                        <option value="SlugHistory" selected="@(query.Source == RedirectSource.SlugHistory)">Otomatik (Slug)</option>
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <select name="isActive" class="form-select">
+                        <option value="" selected="@(!query.IsActive.HasValue)">Durum: Hepsi</option>
+                        <option value="true" selected="@(query.IsActive == true)">Sadece aktif</option>
+                        <option value="false" selected="@(query.IsActive == false)">Sadece pasif</option>
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="ti ti-search me-1"></i> Ara
+                    </button>
+                    <a asp-action="Index" asp-controller="Redirects" asp-area="Admin"
+                       class="btn btn-outline-secondary">Sıfırla</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="empty">
+            <p class="empty-title">Yönlendirme tanımı yok</p>
+            <p class="empty-subtitle text-secondary">
+                "Yeni Yönlendirme" ile manuel kural oluşturabilirsin. Slug değişimi otomatik yönlendirme oluşturur.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table card-table table-vcenter">
+                <thead>
+                    <tr>
+                        <th style="width:110px">Tür</th>
+                        <th>Kaynak (FromPath)</th>
+                        <th>Hedef (ToPath)</th>
+                        <th style="width:90px">Kod</th>
+                        <th style="width:90px">Durum</th>
+                        <th style="width:80px">Hit</th>
+                        <th style="width:170px">Son hit</th>
+                        <th class="w-1">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model.Items)
+                    {
+                        <tr>
+                            <td>
+                                @if (r.Source == RedirectSource.Manual)
+                                {
+                                    <span class="badge bg-primary-lt">Manuel</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-lt" title="Slug değişiminden otomatik üretildi (salt-okunur)">
+                                        Otomatik
+                                    </span>
+                                }
+                            </td>
+                            <td><code class="text-break">@r.FromPath</code></td>
+                            <td>
+                                @if (r.TargetDeleted)
+                                {
+                                    <span class="text-danger">
+                                        <i class="ti ti-alert-circle me-1"></i> Hedef silinmiş
+                                    </span>
+                                }
+                                else if (!string.IsNullOrEmpty(r.ToPath))
+                                {
+                                    <code class="text-break">@r.ToPath</code>
+                                }
+                                else
+                                {
+                                    <span class="text-secondary">—</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge @(r.StatusCode == 301 ? "bg-success-lt" : "bg-info-lt")">
+                                    @r.StatusCode
+                                </span>
+                            </td>
+                            <td>
+                                @if (r.Source == RedirectSource.SlugHistory)
+                                {
+                                    <span class="text-secondary" title="Slug izi her zaman aktif">—</span>
+                                }
+                                else if (r.IsActive)
+                                {
+                                    <span class="badge bg-success-lt">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-lt">Pasif</span>
+                                }
+                            </td>
+                            <td>
+                                @if (r.Source == RedirectSource.Manual)
+                                {
+                                    @r.HitCount
+                                }
+                                else
+                                {
+                                    <span class="text-secondary">—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (r.Source == RedirectSource.Manual)
+                                {
+                                    @(r.LastHitAt?.ToString("dd.MM.yyyy HH:mm") ?? "—")
+                                }
+                                else
+                                {
+                                    <span class="text-secondary">—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (r.IsReadOnly)
+                                {
+                                    <span class="text-secondary small" title="Otomatik üretildi — silmek için entity'den slug değişimini geri al">
+                                        salt-okunur
+                                    </span>
+                                }
+                                else
+                                {
+                                    <div class="btn-list flex-nowrap">
+                                        <a asp-action="Edit" asp-controller="Redirects" asp-area="Admin"
+                                           asp-route-id="@r.Id" class="btn btn-sm btn-outline-secondary" title="Düzenle">
+                                            <i class="ti ti-pencil"></i>
+                                        </a>
+                                        <form asp-action="ToggleActive" asp-controller="Redirects" asp-area="Admin"
+                                              asp-route-id="@r.Id" method="post"
+                                              data-confirm="@(r.IsActive ? "Bu yonlendirme pasiflesecek. Devam mi?" : "Bu yonlendirme aktive edilecek. Devam mi?")"
+                                              data-confirm-title="Durum degisikligi"
+                                              data-confirm-button="Evet"
+                                              class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary" title="@(r.IsActive ? "Pasifleştir" : "Aktifleştir")">
+                                                <i class="ti @(r.IsActive ? "ti-toggle-left" : "ti-toggle-right")"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-action="Delete" asp-controller="Redirects" asp-area="Admin"
+                                              asp-route-id="@r.Id" method="post"
+                                              data-confirm="Yönlendirme silinecek. Bu işlem geri alınamaz."
+                                              data-confirm-title="Yönlendirme sil?"
+                                              data-confirm-button="Evet, sil"
+                                              data-confirm-variant="danger"
+                                              class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">
+                <strong>@((Model.PageNumber - 1) * Model.PageSize + 1)</strong> -
+                <strong>@Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)</strong>
+                arası, toplam <strong>@Model.TotalCount</strong> kayıt
+            </p>
+            <div class="ms-auto">
+                <partial name="_Pagination" model="paginationVm" />
+            </div>
+        </div>
+    }
+</div>

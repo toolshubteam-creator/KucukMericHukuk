@@ -40,8 +40,9 @@ public class AttorneyServiceTests : IDisposable
     {
         var uow = new UnitOfWork(context);
         var slugService = new SlugService(uow);
+        var slugHistoryService = new SlugHistoryService(uow);
         var sanitizer = new HtmlSanitizerService();
-        return new AttorneyService(uow, slugService, _mapper, _validator, sanitizer);
+        return new AttorneyService(uow, slugService, slugHistoryService, _mapper, _validator, sanitizer);
     }
 
     private static AttorneyInputDto BuildValidInput(

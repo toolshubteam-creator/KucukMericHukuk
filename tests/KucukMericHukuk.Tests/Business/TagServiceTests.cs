@@ -38,7 +38,8 @@ public class TagServiceTests : IDisposable
     {
         var uow = new UnitOfWork(context);
         var slugService = new SlugService(uow);
-        return new TagService(uow, slugService, _mapper, _validator);
+        var slugHistoryService = new SlugHistoryService(uow);
+        return new TagService(uow, slugService, slugHistoryService, _mapper, _validator);
     }
 
     private static TagInputDto BuildValidInput(
@@ -186,6 +187,25 @@ public class TagServiceTests : IDisposable
         t.Id.Should().Be(originalId, "Translation Id KORUNMALI (diff-merge)");
         t.CreatedAt.Should().Be(originalCreatedAt);
         t.Name.Should().Be("Yeni Etiket");
+    }
+
+    /// <summary>Faz 7.4.3a — Tag slug-change SlugHistory satırı üretmeli.</summary>
+    [Fact]
+    public async Task UpdateAsync_SlugChanged_RecordsSlugHistory()
+    {
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var created = await sut.CreateAsync(BuildValidInput(name: "Hukuk", slug: "hukuk"));
+        var updateInput = BuildValidInput(name: "Hukuk", slug: "hukuk-yeni", id: created.Value);
+        (await sut.UpdateAsync(updateInput)).IsSuccess.Should().BeTrue();
+
+        await using var verify = _factory.CreateContext();
+        var histories = await verify.SlugHistories.AsNoTracking().ToListAsync();
+        histories.Should().HaveCount(1);
+        histories[0].EntityType.Should().Be(SluggedEntityType.Tag);
+        histories[0].EntityId.Should().Be(created.Value);
+        histories[0].OldSlug.Should().Be("hukuk");
     }
 
     [Fact]

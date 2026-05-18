@@ -39,4 +39,16 @@ public class SlugHistoryRepository : ISlugHistoryRepository
 
     public Task AddAsync(SlugHistory entity, CancellationToken ct = default)
         => _dbSet.AddAsync(entity, ct).AsTask();
+
+    public async Task<IReadOnlyList<SlugHistory>> GetFilteredForAdminAsync(
+        string? keyword, CancellationToken ct = default)
+    {
+        var q = _dbSet.AsNoTracking().AsQueryable();
+        if (!string.IsNullOrWhiteSpace(keyword))
+        {
+            var k = keyword.Trim();
+            q = q.Where(s => s.OldSlug.Contains(k));
+        }
+        return await q.OrderByDescending(s => s.CreatedAt).ToListAsync(ct);
+    }
 }

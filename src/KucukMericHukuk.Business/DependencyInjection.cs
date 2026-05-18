@@ -46,6 +46,8 @@ public static class DependencyInjection
         services.AddScoped<ISubscriberService, SubscriberService>();
         services.AddScoped<INewsletterService, NewsletterService>();
         services.AddScoped<INotFoundService, NotFoundService>();
+        services.AddScoped<ISlugHistoryService, SlugHistoryService>();
+        services.AddScoped<IRedirectService, RedirectService>();
 
         // SiteSettingsService memory cache kullanır (5dk TTL, update sonrası InvalidateCache).
         services.AddMemoryCache();

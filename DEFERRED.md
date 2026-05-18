@@ -300,12 +300,12 @@
 
 ### Grup C — Yönlendirmeler (Küçükmeriç'te HİÇ YOK — sıfırdan, Hafriyat iyi referans)
 
-- **Redirect modülü** — Küçükmeriç'te redirect özelliği hiç yok
-  - Redirect entity + SlugHistory entity + RedirectMiddleware (manuel tablo +
-    otomatik slug history) + admin CRUD + döngü kontrolü (AJAX loop-check)
-  - Hafriyat'ta tam çalışır halde — middleware + loop-check mantığı düz adapte edilebilir
-  - 404 Takibi (Grup A) ile entegre: 404 → tek-tık 301 kur akışı
-  - Tahmini: ~2-3 alt-adım
+- **🔄 Redirect modülü** — Faz 7.4'te devam ediyor
+  - ✅ 7.4.1 (18.05.2026): Redirect + SlugHistory entity + repo + migration
+  - ✅ 7.4.2 (18.05.2026): RedirectMiddleware (pipeline NotFoundLogging'den önce) + IMemoryCache + POC
+  - ✅ 7.4.3a (18.05.2026): SlugHistoryService + 6 servis update kanca (Article pilot + Page/Service/Attorney/Category/Tag) + RedirectController admin CRUD + insert-time cycle validation (max 10 hop) + AJAX loop-check + cache invalidation
+  - 🔄 7.4.3b (kalan): NotFoundLog → "Redirect Kur" tek-tık köprü (7.3↔7.4 birleşme)
+  - 🔄 7.4.4 (kalan): Faz 7.4 kapanış (DEFERRED + PROGRESS senkron)
 
 ### Notlar
 
@@ -373,11 +373,9 @@
   - Şu an "FullName" claim adı string sabit (Faz 2.3)
   - Yeni claim tipleri eklendikçe `Core/Constants/AppClaimTypes.cs` oluşturulur
 
-- **SluggedEntityType enum dosya organizasyonu**
-  - Şu an `Core/Interfaces/Services/ISlugService.cs` içinde tanımlı (Faz 2.4b)
-  - Başka tüketici (örn. URL routing, Sitemap üretici) bağımsız ihtiyaç
-    duyarsa ayrı dosyaya taşınır: `Core/Common/SluggedEntityType.cs`
-  - Şu an taşımaya gerek yok — single-tenant interface tarafı
+- **✅ SluggedEntityType enum dosya organizasyonu** — Faz 7.4.3a'da kapatıldı (18.05.2026)
+  - SlugHistory 2. tüketici olarak eklenince enum `Core/Common/SluggedEntityType.cs`'e taşındı
+  - Tüm referanslar derlendi (zaten `Core.Common` import ediyordu, sadece SlugServiceTests'e using eklendi)
 
 - **PROGRESS.md Faz 6 tablosu senkron borcu** (Faz 6 kapanışı / 6.26)
   - PROGRESS.md "Tamamlanan Adımlar" tablosu 6.17/#33'te duruyor — 6.18-6.22

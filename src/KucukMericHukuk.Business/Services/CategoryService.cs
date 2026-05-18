@@ -17,17 +17,20 @@ public class CategoryService : ICategoryService
 {
     private readonly IUnitOfWork _uow;
     private readonly ISlugService _slugService;
+    private readonly ISlugHistoryService _slugHistory;
     private readonly IMapper _mapper;
     private readonly IValidator<CategoryInputDto> _validator;
 
     public CategoryService(
         IUnitOfWork uow,
         ISlugService slugService,
+        ISlugHistoryService slugHistory,
         IMapper mapper,
         IValidator<CategoryInputDto> validator)
     {
         _uow = uow;
         _slugService = slugService;
+        _slugHistory = slugHistory;
         _mapper = mapper;
         _validator = validator;
     }
@@ -205,6 +208,10 @@ public class CategoryService : ICategoryService
             MetaDescription = t.MetaDescription,
         }).ToList();
 
+        // Faz 7.4.3a: slug-change snapshot.
+        var oldSlugsByLang = category.Translations
+            .ToDictionary(t => t.LanguageCode, t => t.Slug, StringComparer.OrdinalIgnoreCase);
+
         TranslationMergeHelper.Merge(category.Translations, incomingTranslations, (target, source) =>
         {
             target.Name = source.Name;
@@ -213,6 +220,16 @@ public class CategoryService : ICategoryService
             target.MetaTitle = source.MetaTitle;
             target.MetaDescription = source.MetaDescription;
         });
+
+        foreach (var translation in category.Translations)
+        {
+            if (oldSlugsByLang.TryGetValue(translation.LanguageCode, out var oldSlug))
+            {
+                await _slugHistory.RecordIfChangedAsync(
+                    SluggedEntityType.Category, category.Id, translation.LanguageCode,
+                    oldSlug, translation.Slug, ct);
+            }
+        }
 
         try
         {

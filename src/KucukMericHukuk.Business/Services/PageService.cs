@@ -17,6 +17,7 @@ public class PageService : IPageService
 {
     private readonly IUnitOfWork _uow;
     private readonly ISlugService _slugService;
+    private readonly ISlugHistoryService _slugHistory;
     private readonly IMapper _mapper;
     private readonly IValidator<PageInputDto> _validator;
     private readonly IHtmlSanitizerService _sanitizer;
@@ -24,12 +25,14 @@ public class PageService : IPageService
     public PageService(
         IUnitOfWork uow,
         ISlugService slugService,
+        ISlugHistoryService slugHistory,
         IMapper mapper,
         IValidator<PageInputDto> validator,
         IHtmlSanitizerService sanitizer)
     {
         _uow = uow;
         _slugService = slugService;
+        _slugHistory = slugHistory;
         _mapper = mapper;
         _validator = validator;
         _sanitizer = sanitizer;
@@ -208,6 +211,10 @@ public class PageService : IPageService
             MetaDescription = t.MetaDescription,
         }).ToList();
 
+        // Faz 7.4.3a: slug-change snapshot (merge target.Slug overwrite eder).
+        var oldSlugsByLang = page.Translations
+            .ToDictionary(t => t.LanguageCode, t => t.Slug, StringComparer.OrdinalIgnoreCase);
+
         TranslationMergeHelper.Merge(page.Translations, incomingTranslations, (target, source) =>
         {
             target.Title = source.Title;
@@ -216,6 +223,16 @@ public class PageService : IPageService
             target.MetaTitle = source.MetaTitle;
             target.MetaDescription = source.MetaDescription;
         });
+
+        foreach (var translation in page.Translations)
+        {
+            if (oldSlugsByLang.TryGetValue(translation.LanguageCode, out var oldSlug))
+            {
+                await _slugHistory.RecordIfChangedAsync(
+                    SluggedEntityType.Page, page.Id, translation.LanguageCode,
+                    oldSlug, translation.Slug, cancellationToken);
+            }
+        }
 
         try
         {

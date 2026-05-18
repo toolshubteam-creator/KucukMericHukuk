@@ -159,6 +159,12 @@ builder.Services.AddRateLimiter(options =>
 // Repository + UnitOfWork
 builder.Services.AddDataAccess();
 
+// Faz 7.4.3a: RedirectMiddleware (7.4.2) cache anahtarlarını admin CRUD
+// sonrası temizleyen IMemoryCache impl. Business katmanı bu interface'i
+// soyut tüketir (Core'da tanımlı, Web'de impl) — temiz katman.
+builder.Services.AddScoped<KucukMericHukuk.Core.Interfaces.Services.IRedirectCacheInvalidator,
+    KucukMericHukuk.Web.Infrastructure.MemoryRedirectCacheInvalidator>();
+
 // Infrastructure (SeedOptions + DbInitializer)
 builder.Services.AddInfrastructure(builder.Configuration);
 
