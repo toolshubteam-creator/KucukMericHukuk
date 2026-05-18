@@ -26,6 +26,7 @@ public class UnitOfWork : IUnitOfWork
     private IAuditLogRepository? _auditLogs;
     private ISubscriberRepository? _subscribers;
     private INewsletterJobRepository? _newsletterJobs;
+    private INotFoundLogRepository? _notFoundLogs;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -47,6 +48,7 @@ public class UnitOfWork : IUnitOfWork
     public IAuditLogRepository AuditLogs => _auditLogs ??= new AuditLogRepository(_context);
     public ISubscriberRepository Subscribers => _subscribers ??= new SubscriberRepository(_context);
     public INewsletterJobRepository NewsletterJobs => _newsletterJobs ??= new NewsletterJobRepository(_context);
+    public INotFoundLogRepository NotFoundLogs => _notFoundLogs ??= new NotFoundLogRepository(_context);
 
     public Task<int> SaveChangesAsync(CancellationToken ct = default)
         => _context.SaveChangesAsync(ct);
