@@ -1,9 +1,11 @@
 using System.Text.RegularExpressions;
 using KucukMericHukuk.Core.Common;
+using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Interfaces;
 using KucukMericHukuk.DataAccess.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace KucukMericHukuk.Web.Middleware;
 
@@ -27,6 +29,15 @@ namespace KucukMericHukuk.Web.Middleware;
 /// </summary>
 public class RedirectMiddleware
 {
+    /// <summary>
+    /// Manuel Redirect lookup TTL. Admin CRUD sonrası cache invalidation 7.4.3'te
+    /// (IRedirectCacheInvalidator) eklenecek; o gelene kadar değişiklikler en geç
+    /// 5dk içinde middleware'e yansır. SlugHistory CACHE'LENMEZ — entity güncel
+    /// slug değişebilir, stale risk yüksek.
+    /// </summary>
+    public const string CacheKeyPrefix = "redirect:";
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
+
     /// <summary>Slug-bazlı sayfalar — path regex (culture + segment + slug).</summary>
     private static readonly Regex SluggedPathRegex = new(
         @"^/(?<culture>[a-z]{2}-[A-Z]{2})/(?<segment>Articles|Services|Attorneys|Pages)/(?<slug>[^/]+?)/?$",
@@ -90,8 +101,7 @@ public class RedirectMiddleware
 
     private async Task<bool> TryHandleManualRedirectAsync(HttpContext context, string path)
     {
-        var uow = context.RequestServices.GetRequiredService<IUnitOfWork>();
-        var redirect = await uow.Redirects.GetByFromPathAsync(path, context.RequestAborted);
+        var redirect = await LookupRedirectCachedAsync(context, path);
         if (redirect is null) return false;
 
         // Runtime self-redirect erken reddi (cycle koruması — tam zincir tespiti 7.4.3
@@ -106,6 +116,7 @@ public class RedirectMiddleware
         // Best-effort hit kaydı — başarısız olsa bile redirect yine yapılır.
         try
         {
+            var uow = context.RequestServices.GetRequiredService<IUnitOfWork>();
             await uow.Redirects.RecordHitAsync(redirect.Id, context.RequestAborted);
         }
         catch (Exception ex)
@@ -118,11 +129,39 @@ public class RedirectMiddleware
         return true;
     }
 
+    /// <summary>
+    /// Cache'li manuel redirect lookup. POSITIVE sonuçlar 5dk cache'lenir;
+    /// negatif (path için redirect yok) cache YOK — her bilinmeyen URL için
+    /// rastgele cache key oluşturmaz (memory taşması engeli).
+    /// </summary>
+    private static async Task<Redirect?> LookupRedirectCachedAsync(HttpContext context, string path)
+    {
+        var cache = context.RequestServices.GetRequiredService<IMemoryCache>();
+        var key = CacheKeyPrefix + path;
+
+        if (cache.TryGetValue<Redirect>(key, out var cached) && cached is not null)
+        {
+            return cached;
+        }
+
+        var uow = context.RequestServices.GetRequiredService<IUnitOfWork>();
+        var redirect = await uow.Redirects.GetByFromPathAsync(path, context.RequestAborted);
+
+        if (redirect is not null)
+        {
+            cache.Set(key, redirect, CacheTtl);
+        }
+        return redirect;
+    }
+
     private async Task<bool> TryHandleSlugHistoryRedirectAsync(HttpContext context, string path)
     {
         var match = TryParseSluggedPath(path);
         if (match is null) return false;
 
+        // SlugHistory CACHE'LENMEZ - entity guncel slug degisebilir; admin slug update
+        // sonrasi middleware'in yanlis hedefe yonlendirme riski cok yuksek. Her istek
+        // DB'ye gider — beklenen yuk dusuk (sadece eski-slug-trafigi).
         var uow = context.RequestServices.GetRequiredService<IUnitOfWork>();
         var history = await uow.SlugHistories.FindCurrentAsync(
             match.Value.EntityType, match.Value.Lang, match.Value.OldSlug,

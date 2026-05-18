@@ -7,6 +7,7 @@ using KucukMericHukuk.Core.Enums;
 using KucukMericHukuk.DataAccess.Context;
 using KucukMericHukuk.IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KucukMericHukuk.IntegrationTests.Middleware;
@@ -229,6 +230,58 @@ public class RedirectMiddlewareTests : IClassFixture<IntegrationTestFactory>
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound,
             "soft-deleted entity icin SlugHistory varsa bile redirect yapilmaz - 404 verilir");
+    }
+
+    /// <summary>
+    /// Faz 7.4.2 — Runtime self-redirect guard. FromPath==ToPath olan kayıt
+    /// pass-through edilir, sonsuz tarayıcı döngüsü engellenir.
+    /// </summary>
+    [Fact]
+    public async Task Self_redirect_FromEqualsTo_is_bypassed()
+    {
+        await ResetTablesAsync();
+        await SeedRedirectAsync("/tr-TR/kendine", "/tr-TR/kendine");
+
+        var client = _factory.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        });
+
+        var response = await client.GetAsync("/tr-TR/kendine");
+
+        // Self-loop → pass-through → controller 404 → NotFoundLogging kaydeder.
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound,
+            "self-redirect kayidi pass-through edilmeli, sonsuz dongu olmamali");
+    }
+
+    /// <summary>
+    /// Faz 7.4.2 — IMemoryCache POSITIVE lookup sonuçlarını cache'liyor (5dk TTL).
+    /// İlk request sonrası cache anahtarı popüle olmuş olmalı.
+    /// </summary>
+    [Fact]
+    public async Task Manual_redirect_lookup_populates_cache()
+    {
+        await ResetTablesAsync();
+        await SeedRedirectAsync("/tr-TR/cache-test", "/tr-TR/yeni-cache-hedefi");
+
+        var client = _factory.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        });
+
+        // İlk istek — DB lookup + cache set
+        var response = await client.GetAsync("/tr-TR/cache-test");
+        response.StatusCode.Should().Be(HttpStatusCode.MovedPermanently);
+
+        using var scope = _factory.Services.CreateScope();
+        var cache = scope.ServiceProvider
+            .GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
+
+        var hit = cache.TryGetValue<Redirect>(
+            KucukMericHukuk.Web.Middleware.RedirectMiddleware.CacheKeyPrefix + "/tr-TR/cache-test",
+            out var cached);
+        hit.Should().BeTrue("manuel redirect lookup sonrasi POSITIVE cache populated olmali");
+        cached!.ToPath.Should().Be("/tr-TR/yeni-cache-hedefi");
     }
 
     [Fact]
