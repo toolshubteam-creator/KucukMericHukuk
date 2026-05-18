@@ -1,4 +1,6 @@
+using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.DTOs.NotFoundLog;
+using KucukMericHukuk.Core.DTOs.Redirect;
 using KucukMericHukuk.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,13 +13,16 @@ namespace KucukMericHukuk.Web.Areas.Admin.Controllers;
 public class NotFoundLogsController : Controller
 {
     private readonly INotFoundService _service;
+    private readonly IRedirectService _redirectService;
     private readonly ILogger<NotFoundLogsController> _logger;
 
     public NotFoundLogsController(
         INotFoundService service,
+        IRedirectService redirectService,
         ILogger<NotFoundLogsController> logger)
     {
         _service = service;
+        _redirectService = redirectService;
         _logger = logger;
     }
 
@@ -72,6 +77,54 @@ public class NotFoundLogsController : Controller
         {
             TempData["Success"] = $"{result.Value} kayıt silindi.";
         }
+        return RedirectToAction(nameof(Index));
+    }
+
+    /// <summary>
+    /// Faz 7.4.3b — 404 kaydından tek-tık redirect kur. FromPath otomatik
+    /// (NotFoundLog.Url), ToPath admin formdan, StatusCode 301 default veya 302.
+    /// Akış: NotFoundLog bul → RedirectService.CreateAsync (duplicate/cycle/self
+    /// reddi otomatik) → başarılı ise NotFoundLog satırını sil (artık çözüldü).
+    /// Başarısızsa NotFoundLog korunur (admin tekrar deneyebilir).
+    /// </summary>
+    [HttpPost("create-redirect/{id:guid}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateRedirect(
+        Guid id, string toPath, int statusCode = 301, CancellationToken ct = default)
+    {
+        var notFound = await _service.GetByIdAsync(id, ct);
+        if (notFound.IsFailure)
+        {
+            TempData["Error"] = "404 kaydı bulunamadı.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var createResult = await _redirectService.CreateAsync(new RedirectFormDto
+        {
+            FromPath = notFound.Value!.Url,
+            ToPath = toPath ?? string.Empty,
+            StatusCode = statusCode,
+            IsActive = true
+        }, ct);
+
+        if (createResult.IsFailure)
+        {
+            // Duplicate / Self / Cycle / Validation → service mesajını göster, NotFoundLog korunur.
+            TempData["Error"] = createResult.FirstError?.Message ?? "Yönlendirme oluşturulamadı.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Redirect başarılı → NotFoundLog kaydı "çözüldü" sayılır, listeyi temiz tut.
+        var purge = await _service.PurgeAsync(id, ct);
+        if (purge.IsFailure)
+        {
+            // Redirect var, 404 kaldı — kullanıcıya bilgi, kritik değil (manuel temizlenebilir).
+            _logger.LogWarning(
+                "CreateRedirect: redirect olusturuldu (Id={RedirectId}) ama NotFoundLog purge basarisiz (NotFoundId={NotFoundId})",
+                createResult.Value, id);
+        }
+
+        TempData["Success"] = $"Yönlendirme oluşturuldu: {notFound.Value.Url} → {toPath}";
         return RedirectToAction(nameof(Index));
     }
 }

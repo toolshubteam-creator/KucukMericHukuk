@@ -42,6 +42,17 @@ public class NotFoundService : INotFoundService
         return Result.Success(result);
     }
 
+    public async Task<Result<NotFoundLogListDto>> GetByIdAsync(Guid id, CancellationToken ct = default)
+    {
+        var entity = await _uow.NotFoundLogs.GetByIdAsync(id, ct);
+        if (entity is null)
+        {
+            return Result.Failure<NotFoundLogListDto>(
+                new Error(ErrorCodes.NotFoundLog.NotFound, "404 kaydı bulunamadı."));
+        }
+        return Result.Success(_mapper.Map<NotFoundLogListDto>(entity));
+    }
+
     public async Task<Result> PurgeAsync(Guid id, CancellationToken ct = default)
     {
         var deleted = await _uow.NotFoundLogs.PurgeAsync(id, ct);

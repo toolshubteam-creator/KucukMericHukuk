@@ -14,6 +14,9 @@ public interface INotFoundService
     Task<Result<PagedResult<NotFoundLogListDto>>> GetPagedAsync(
         NotFoundLogQueryDto query, CancellationToken ct = default);
 
+    /// <summary>Tek 404 kaydı (Faz 7.4.3b köprü akışında redirect form için).</summary>
+    Task<Result<NotFoundLogListDto>> GetByIdAsync(Guid id, CancellationToken ct = default);
+
     /// <summary>Tek 404 kaydını sil.</summary>
     Task<Result> PurgeAsync(Guid id, CancellationToken ct = default);
 
