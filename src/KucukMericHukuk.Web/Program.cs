@@ -328,6 +328,12 @@ var localizationOptions = app.Services
     .GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
 app.UseRequestLocalization(localizationOptions);
 
+// Faz 7.3.2: 404 logging — UseStatusCodePagesWithReExecute'den ÖNCE konumlanir.
+// Tek-pass çalışır (re-execute StatusCodePages'ten SONRAKI pipeline'i tekrarlar,
+// bu middleware'i değil). await _next sonrası IStatusCodeReExecuteFeature set'li
+// gelir ve orijinal URL (re-execute hedefi /Error/404 DEĞİL) ondan okunur.
+app.UseMiddleware<NotFoundLoggingMiddleware>();
+
 // 4xx/5xx yakalayıp culture-aware Error sayfasına yönlendir.
 // Sabit "tr-TR" — çok dilli destek genişlerse middleware'in RouteData'dan
 // culture'ı okuması gerekir (DEFERRED Faz 5/6).

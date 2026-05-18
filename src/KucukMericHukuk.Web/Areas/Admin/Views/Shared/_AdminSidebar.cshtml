@@ -138,6 +138,14 @@
                             <span class="nav-link-title">Aktivite Logu</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link @Html.IsActiveController("NotFoundLogs")" asp-action="Index" asp-controller="NotFoundLogs" asp-area="Admin">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-link-off"></i>
+                            </span>
+                            <span class="nav-link-title">404 Kayıtları</span>
+                        </a>
+                    </li>
                     <li class="nav-item my-2 px-3"><hr class="sidebar-divider" /></li>
                     <li class="nav-item">
                         <a class="nav-link @Html.IsActiveController("Users")" asp-action="Index" asp-controller="Users" asp-area="Admin">

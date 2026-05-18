@@ -30,4 +30,10 @@ public interface INotFoundLogRepository
         NotFoundLogQueryDto query, CancellationToken ct = default);
 
     Task<NotFoundLog?> GetByIdAsync(Guid id, CancellationToken ct = default);
+
+    /// <summary>Tek kayıt hard-delete. Bulunduysa true, yoksa false.</summary>
+    Task<bool> PurgeAsync(Guid id, CancellationToken ct = default);
+
+    /// <summary>Tüm kayıtları hard-delete. Silinen satır sayısını döner.</summary>
+    Task<int> PurgeAllAsync(CancellationToken ct = default);
 }

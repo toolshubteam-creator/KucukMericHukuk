@@ -40,7 +40,7 @@ DEFERRED'daki "Faz 7 → Admin Zenginleştirme" maddesinin (6.22-keşif raporund
 | ✅ 7.2a | Abone altyapısı (Subscriber entity + public footer formu + token iptal + admin liste; bülten gönderimi 7.2b'de) — UX fix uygulandı (AJAX content negotiation + subscribe bant + sade footer); fix2 — turnstile normal mode + bant dikey sıkılaştırma; route dili tutarsızlığı DEFERRED'a | — | — | ~1 alt-adım |
 | ✅ 7.2b-1 | Bülten altyapısı (NewsletterJob entity + Article.NewsletterSentAt flag + mail HTML şablonu + admin "Bülten" modülü: bekleyen liste + gönderim geçmişi + önizleme; migration backfill mevcut makaleleri "gönderildi" sayar; gönderim 7.2b-2'de) | 7.2a | — | ~1 alt-adım |
 | ✅ 7.2b-2 | Bülten gönderim motoru (NewsletterService.ProcessJobAsync + NewsletterDispatcher Task.Run + abone-bazlı try/catch + SMTP rate limit her 10 mailde 1500ms + Article.NewsletterSentAt set Completed, Failed'da SET ETMEZ) | 7.2b-1 | — | ~1 alt-adım |
-| 7.3 | 404 Takibi (`NotFoundLog` + middleware + admin liste) | — | YOK, sıfırdan | ~2-3 alt-adım |
+| ✅ 7.3 | 404 Takibi — Tam tamamlandı (Faz 7.3.1 + 7.3.2a + 7.3.2b, 18.05.2026) | — | YOK, sıfırdan | ~3 alt-adım |
 | 7.4 | Redirect modülü (`Redirect` + `SlugHistory` + middleware + 404 ile entegre "tek-tık 301 kur") | 7.3 | Var, iyi referans, middleware mantığı düz adapte | ~2-3 alt-adım |
 | 7.5 | Grup B ortak altyapı (Google.Apis NuGet + credential okuma + `IGoogleApiClient` + admin Site Ayarları → Google entegrasyon tab) | — | YOK, sıfırdan | ~2 alt-adım |
 | 7.6 | GA4 Data API widget (dashboard) — Property ID boş-state, domain gelince configure | 7.5 | YOK | ~2 alt-adım |

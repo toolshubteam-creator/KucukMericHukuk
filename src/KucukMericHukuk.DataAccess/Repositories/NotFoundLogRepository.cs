@@ -115,4 +115,13 @@ public class NotFoundLogRepository : INotFoundLogRepository
 
     public Task<NotFoundLog?> GetByIdAsync(Guid id, CancellationToken ct = default)
         => _dbSet.AsNoTracking().FirstOrDefaultAsync(n => n.Id == id, ct);
+
+    public async Task<bool> PurgeAsync(Guid id, CancellationToken ct = default)
+    {
+        var rows = await _dbSet.Where(n => n.Id == id).ExecuteDeleteAsync(ct);
+        return rows > 0;
+    }
+
+    public Task<int> PurgeAllAsync(CancellationToken ct = default)
+        => _dbSet.ExecuteDeleteAsync(ct);
 }

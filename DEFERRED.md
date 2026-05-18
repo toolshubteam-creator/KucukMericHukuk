@@ -270,10 +270,12 @@
 
 ### Grup A — İç araçlar (Hafriyat'ta kısmen var, dış bağımlılık yok)
 
-- **404 Takibi** — Hafriyat'ta YOK, sıfırdan
-  - NotFoundLog entity + migration + 404 logging middleware + repo/UoW +
-    Business servis + admin liste/filtre + "tek-tık 301 kur" akışı
-  - Tahmini: ~2-3 alt-adım
+- **✅ 404 Takibi** — Faz 7.3'te tamamlandı (18.05.2026)
+  - 7.3.1: NotFoundLog entity (aggregate Url + HitCount + LastSeenAt) + race-safe upsert repo + migration
+  - 7.3.2a: NotFoundLoggingMiddleware (UseStatusCodePagesWithReExecute'ten ÖNCE, IStatusCodeReExecuteFeature.OriginalPath ile orijinal URL yakalama, filtreler: asset/admin/Error/GET-only, 850+ truncate)
+  - 7.3.2b: NotFoundService + admin "404 Kayıtları" liste (filtre/sort) + Temizle (tek + tümü, hard-delete)
+  - 17 yeni test (7 repo + 9 integration + 5 service), 569 total PASSED
+  - "Tek-tık 301 kur" akışı 7.4 Redirect modülüne bırakıldı (bu modülde redirect alanı YOK)
 
 - **✅ Aktivite Logu** — Faz 7.1'de tamamlandı (15.05.2026)
   - AuditLog entity + AuditSaveChangesInterceptor + ICurrentUserAccessor + admin liste/detay
@@ -311,6 +313,17 @@
   Küçükmeriç zaten eşdeğer/üstün — yapılacak bir şey yok
 - Tetik: Faz 6 tamamlanıp site yayına çıktıktan sonra; Faz 7 başında bu
   bölüm sıralı alt-adım planına dönüştürülür
+
+---
+
+## 404 Takibi — UA/Bot Filtresi (opsiyonel iyileştirme)
+
+- **Şu an:** TÜM 404 hit'leri kaydediliyor (bot/crawler dahil). NotFoundLoggingMiddleware (Faz 7.3.2a) UA filtresi UYGULAMIYOR — varsayılan kararı: site sahibi eski URL tarayan Google/Bing crawler'larını da görmek isteyebilir (redirect kurma kararına bilgi).
+- **Sorun çıkarsa:** bot trafiği aggregate tabloyu şişirebilir. Aggregate zaten URL başına tek satır tutuyor (HitCount artar), ama yine de farklı URL'leri tarayan crawler binlerce satır oluşturabilir.
+- **Çözüm yolları (gerekirse):**
+  - User-Agent regex filtresi (örn. `bot|crawler|spider|googlebot|bingbot`) — appsettings veya admin Site Ayarları'nda toggle
+  - 30 günlük TTL otomatik temizlik job — admin "Temizle" tuşunu manuel iş yapıyor şu an
+- **Tetik:** Admin "404 Kayıtları" sayfasında gürültü rahatsız ederse, veya 7.4 Redirect modülünden sonra "hangi URL gerçekten kullanıcı, hangisi crawler" ayrımı önem kazanırsa.
 
 ---
 
