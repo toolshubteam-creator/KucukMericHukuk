@@ -81,7 +81,7 @@ public class RedirectsController : Controller
         {
             Id = dto.Id,
             FromPath = dto.FromPath,
-            ToPath = dto.ToPath,
+            ToPath = dto.ToPath ?? string.Empty,
             StatusCode = dto.StatusCode,
             IsActive = dto.IsActive
         });

@@ -21,4 +21,12 @@ public interface ISlugHistoryRepository
         CancellationToken ct = default);
 
     Task AddAsync(SlugHistory entity, CancellationToken ct = default);
+
+    /// <summary>
+    /// Admin "Yönlendirmeler" birleşik listesi için (Faz 7.4.3a-ek). Keyword
+    /// filter `OldSlug` üzerinde Contains. `CreatedAt DESC` sıralı, tümü döner —
+    /// RedirectService in-memory birleştirme + sayfalama yapar.
+    /// </summary>
+    Task<IReadOnlyList<SlugHistory>> GetFilteredForAdminAsync(
+        string? keyword, CancellationToken ct = default);
 }

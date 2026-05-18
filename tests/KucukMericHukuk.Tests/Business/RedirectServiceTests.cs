@@ -4,6 +4,8 @@ using KucukMericHukuk.Business.Services;
 using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.DTOs.Redirect;
 using KucukMericHukuk.Core.Entities;
+using KucukMericHukuk.Core.Entities.Translations;
+using KucukMericHukuk.Core.Enums;
 using KucukMericHukuk.Core.Interfaces.Services;
 using KucukMericHukuk.DataAccess.Context;
 using KucukMericHukuk.DataAccess.UnitOfWork;
@@ -36,7 +38,7 @@ public class RedirectServiceTests : IDisposable
     private RedirectService CreateSut(AppDbContext context)
     {
         var uow = new UnitOfWork(context);
-        return new RedirectService(uow, _mapper, _cacheMock.Object);
+        return new RedirectService(uow, _mapper, _cacheMock.Object, context);
     }
 
     [Fact]
@@ -193,6 +195,162 @@ public class RedirectServiceTests : IDisposable
 
         result.IsSuccess.Should().BeTrue();
         _cacheMock.Verify(c => c.Invalidate("/silinecek"), Times.Once);
+    }
+
+    // ============= Faz 7.4.3a-ek: Birleşik liste (Manuel + SlugHistory) =============
+
+    [Fact]
+    public async Task GetAdminPagedAsync_NoSourceFilter_ReturnsBothManualAndSlugHistory()
+    {
+        int articleId;
+        await using (var seed = _factory.CreateContext())
+        {
+            seed.Redirects.Add(new Redirect
+            {
+                FromPath = "/manuel-eski",
+                ToPath = "/manuel-yeni",
+                StatusCode = 301,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow.AddMinutes(-10)
+            });
+
+            var article = new Article
+            {
+                Status = ArticleStatus.Published,
+                CreatedAt = DateTime.UtcNow,
+                Translations = new List<ArticleTranslation>
+                {
+                    new() { LanguageCode = "tr-TR", Title = "T", Slug = "guncel-slug", Content = "<p>x</p>", CreatedAt = DateTime.UtcNow }
+                }
+            };
+            seed.Set<Article>().Add(article);
+            await seed.SaveChangesAsync();
+            articleId = article.Id;
+
+            seed.SlugHistories.Add(new SlugHistory
+            {
+                EntityType = SluggedEntityType.Article,
+                EntityId = articleId,
+                LanguageCode = "tr-TR",
+                OldSlug = "eski-makale-slug",
+                CreatedAt = DateTime.UtcNow.AddMinutes(-5)
+            });
+            await seed.SaveChangesAsync();
+        }
+
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var result = await sut.GetAdminPagedAsync(new RedirectQueryDto());
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.TotalCount.Should().Be(2);
+        result.Value.Items.Should().Contain(i => i.Source == RedirectSource.Manual && i.FromPath == "/manuel-eski");
+        result.Value.Items.Should().Contain(i => i.Source == RedirectSource.SlugHistory && i.FromPath == "/tr-TR/Articles/eski-makale-slug");
+
+        var slugItem = result.Value.Items.First(i => i.Source == RedirectSource.SlugHistory);
+        slugItem.ToPath.Should().Be("/tr-TR/Articles/guncel-slug", "SlugHistory satiri current slug ile resolve edilmeli");
+        slugItem.TargetDeleted.Should().BeFalse();
+        slugItem.IsReadOnly.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetAdminPagedAsync_SourceFilterManual_ExcludesSlugHistory()
+    {
+        await using (var seed = _factory.CreateContext())
+        {
+            seed.Redirects.Add(new Redirect
+            {
+                FromPath = "/m", ToPath = "/n", StatusCode = 301, IsActive = true, CreatedAt = DateTime.UtcNow
+            });
+            seed.SlugHistories.Add(new SlugHistory
+            {
+                EntityType = SluggedEntityType.Article, EntityId = 1, LanguageCode = "tr-TR",
+                OldSlug = "skip-this", CreatedAt = DateTime.UtcNow
+            });
+            await seed.SaveChangesAsync();
+        }
+
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var result = await sut.GetAdminPagedAsync(new RedirectQueryDto { Source = RedirectSource.Manual });
+
+        result.Value!.TotalCount.Should().Be(1);
+        result.Value.Items.Should().OnlyContain(i => i.Source == RedirectSource.Manual);
+    }
+
+    [Fact]
+    public async Task GetAdminPagedAsync_SourceFilterSlugHistory_ExcludesManual()
+    {
+        int articleId;
+        await using (var seed = _factory.CreateContext())
+        {
+            seed.Redirects.Add(new Redirect
+            {
+                FromPath = "/m", ToPath = "/n", StatusCode = 301, IsActive = true, CreatedAt = DateTime.UtcNow
+            });
+            var article = new Article
+            {
+                Status = ArticleStatus.Published, CreatedAt = DateTime.UtcNow,
+                Translations = new List<ArticleTranslation> { new() { LanguageCode = "tr-TR", Title = "T", Slug = "yeni", Content = "<p>x</p>", CreatedAt = DateTime.UtcNow } }
+            };
+            seed.Set<Article>().Add(article);
+            await seed.SaveChangesAsync();
+            articleId = article.Id;
+
+            seed.SlugHistories.Add(new SlugHistory
+            {
+                EntityType = SluggedEntityType.Article, EntityId = articleId, LanguageCode = "tr-TR",
+                OldSlug = "skip-manual", CreatedAt = DateTime.UtcNow
+            });
+            await seed.SaveChangesAsync();
+        }
+
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var result = await sut.GetAdminPagedAsync(new RedirectQueryDto { Source = RedirectSource.SlugHistory });
+
+        result.Value!.TotalCount.Should().Be(1);
+        result.Value.Items.Should().OnlyContain(i => i.Source == RedirectSource.SlugHistory);
+    }
+
+    [Fact]
+    public async Task GetAdminPagedAsync_SlugHistoryForSoftDeletedEntity_MarksTargetDeleted()
+    {
+        int articleId;
+        await using (var seed = _factory.CreateContext())
+        {
+            var article = new Article
+            {
+                Status = ArticleStatus.Published,
+                IsDeleted = true,
+                DeletedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
+                Translations = new List<ArticleTranslation> { new() { LanguageCode = "tr-TR", Title = "T", Slug = "silinmis-guncel", Content = "<p>x</p>", CreatedAt = DateTime.UtcNow } }
+            };
+            seed.Set<Article>().Add(article);
+            await seed.SaveChangesAsync();
+            articleId = article.Id;
+
+            seed.SlugHistories.Add(new SlugHistory
+            {
+                EntityType = SluggedEntityType.Article, EntityId = articleId, LanguageCode = "tr-TR",
+                OldSlug = "eski-silinmisin", CreatedAt = DateTime.UtcNow
+            });
+            await seed.SaveChangesAsync();
+        }
+
+        await using var context = _factory.CreateContext();
+        var sut = CreateSut(context);
+
+        var result = await sut.GetAdminPagedAsync(new RedirectQueryDto { Source = RedirectSource.SlugHistory });
+
+        result.Value!.TotalCount.Should().Be(1);
+        var slugItem = result.Value.Items.Single();
+        slugItem.TargetDeleted.Should().BeTrue();
+        slugItem.ToPath.Should().BeNull("soft-deleted parent icin current slug resolve null doner");
     }
 
     [Fact]

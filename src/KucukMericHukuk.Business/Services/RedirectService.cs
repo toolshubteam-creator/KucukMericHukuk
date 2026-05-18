@@ -2,9 +2,12 @@ using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.DTOs.Common;
 using KucukMericHukuk.Core.DTOs.Redirect;
 using KucukMericHukuk.Core.Entities;
+using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Interfaces;
 using KucukMericHukuk.Core.Interfaces.Services;
+using KucukMericHukuk.DataAccess.Context;
 using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace KucukMericHukuk.Business.Services;
 
@@ -19,24 +22,65 @@ public class RedirectService : IRedirectService
     private readonly IUnitOfWork _uow;
     private readonly IMapper _mapper;
     private readonly IRedirectCacheInvalidator _cacheInvalidator;
+    private readonly AppDbContext _db;
 
     public RedirectService(
         IUnitOfWork uow,
         IMapper mapper,
-        IRedirectCacheInvalidator cacheInvalidator)
+        IRedirectCacheInvalidator cacheInvalidator,
+        AppDbContext db)
     {
         _uow = uow;
         _mapper = mapper;
         _cacheInvalidator = cacheInvalidator;
+        // Faz 7.4.3a-ek: birleşik liste SlugHistory satırları için 4 translation
+        // tablosundan current slug resolve. Business katmanı pattern olarak UoW
+        // kullanır; bu istisna admin liste render için tek yerde (RedirectMiddleware
+        // de aynı AppDbContext pattern'i kullanıyor — referans).
+        _db = db;
     }
 
     public async Task<Result<PagedResult<RedirectListDto>>> GetAdminPagedAsync(
         RedirectQueryDto query, CancellationToken ct = default)
     {
-        var paged = await _uow.Redirects.GetAdminPagedAsync(query, ct);
-        var dtos = paged.Items.Select(r => _mapper.Map<RedirectListDto>(r)).ToList();
-        var result = new PagedResult<RedirectListDto>(dtos, paged.TotalCount, paged.PageNumber, paged.PageSize);
-        return Result.Success(result);
+        var page = query.Page < 1 ? 1 : query.Page;
+        var pageSize = query.PageSize is < 1 or > 100 ? 30 : query.PageSize;
+
+        var combined = new List<RedirectListDto>();
+
+        // Manuel kaynak.
+        if (query.Source != RedirectSource.SlugHistory)
+        {
+            var manualQuery = new RedirectQueryDto
+            {
+                Keyword = query.Keyword,
+                IsActive = query.IsActive,
+                Page = 1,
+                PageSize = int.MaxValue
+            };
+            var manual = await _uow.Redirects.GetAdminPagedAsync(manualQuery, ct);
+            combined.AddRange(manual.Items.Select(MapManual));
+        }
+
+        // SlugHistory kaynağı — IsActive=false filtre sadece pasif Manual'i ister, SlugHistory atlanır.
+        if (query.Source != RedirectSource.Manual && query.IsActive != false)
+        {
+            var histories = await _uow.SlugHistories.GetFilteredForAdminAsync(query.Keyword, ct);
+            var resolutions = await ResolveCurrentSlugBatchAsync(histories, ct);
+            foreach (var h in histories)
+            {
+                var key = (h.EntityType, h.EntityId, h.LanguageCode);
+                var currentSlug = resolutions.TryGetValue(key, out var s) ? s : null;
+                combined.Add(MapSlugHistory(h, currentSlug));
+            }
+        }
+
+        // Birleşik sıralama (CreatedAt DESC) + in-memory sayfalama.
+        var sorted = combined.OrderByDescending(c => c.CreatedAt).ToList();
+        var pageItems = sorted.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        return Result.Success(new PagedResult<RedirectListDto>(
+            pageItems, sorted.Count, page, pageSize));
     }
 
     public async Task<Result<RedirectListDto>> GetByIdAsync(int id, CancellationToken ct = default)
@@ -47,7 +91,133 @@ public class RedirectService : IRedirectService
             return Result.Failure<RedirectListDto>(
                 new Error(ErrorCodes.Redirect.NotFound, "Yönlendirme bulunamadı."));
         }
-        return Result.Success(_mapper.Map<RedirectListDto>(entity));
+        return Result.Success(MapManual(entity));
+    }
+
+    private static RedirectListDto MapManual(Redirect r) => new()
+    {
+        Id = r.Id,
+        Source = RedirectSource.Manual,
+        FromPath = r.FromPath,
+        ToPath = r.ToPath,
+        StatusCode = r.StatusCode,
+        IsActive = r.IsActive,
+        HitCount = r.HitCount,
+        LastHitAt = r.LastHitAt,
+        CreatedAt = r.CreatedAt,
+        UpdatedAt = r.UpdatedAt
+    };
+
+    private static RedirectListDto MapSlugHistory(SlugHistory h, string? currentSlug)
+    {
+        var segment = UrlSegmentFor(h.EntityType);
+        // 4 entity (Article/Service/Attorney/Page) URL'ye dönüşür. Category/Tag
+        // route'sız — segment null, FromPath sadece "(Kategori)/eski-slug" gibi
+        // metinsel etiketle gösterilir.
+        var fromPath = segment is null
+            ? $"({h.EntityType})/{h.OldSlug}"
+            : $"/{h.LanguageCode}/{segment}/{h.OldSlug}";
+
+        var targetDeleted = currentSlug is null;
+        var toPath = segment is not null && currentSlug is not null
+            ? $"/{h.LanguageCode}/{segment}/{currentSlug}"
+            : null;
+
+        return new RedirectListDto
+        {
+            Id = h.Id,
+            Source = RedirectSource.SlugHistory,
+            FromPath = fromPath,
+            ToPath = toPath,
+            StatusCode = 301,
+            IsActive = true,
+            HitCount = 0,
+            LastHitAt = null,
+            CreatedAt = h.CreatedAt,
+            UpdatedAt = null,
+            EntityType = h.EntityType,
+            EntityId = h.EntityId,
+            LanguageCode = h.LanguageCode,
+            TargetDeleted = targetDeleted
+        };
+    }
+
+    /// <summary>
+    /// Path map'i — RedirectMiddleware'in `TryParseSluggedPath` regex'i ile aynı 4
+    /// segment. Category/Tag URL route'a sahip değil (filtre olarak görünür),
+    /// SlugHistory satırlarında "—" gösterilir.
+    /// </summary>
+    private static string? UrlSegmentFor(SluggedEntityType type) => type switch
+    {
+        SluggedEntityType.Article => "Articles",
+        SluggedEntityType.Page => "Pages",
+        SluggedEntityType.Service => "Services",
+        SluggedEntityType.Attorney => "Attorneys",
+        _ => null
+    };
+
+    /// <summary>
+    /// 4 translation tablosu üzerinden (EntityType, EntityId, Lang) → current slug
+    /// batch lookup. AppDbContext global query filter parent IsDeleted=true'leri
+    /// gizler → soft-deleted entity dict'e gelmez → caller `TargetDeleted=true`
+    /// olarak işaretler. Her entity tipi için ayrı query (max 4 query toplam) —
+    /// N+1 yok.
+    /// </summary>
+    private async Task<Dictionary<(SluggedEntityType, int, string), string?>> ResolveCurrentSlugBatchAsync(
+        IReadOnlyList<SlugHistory> histories, CancellationToken ct)
+    {
+        var result = new Dictionary<(SluggedEntityType, int, string), string?>();
+        if (histories.Count == 0) return result;
+
+        foreach (var group in histories.GroupBy(h => h.EntityType))
+        {
+            var ids = group.Select(h => h.EntityId).ToHashSet();
+            var langs = group.Select(h => h.LanguageCode).ToHashSet();
+
+            switch (group.Key)
+            {
+                case SluggedEntityType.Article:
+                    var aRows = await _db.Set<ArticleTranslation>()
+                        .AsNoTracking()
+                        .Where(t => ids.Contains(t.ArticleId) && langs.Contains(t.LanguageCode))
+                        .Select(t => new { EntityId = t.ArticleId, t.LanguageCode, t.Slug })
+                        .ToListAsync(ct);
+                    foreach (var r in aRows) result[(SluggedEntityType.Article, r.EntityId, r.LanguageCode)] = r.Slug;
+                    break;
+
+                case SluggedEntityType.Page:
+                    var pRows = await _db.Set<PageTranslation>()
+                        .AsNoTracking()
+                        .Where(t => ids.Contains(t.PageId) && langs.Contains(t.LanguageCode))
+                        .Select(t => new { EntityId = t.PageId, t.LanguageCode, t.Slug })
+                        .ToListAsync(ct);
+                    foreach (var r in pRows) result[(SluggedEntityType.Page, r.EntityId, r.LanguageCode)] = r.Slug;
+                    break;
+
+                case SluggedEntityType.Service:
+                    var sRows = await _db.Set<ServiceTranslation>()
+                        .AsNoTracking()
+                        .Where(t => ids.Contains(t.ServiceId) && langs.Contains(t.LanguageCode))
+                        .Select(t => new { EntityId = t.ServiceId, t.LanguageCode, t.Slug })
+                        .ToListAsync(ct);
+                    foreach (var r in sRows) result[(SluggedEntityType.Service, r.EntityId, r.LanguageCode)] = r.Slug;
+                    break;
+
+                case SluggedEntityType.Attorney:
+                    var atRows = await _db.Set<AttorneyTranslation>()
+                        .AsNoTracking()
+                        .Where(t => ids.Contains(t.AttorneyId) && langs.Contains(t.LanguageCode))
+                        .Select(t => new { EntityId = t.AttorneyId, t.LanguageCode, t.Slug })
+                        .ToListAsync(ct);
+                    foreach (var r in atRows) result[(SluggedEntityType.Attorney, r.EntityId, r.LanguageCode)] = r.Slug;
+                    break;
+
+                // Category/Tag: URL route'sız — resolve atlanır, FromPath etiket olarak gösterilir.
+                default: break;
+            }
+        }
+
+        return result;
     }
 
     public async Task<Result<int>> CreateAsync(RedirectFormDto input, CancellationToken ct = default)
