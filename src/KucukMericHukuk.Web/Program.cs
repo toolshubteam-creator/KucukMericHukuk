@@ -328,6 +328,11 @@ var localizationOptions = app.Services
     .GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
 app.UseRequestLocalization(localizationOptions);
 
+// Faz 7.4.2: URL yönlendirme — NotFoundLogging'den ÖNCE konumlanır. Redirect bulunan
+// URL controller'a hiç ulaşmaz → 404 üretilmez, NotFoundLog'a düşmez (7.3 çakışma sıfır).
+// Lookup: Redirects.FromPath (manuel) → SlugHistories (otomatik) → next().
+app.UseMiddleware<RedirectMiddleware>();
+
 // Faz 7.3.2: 404 logging — UseStatusCodePagesWithReExecute'den ÖNCE konumlanir.
 // Tek-pass çalışır (re-execute StatusCodePages'ten SONRAKI pipeline'i tekrarlar,
 // bu middleware'i değil). await _next sonrası IStatusCodeReExecuteFeature set'li
