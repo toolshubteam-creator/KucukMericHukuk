@@ -157,18 +157,37 @@
                             <td>@n.FirstSeenAt.ToString("dd.MM.yyyy HH:mm")</td>
                             <td>@n.LastSeenAt.ToString("dd.MM.yyyy HH:mm")</td>
                             <td>
-                                <form asp-action="PurgeOne" asp-controller="NotFoundLogs" asp-area="Admin"
-                                      asp-route-id="@n.Id" method="post"
-                                      data-confirm="Bu kayıt silinecek. Devam edilsin mi?"
-                                      data-confirm-title="Kaydı sil?"
-                                      data-confirm-button="Evet, sil"
-                                      data-confirm-variant="danger"
-                                      class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
-                                        <i class="ti ti-trash"></i>
+                                <div class="btn-list flex-nowrap">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary"
+                                            title="Redirect Kur"
+                                            data-notfound-redirect
+                                            data-notfound-id="@n.Id"
+                                            data-notfound-url="@n.Url">
+                                        <i class="ti ti-arrow-forward"></i>
                                     </button>
-                                </form>
+                                    <form asp-action="PurgeOne" asp-controller="NotFoundLogs" asp-area="Admin"
+                                          asp-route-id="@n.Id" method="post"
+                                          data-confirm="Bu kayıt silinecek. Devam edilsin mi?"
+                                          data-confirm-title="Kaydı sil?"
+                                          data-confirm-button="Evet, sil"
+                                          data-confirm-variant="danger"
+                                          class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Sil">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </form>
+                                    @* Faz 7.4.3b: SweetAlert promptu doldurunca bu hidden form gonderilir. *@
+                                    <form asp-action="CreateRedirect" asp-controller="NotFoundLogs" asp-area="Admin"
+                                          asp-route-id="@n.Id" method="post"
+                                          class="d-none"
+                                          data-redirect-form-for="@n.Id">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="toPath" />
+                                        <input type="hidden" name="statusCode" value="301" />
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -188,3 +207,7 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script src="~/js/admin/notfound-redirect.js" asp-append-version="true" nonce="@Context.Items["csp-nonce"]"></script>
+}

@@ -303,9 +303,9 @@
 - **🔄 Redirect modülü** — Faz 7.4'te devam ediyor
   - ✅ 7.4.1 (18.05.2026): Redirect + SlugHistory entity + repo + migration
   - ✅ 7.4.2 (18.05.2026): RedirectMiddleware (pipeline NotFoundLogging'den önce) + IMemoryCache + POC
-  - ✅ 7.4.3a (18.05.2026): SlugHistoryService + 6 servis update kanca (Article pilot + Page/Service/Attorney/Category/Tag) + RedirectController admin CRUD + insert-time cycle validation (max 10 hop) + AJAX loop-check + cache invalidation
-  - 🔄 7.4.3b (kalan): NotFoundLog → "Redirect Kur" tek-tık köprü (7.3↔7.4 birleşme)
-  - 🔄 7.4.4 (kalan): Faz 7.4 kapanış (DEFERRED + PROGRESS senkron)
+  - ✅ 7.4.3a (18.05.2026): SlugHistoryService + 6 servis update kanca (Article pilot + Page/Service/Attorney/Category/Tag) + RedirectController admin CRUD + insert-time cycle validation (max 10 hop) + AJAX loop-check + cache invalidation + Yönlendirmeler birleşik liste (Manuel + SlugHistory Tür kolonu)
+  - ✅ 7.4.3b (18.05.2026): NotFoundLog → "Redirect Kur" tek-tık köprü (7.3↔7.4 birleşme tamam) — SweetAlert2 input modal, başarıda 404 satırı çözüldü silinir
+  - 🔄 7.4.4 (kalan): Faz 7.4 kapanış (DEFERRED + PROGRESS final senkron)
 
 ### Notlar
 
