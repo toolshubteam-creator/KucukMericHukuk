@@ -290,7 +290,7 @@
 
 ### Grup B — Dış API entegrasyonu (Hafriyat'ta HİÇ YOK — sıfırdan + müşteri-bağımlı)
 
-- **✅ Ortak Google altyapı** — Faz 7.5'te tamamlandı (19.05.2026): Google.Apis.Auth + `IGoogleApiClient` + credential okuma + SiteSettings Google Entegrasyonu tab
+- **✅ Ortak Google altyapı** — Faz 7.5'te tamamlandı (19.05.2026): Google.Apis.Auth + `IGoogleApiClient` + credential okuma + SiteSettings Google API Ayarları tab
 - **GA4 Data API widget** — Faz 7.6; Property ID boş-state + veri çekme
 - **Search Console API widget** — Faz 7.7; Site URL boş-state + veri çekme
 - **PageSpeed Insights widget** — Faz 7 kapsamı dışı (kullanıcı kararı; PROGRESS.md karar notu)
