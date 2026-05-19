@@ -41,7 +41,7 @@ DEFERRED'daki "Faz 7 → Admin Zenginleştirme" maddesinin (6.22-keşif raporund
 | ✅ 7.2b-1 | Bülten altyapısı (NewsletterJob entity + Article.NewsletterSentAt flag + mail HTML şablonu + admin "Bülten" modülü: bekleyen liste + gönderim geçmişi + önizleme; migration backfill mevcut makaleleri "gönderildi" sayar; gönderim 7.2b-2'de) | 7.2a | — | ~1 alt-adım |
 | ✅ 7.2b-2 | Bülten gönderim motoru (NewsletterService.ProcessJobAsync + NewsletterDispatcher Task.Run + abone-bazlı try/catch + SMTP rate limit her 10 mailde 1500ms + Article.NewsletterSentAt set Completed, Failed'da SET ETMEZ) | 7.2b-1 | — | ~1 alt-adım |
 | ✅ 7.3 | 404 Takibi — Tam tamamlandı (Faz 7.3.1 + 7.3.2a + 7.3.2b, 18.05.2026) | — | YOK, sıfırdan | ~3 alt-adım |
-| 🔄 7.4 | Redirect modülü — 7.4.1 + 7.4.2 + 7.4.3a + 7.4.3b ✅ (18.05.2026); 7.4.4 (kapanış) kaldı | 7.3 | Var, iyi referans, middleware mantığı düz adapte | ~2-3 alt-adım |
+| ✅ 7.4 | Redirect modülü — Tam tamamlandı (7.4.1 altyapı + 7.4.2 middleware + 7.4.3a slug entegrasyon/admin + 7.4.3b 404→Redirect köprü + 7.4.4 kapanış, 19.05.2026) | 7.3 | Var, iyi referans, middleware mantığı düz adapte | ~2-3 alt-adım |
 | 7.5 | Grup B ortak altyapı (Google.Apis NuGet + credential okuma + `IGoogleApiClient` + admin Site Ayarları → Google entegrasyon tab) | — | YOK, sıfırdan | ~2 alt-adım |
 | 7.6 | GA4 Data API widget (dashboard) — Property ID boş-state, domain gelince configure | 7.5 | YOK | ~2 alt-adım |
 | 7.7 | Search Console API widget (dashboard) — Site URL boş-state | 7.5 | YOK | ~2 alt-adım |
@@ -54,6 +54,7 @@ DEFERRED'daki "Faz 7 → Admin Zenginleştirme" maddesinin (6.22-keşif raporund
 - **Grup B (GA4 + Search Console) domain-bağımsız geliştirilir.** Property ID / Site URL admin panelde boş bırakılabilir, widget "Yapılandırılmamış" boş-state gösterir. Domain hazır olunca `toolshubteam@gmail.com` ile Google Cloud setup yapılır, ID'ler girilir.
 - **Hafriyat klonu kalıcı tutulmuyor** — yapı bilgisi yeterli, gerekirse spot-check.
 - **Sıralama bağımlılık tabanlı:** 7.1 audit infra önce (sonraki adımlar otomatik log'lanır), 7.3-7.4 birlikte (404 → Redirect zinciri), 7.5 Grup B ortak altyapı önce, 7.6-7.7 ona bağlı.
+- **Redirect modülü kapandı.** 7.4.1-7.4.3b PR #51-#54 zinciriyle develop'a merge edildi; 7.4.4 doc-sync ile DEFERRED/PROGRESS/CLAUDE durumları senkronlandı. `SluggedEntityType` enum organizasyonu `Core/Common/SluggedEntityType.cs` altında teyit edildi.
 
 ### Faz 7 Sonu Hedefleri
 
