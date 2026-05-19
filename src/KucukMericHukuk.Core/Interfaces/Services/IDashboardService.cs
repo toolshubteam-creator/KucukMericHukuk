@@ -17,4 +17,6 @@ public interface IDashboardService
     Task<SiteSummaryWidgetDto> GetSiteSummaryAsync(CancellationToken ct = default);
 
     Task<GoogleAnalyticsDashboardWidgetDto> GetGoogleAnalyticsWidgetAsync(CancellationToken ct = default);
+
+    Task<GoogleSearchConsoleDashboardWidgetDto> GetSearchConsoleWidgetAsync(CancellationToken ct = default);
 }

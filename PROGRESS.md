@@ -44,7 +44,7 @@ DEFERRED'daki "Faz 7 → Admin Zenginleştirme" maddesinin (6.22-keşif raporund
 | ✅ 7.4 | Redirect modülü — Tam tamamlandı (7.4.1 altyapı + 7.4.2 middleware + 7.4.3a slug entegrasyon/admin + 7.4.3b 404→Redirect köprü + 7.4.4 kapanış, 19.05.2026) | 7.3 | Var, iyi referans, middleware mantığı düz adapte | ~2-3 alt-adım |
 | ✅ 7.5 | Grup B ortak altyapı — Google.Apis.Auth 1.74.0 + credential okuma (`IGoogleApiClient`) + admin Site Ayarları → Google API Ayarları tab (19.05.2026) | — | YOK, sıfırdan | ~2 alt-adım |
 | ✅ 7.6 | GA4 Data API widget (dashboard) — Google.Apis.AnalyticsData.v1beta + son 28 gün metrik kartı + Property ID/credential boş-state (19.05.2026) | 7.5 | YOK | ~2 alt-adım |
-| 7.7 | Search Console API widget (dashboard) — Site URL boş-state | 7.5 | YOK | ~2 alt-adım |
+| ✅ 7.7 | Search Console API widget (dashboard) — Google.Apis.SearchConsole.v1 + son 28 gün organik arama metrik kartı + Site URL/credential boş-state (19.05.2026) | 7.5 | YOK | ~2 alt-adım |
 | 7.8 | Faz 7 kapanış — doc senkron + DEFERRED temizlik + Faz 6 ile birlikte tag `v0.7.0` hazırlığı | tüm | — | ~1 alt-adım |
 
 ### Önemli Kararlar
@@ -57,6 +57,7 @@ DEFERRED'daki "Faz 7 → Admin Zenginleştirme" maddesinin (6.22-keşif raporund
 - **Redirect modülü kapandı.** 7.4.1-7.4.3b PR #51-#54 zinciriyle develop'a merge edildi; 7.4.4 doc-sync ile DEFERRED/PROGRESS/CLAUDE durumları senkronlandı. `SluggedEntityType` enum organizasyonu `Core/Common/SluggedEntityType.cs` altında teyit edildi.
 - **Google ortak altyapı kapandı.** `GoogleIntegrationOptions`, `IGoogleApiClient`, `GoogleApiClient`, SiteSettings `GoogleIntegration` grubu ve admin "Google API Ayarları" tab'ı eklendi. Credential kaynak önceliği: config/env JSON → config/env base64 → config/env dosya yolu → DB SiteSettings JSON.
 - **GA4 dashboard widget kapandı.** Admin Kontrol Paneli'ne son 28 gün için aktif kullanıcı, yeni kullanıcı, oturum, sayfa görüntüleme ve etkinlik metrikleri eklendi. `GoogleAnalyticsPropertyId` veya credential yoksa kart güvenli boş-state gösterir; domain/Google Cloud hazır olduğunda ayarlar girilerek veri çekmeye başlar.
+- **Search Console dashboard widget kapandı.** Admin Kontrol Paneli'ne son 28 gün için organik tıklama, gösterim, CTR ve ortalama pozisyon metrikleri eklendi. `GoogleSearchConsoleSiteUrl` veya credential yoksa kart güvenli boş-state gösterir; service account Search Console property'ye yetkilendirilince veri çekmeye başlar.
 
 ### Faz 7 Sonu Hedefleri
 

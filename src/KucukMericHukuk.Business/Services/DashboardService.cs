@@ -16,15 +16,18 @@ public class DashboardService : IDashboardService
     private readonly IUnitOfWork _uow;
     private readonly IMapper _mapper;
     private readonly IGoogleAnalyticsService _googleAnalyticsService;
+    private readonly IGoogleSearchConsoleService _googleSearchConsoleService;
 
     public DashboardService(
         IUnitOfWork uow,
         IMapper mapper,
-        IGoogleAnalyticsService googleAnalyticsService)
+        IGoogleAnalyticsService googleAnalyticsService,
+        IGoogleSearchConsoleService googleSearchConsoleService)
     {
         _uow = uow;
         _mapper = mapper;
         _googleAnalyticsService = googleAnalyticsService;
+        _googleSearchConsoleService = googleSearchConsoleService;
     }
 
     public async Task<RecentArticlesWidgetDto> GetRecentArticlesAsync(
@@ -64,6 +67,18 @@ public class DashboardService : IDashboardService
             : new GoogleAnalyticsDashboardWidgetDto
             {
                 Message = result.FirstError?.Message ?? "GA4 verisi alınamadı.",
+            };
+    }
+
+    public async Task<GoogleSearchConsoleDashboardWidgetDto> GetSearchConsoleWidgetAsync(
+        CancellationToken ct = default)
+    {
+        var result = await _googleSearchConsoleService.GetDashboardWidgetAsync(ct);
+        return result.IsSuccess
+            ? result.Value
+            : new GoogleSearchConsoleDashboardWidgetDto
+            {
+                Message = result.FirstError?.Message ?? "Search Console verisi alınamadı.",
             };
     }
 }

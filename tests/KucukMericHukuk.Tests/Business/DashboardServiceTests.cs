@@ -33,7 +33,8 @@ public class DashboardServiceTests : IDisposable
 
     private DashboardService CreateSut(
         AppDbContext context,
-        IGoogleAnalyticsService? googleAnalyticsService = null)
+        IGoogleAnalyticsService? googleAnalyticsService = null,
+        IGoogleSearchConsoleService? googleSearchConsoleService = null)
     {
         if (googleAnalyticsService is null)
         {
@@ -44,7 +45,20 @@ public class DashboardServiceTests : IDisposable
             googleAnalyticsService = googleAnalytics.Object;
         }
 
-        return new DashboardService(new UnitOfWork(context), _mapper, googleAnalyticsService);
+        if (googleSearchConsoleService is null)
+        {
+            var searchConsole = new Mock<IGoogleSearchConsoleService>();
+            searchConsole
+                .Setup(s => s.GetDashboardWidgetAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Result.Success(new GoogleSearchConsoleDashboardWidgetDto()));
+            googleSearchConsoleService = searchConsole.Object;
+        }
+
+        return new DashboardService(
+            new UnitOfWork(context),
+            _mapper,
+            googleAnalyticsService,
+            googleSearchConsoleService);
     }
 
     private static void SeedArticle(
@@ -177,6 +191,45 @@ public class DashboardServiceTests : IDisposable
 
         result.IsConfigured.Should().BeFalse();
         result.Message.Should().Be("GA4 okunamadı.");
+    }
+
+    [Fact]
+    public async Task GetSearchConsoleWidgetAsync_ReturnsSearchConsoleServiceValue()
+    {
+        await using var context = _factory.CreateContext();
+        var searchConsole = new Mock<IGoogleSearchConsoleService>();
+        searchConsole
+            .Setup(s => s.GetDashboardWidgetAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success(new GoogleSearchConsoleDashboardWidgetDto
+            {
+                IsConfigured = true,
+                SiteUrl = "https://example.com/",
+                Clicks = 42,
+            }));
+
+        var sut = CreateSut(context, googleSearchConsoleService: searchConsole.Object);
+        var result = await sut.GetSearchConsoleWidgetAsync();
+
+        result.IsConfigured.Should().BeTrue();
+        result.SiteUrl.Should().Be("https://example.com/");
+        result.Clicks.Should().Be(42);
+    }
+
+    [Fact]
+    public async Task GetSearchConsoleWidgetAsync_ServiceFailure_ReturnsSafeEmptyWidget()
+    {
+        await using var context = _factory.CreateContext();
+        var searchConsole = new Mock<IGoogleSearchConsoleService>();
+        searchConsole
+            .Setup(s => s.GetDashboardWidgetAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Failure<GoogleSearchConsoleDashboardWidgetDto>(
+                new Error(ErrorCodes.GoogleIntegration.ReportRequestFailed, "Search Console okunamadı.")));
+
+        var sut = CreateSut(context, googleSearchConsoleService: searchConsole.Object);
+        var result = await sut.GetSearchConsoleWidgetAsync();
+
+        result.IsConfigured.Should().BeFalse();
+        result.Message.Should().Be("Search Console okunamadı.");
     }
 
     public void Dispose() => _factory.Dispose();

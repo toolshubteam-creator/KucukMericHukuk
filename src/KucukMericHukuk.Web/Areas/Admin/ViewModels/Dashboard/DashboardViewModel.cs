@@ -10,4 +10,5 @@ public class DashboardViewModel
     public RecentArticlesWidgetDto Articles { get; init; } = new();
     public SiteSummaryWidgetDto SiteSummary { get; init; } = new();
     public GoogleAnalyticsDashboardWidgetDto GoogleAnalytics { get; init; } = new();
+    public GoogleSearchConsoleDashboardWidgetDto SearchConsole { get; init; } = new();
 }

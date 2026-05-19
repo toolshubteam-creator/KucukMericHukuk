@@ -41,6 +41,8 @@ public static class DependencyInjection
         services.AddScoped<IGoogleApiClient, GoogleApiClient>();
         services.AddScoped<IAnalyticsDataReportClient, AnalyticsDataReportClient>();
         services.AddScoped<IGoogleAnalyticsService, GoogleAnalyticsService>();
+        services.AddScoped<ISearchConsoleReportClient, SearchConsoleReportClient>();
+        services.AddScoped<IGoogleSearchConsoleService, GoogleSearchConsoleService>();
 
         return services;
     }

@@ -292,11 +292,11 @@
 
 - **✅ Ortak Google altyapı** — Faz 7.5'te tamamlandı (19.05.2026): Google.Apis.Auth + `IGoogleApiClient` + credential okuma + SiteSettings Google API Ayarları tab
 - **✅ GA4 Data API widget** — Faz 7.6'da tamamlandı (19.05.2026): `Google.Apis.AnalyticsData.v1beta` + dashboard son 28 gün metrik kartı + Property ID/credential boş-state
-- **Search Console API widget** — Faz 7.7; Site URL boş-state + veri çekme
+- **✅ Search Console API widget** — Faz 7.7'de tamamlandı (19.05.2026): `Google.Apis.SearchConsole.v1` + dashboard son 28 gün organik arama metrik kartı + Site URL/credential boş-state
 - **PageSpeed Insights widget** — Faz 7 kapsamı dışı (kullanıcı kararı; PROGRESS.md karar notu)
 - Ortak blocker: Google Cloud projesi ve service account yetkileri — müşteri tarafı kurulum gerektirir
 - Hafriyat'ta adapte edilecek kaynak kod SIFIR — tamamı yeni entegrasyon
-- 7.7 için Google API specific NuGet paketi ilgili adımda eklenir (`Google.Apis.SearchConsole.v1`)
+- 7.6/7.7 Google API paketleri eklendi (`Google.Apis.AnalyticsData.v1beta`, `Google.Apis.SearchConsole.v1`)
 
 ### Grup C — Yönlendirmeler (Küçükmeriç'te HİÇ YOK — sıfırdan, Hafriyat iyi referans)
 
