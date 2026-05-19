@@ -135,6 +135,13 @@ public static class ErrorCodes
         public const string GroupNotFound = "SiteSetting.GroupNotFound";
     }
 
+    public static class GoogleIntegration
+    {
+        public const string CredentialMissing = "GoogleIntegration.CredentialMissing";
+        public const string CredentialInvalid = "GoogleIntegration.CredentialInvalid";
+        public const string TokenRequestFailed = "GoogleIntegration.TokenRequestFailed";
+    }
+
     public static class User
     {
         public const string NotFound = "User.NotFound";

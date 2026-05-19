@@ -271,5 +271,26 @@ public class SiteSettingsServiceTests : IDisposable
         result.Value.First(g => g.Group == "Integration").Settings.Should().HaveCount(1);
     }
 
+    [Fact]
+    public async Task GetGroupedAsync_ReturnsGroupsInAdminTabOrder()
+    {
+        await using var context = _factory.CreateContext();
+        await SeedAsync(context,
+            Build("GoogleAnalyticsPropertyId", null, SiteSettingKeys.Groups.GoogleIntegration),
+            Build("GoogleAnalyticsId", null, SiteSettingKeys.Groups.Integration),
+            Build("DefaultOgImage", null, SiteSettingKeys.Groups.Seo),
+            Build("Name", "X", SiteSettingKeys.Groups.SiteInfo));
+
+        var sut = CreateSut(context);
+        var result = await sut.GetGroupedAsync();
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Select(g => g.Group).Should().ContainInOrder(
+            SiteSettingKeys.Groups.SiteInfo,
+            SiteSettingKeys.Groups.Seo,
+            SiteSettingKeys.Groups.Integration,
+            SiteSettingKeys.Groups.GoogleIntegration);
+    }
+
     public void Dispose() => _factory.Dispose();
 }

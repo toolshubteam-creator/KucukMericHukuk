@@ -290,13 +290,13 @@
 
 ### Grup B — Dış API entegrasyonu (Hafriyat'ta HİÇ YOK — sıfırdan + müşteri-bağımlı)
 
-- **GA4 Data API widget** — Google.Apis.AnalyticsData.v1beta + OAuth/service account
-- **Search Console API widget** — Google.Apis.SearchConsole.v1
-- **PageSpeed Insights widget** — PageSpeed API key + per-URL job
-- Ortak blocker: Google Cloud projesi, OAuth client veya service account,
-  API key/quota — müşteri tarafı kurulum gerektirir
+- **✅ Ortak Google altyapı** — Faz 7.5'te tamamlandı (19.05.2026): Google.Apis.Auth + `IGoogleApiClient` + credential okuma + SiteSettings Google Entegrasyonu tab
+- **GA4 Data API widget** — Faz 7.6; Property ID boş-state + veri çekme
+- **Search Console API widget** — Faz 7.7; Site URL boş-state + veri çekme
+- **PageSpeed Insights widget** — Faz 7 kapsamı dışı (kullanıcı kararı; PROGRESS.md karar notu)
+- Ortak blocker: Google Cloud projesi ve service account yetkileri — müşteri tarafı kurulum gerektirir
 - Hafriyat'ta adapte edilecek kaynak kod SIFIR — tamamı yeni entegrasyon
-- Tahmini: büyük, ayrı bir entegrasyon paketi
+- 7.6/7.7 için Google API specific NuGet paketleri ilgili adımda eklenir (`Google.Apis.AnalyticsData.v1beta`, `Google.Apis.SearchConsole.v1`)
 
 ### Grup C — Yönlendirmeler (Küçükmeriç'te HİÇ YOK — sıfırdan, Hafriyat iyi referans)
 

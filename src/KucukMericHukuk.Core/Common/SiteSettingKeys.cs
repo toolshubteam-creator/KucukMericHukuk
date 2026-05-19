@@ -11,6 +11,7 @@ public static class SiteSettingKeys
         public const string SiteInfo = "SiteInfo";
         public const string Seo = "Seo";
         public const string Integration = "Integration";
+        public const string GoogleIntegration = "GoogleIntegration";
     }
 
     public static class DataTypes
@@ -53,4 +54,9 @@ public static class SiteSettingKeys
     public const string GoogleTagManagerId = "GoogleTagManagerId";
     public const string MicrosoftClarityId = "MicrosoftClarityId";
     public const string FacebookPixelId = "FacebookPixelId";
+
+    // GoogleIntegration group - GA4/Search Console dashboard widget'lari icin Faz 7.5 ortak altyapi.
+    public const string GoogleAnalyticsPropertyId = "GoogleAnalyticsPropertyId";
+    public const string GoogleSearchConsoleSiteUrl = "GoogleSearchConsoleSiteUrl";
+    public const string GoogleServiceAccountJson = "GoogleServiceAccountJson";
 }

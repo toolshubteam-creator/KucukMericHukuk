@@ -174,6 +174,11 @@ public class DbInitializer : IDbInitializer
             (SiteSettingKeys.GoogleTagManagerId, SiteSettingKeys.Groups.Integration, SiteSettingKeys.DataTypes.String, "GTM container ID (GTM-XXXXXXX).", 2),
             (SiteSettingKeys.MicrosoftClarityId, SiteSettingKeys.Groups.Integration, SiteSettingKeys.DataTypes.String, "Microsoft Clarity project ID.", 3),
             (SiteSettingKeys.FacebookPixelId, SiteSettingKeys.Groups.Integration, SiteSettingKeys.DataTypes.String, "Facebook Pixel ID.", 4),
+
+            // GoogleIntegration group
+            (SiteSettingKeys.GoogleAnalyticsPropertyId, SiteSettingKeys.Groups.GoogleIntegration, SiteSettingKeys.DataTypes.String, "GA4 Data API property ID (sadece sayısal ID; G- measurement ID değil).", 1),
+            (SiteSettingKeys.GoogleSearchConsoleSiteUrl, SiteSettingKeys.Groups.GoogleIntegration, SiteSettingKeys.DataTypes.String, "Search Console site URL (örn. https://kucukmerichukuk.av.tr/ veya sc-domain:kucukmerichukuk.av.tr).", 2),
+            (SiteSettingKeys.GoogleServiceAccountJson, SiteSettingKeys.Groups.GoogleIntegration, SiteSettingKeys.DataTypes.Text, "Service account JSON. Boş bırakılırsa GoogleIntegration__ServiceAccountJson/Base64/FilePath env-var kaynakları denenir.", 3),
         };
 
         var addedCount = 0;

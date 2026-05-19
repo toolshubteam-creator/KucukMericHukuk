@@ -53,7 +53,8 @@ public class SiteSettingsService : ISiteSettingsService
         var settings = await _uow.SiteSettings.GetAllOrderedAsync(ct);
         var grouped = settings
             .GroupBy(s => s.Group)
-            .OrderBy(g => g.Key)
+            .OrderBy(g => GetGroupOrder(g.Key))
+            .ThenBy(g => g.Key)
             .Select(g => new SiteSettingGroupDto
             {
                 Group = g.Key,
@@ -122,4 +123,13 @@ public class SiteSettingsService : ISiteSettingsService
         _cache.Set(CacheKeyAll, ro, CacheTtl);
         return ro;
     }
+
+    private static int GetGroupOrder(string group) => group switch
+    {
+        SiteSettingKeys.Groups.SiteInfo => 1,
+        SiteSettingKeys.Groups.Seo => 2,
+        SiteSettingKeys.Groups.Integration => 3,
+        SiteSettingKeys.Groups.GoogleIntegration => 4,
+        _ => 99
+    };
 }

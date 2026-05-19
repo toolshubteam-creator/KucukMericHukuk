@@ -42,7 +42,9 @@ public class SiteSettingsController : Controller
         {
             Groups = result.Value,
             ActiveGroup = string.IsNullOrWhiteSpace(activeGroup)
-                ? (result.Value.FirstOrDefault()?.Group ?? "SiteInfo")
+                ? (result.Value.Any(g => g.Group == SiteSettingKeys.Groups.SiteInfo)
+                    ? SiteSettingKeys.Groups.SiteInfo
+                    : result.Value.FirstOrDefault()?.Group ?? SiteSettingKeys.Groups.SiteInfo)
                 : activeGroup
         };
 
