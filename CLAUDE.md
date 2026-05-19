@@ -409,7 +409,7 @@ Integration test'lerde `IntegrationTestFactory` `SecurePolicy.SameAsRequest`'e i
 
 ## 11. Faz Durumu
 
-**Mevcut Faz:** Faz 7 — Admin Zenginleştirme (🔄 devam ediyor) + Faz 6 deploy bekliyor (kod-tamamlandı). Faz 7 alt-adımları: 7.1 Aktivite Logu ✅, 7.2 Aboneler+Bülten ✅, 7.3 404 Takibi ✅, 7.4 Redirect ✅, 7.5 Grup B altyapı ✅, 7.6 GA4, 7.7 Search Console, 7.8 kapanış.
+**Mevcut Faz:** Faz 7 — Admin Zenginleştirme (🔄 devam ediyor) + Faz 6 deploy bekliyor (kod-tamamlandı). Faz 7 alt-adımları: 7.1 Aktivite Logu ✅, 7.2 Aboneler+Bülten ✅, 7.3 404 Takibi ✅, 7.4 Redirect ✅, 7.5 Grup B altyapı ✅, 7.6 GA4 ✅, 7.7 Search Console, 7.8 kapanış.
 
 - ✅ **Faz 1 — Proje Kurulumu & Mimari** tamamlandı (05.05.2026): 5 katmanlı solution, BaseEntity + Identity, 6 domain entity + translation, Generic Repository + UoW + 6 özel repository, 24 DTO + 6 Mapster mapping config, çok dilli altyapı, 11 test PASSED
 - ✅ **Faz 2 — Yönetim Paneli (Admin CMS)** tamamlandı (06.05.2026, tag `v0.2.0`): 5 modül full CRUD (Page/Tag/Service/Category/Attorney), cookie auth + 3 rol seed, FluentValidation server+client side, SweetAlert2 + Quill + Tabler 1.4.0, integration test altyapısı, **180/180 test PASSED** (167 birim + 13 integration), 29 commit
@@ -417,7 +417,7 @@ Integration test'lerde `IntegrationTestFactory` `SecurePolicy.SameAsRequest`'e i
 - ✅ **Faz 4 — Frontend (Tasarım & Geliştirme)** tamamlandı (09.05.2026, tag `v0.4.0`): 17 public sayfa + responsive + SEO temelleri + KVKK uyumlu iletişim formu + custom 404, Faq + ContactMessage entity, 231/231 test PASSED (208 birim + 23 integration)
 - ✅ **Faz 5 — SEO, Güvenlik, Admin Geri Dönüşleri** tamamlandı (11.05.2026, tag `v0.5.0`): meta tag + JSON-LD + sitemap + breadcrumb, CDN SRI + Turnstile + RateLimit + global exception middleware + security headers, Faq admin CRUD + ContactMessages liste UI, 275/275 test PASSED (246 birim + 29 integration)
 - 🔄 **Faz 6 — Test, Düzeltme, Yayına Hazırlık** devam ediyor (6.1–6.25 tamam, 474/474 test, 6.26 deploy bekliyor)
-- 🔄 **Faz 7 — Admin Zenginleştirme** devam ediyor (7.1 Aktivite Logu + 7.1.2 Translation merge + 7.2 Aboneler+Bülten tam + 7.3 404 Takibi tam + 7.4 Redirect tam + 7.5 Google ortak altyapı tam; 7.6-7.8 sırada)
+- 🔄 **Faz 7 — Admin Zenginleştirme** devam ediyor (7.1 Aktivite Logu + 7.1.2 Translation merge + 7.2 Aboneler+Bülten tam + 7.3 404 Takibi tam + 7.4 Redirect tam + 7.5 Google ortak altyapı tam + 7.6 GA4 dashboard widget tam; 7.7-7.8 sırada)
 
 Faz tamamlama detayları için `PROGRESS.md` dosyasına bakınız.
 

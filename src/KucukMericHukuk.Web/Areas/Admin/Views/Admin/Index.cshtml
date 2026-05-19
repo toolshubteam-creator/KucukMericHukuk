@@ -152,4 +152,84 @@
             </div>
         </div>
     </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">GA4 Ziyaretçi Özeti</h3>
+                @if (User.IsInRole("Admin"))
+                {
+                    <div class="card-actions">
+                        <a asp-action="Index" asp-controller="SiteSettings" asp-area="Admin"
+                           asp-route-group="GoogleIntegration"
+                           class="btn btn-sm btn-outline-secondary">
+                            <i class="ti ti-settings me-1"></i> Ayarlar
+                        </a>
+                    </div>
+                }
+            </div>
+            <div class="card-body">
+                @if (Model.GoogleAnalytics.IsConfigured)
+                {
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <span class="bg-success-lt text-success avatar avatar-lg">
+                                <i class="ti ti-chart-line"></i>
+                            </span>
+                        </div>
+                        <div>
+                            <div class="h1 mb-0">@Model.GoogleAnalytics.ActiveUsers</div>
+                            <div class="text-secondary">aktif kullanıcı</div>
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="text-secondary">Yeni kullanıcı</div>
+                            <div class="h3 mb-0">@Model.GoogleAnalytics.NewUsers</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-secondary">Oturum</div>
+                            <div class="h3 mb-0">@Model.GoogleAnalytics.Sessions</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-secondary">Sayfa görüntüleme</div>
+                            <div class="h3 mb-0">@Model.GoogleAnalytics.ScreenPageViews</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-secondary">Etkinlik</div>
+                            <div class="h3 mb-0">@Model.GoogleAnalytics.EventCount</div>
+                        </div>
+                    </div>
+
+                    <div class="text-secondary small mt-3">
+                        @Model.GoogleAnalytics.DateRangeLabel
+                        @if (!string.IsNullOrWhiteSpace(Model.GoogleAnalytics.PropertyId))
+                        {
+                            <span>· Property @Model.GoogleAnalytics.PropertyId</span>
+                        }
+                    </div>
+
+                    @if (!Model.GoogleAnalytics.HasData)
+                    {
+                        <div class="alert alert-info mt-3 mb-0">
+                            @Model.GoogleAnalytics.Message
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty my-0">
+                        <div class="empty-icon">
+                            <i class="ti ti-chart-line"></i>
+                        </div>
+                        <p class="empty-title">GA4 yapılandırılmamış</p>
+                        <p class="empty-subtitle text-secondary">
+                            @Model.GoogleAnalytics.Message
+                        </p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>

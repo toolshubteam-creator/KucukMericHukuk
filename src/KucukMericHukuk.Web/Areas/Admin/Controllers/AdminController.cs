@@ -33,6 +33,7 @@ public class AdminController : Controller
         var articlesWidget = await _dashboardService.GetRecentArticlesAsync(
             LanguageCodes.Default, DashboardRecentCount, ct);
         var siteSummary = await _dashboardService.GetSiteSummaryAsync(ct);
+        var googleAnalytics = await _dashboardService.GetGoogleAnalyticsWidgetAsync(ct);
 
         var vm = new DashboardViewModel
         {
@@ -43,6 +44,7 @@ public class AdminController : Controller
             },
             Articles = articlesWidget,
             SiteSummary = siteSummary,
+            GoogleAnalytics = googleAnalytics,
         };
 
         return View(vm);

@@ -1,5 +1,6 @@
 using KucukMericHukuk.Core.DTOs.Article;
 using KucukMericHukuk.Core.DTOs.Dashboard;
+using KucukMericHukuk.Core.DTOs.Google;
 using KucukMericHukuk.Core.Interfaces;
 using KucukMericHukuk.Core.Interfaces.Services;
 using MapsterMapper;
@@ -14,11 +15,16 @@ public class DashboardService : IDashboardService
 {
     private readonly IUnitOfWork _uow;
     private readonly IMapper _mapper;
+    private readonly IGoogleAnalyticsService _googleAnalyticsService;
 
-    public DashboardService(IUnitOfWork uow, IMapper mapper)
+    public DashboardService(
+        IUnitOfWork uow,
+        IMapper mapper,
+        IGoogleAnalyticsService googleAnalyticsService)
     {
         _uow = uow;
         _mapper = mapper;
+        _googleAnalyticsService = googleAnalyticsService;
     }
 
     public async Task<RecentArticlesWidgetDto> GetRecentArticlesAsync(
@@ -47,5 +53,17 @@ public class DashboardService : IDashboardService
             FaqCount = await _uow.Faqs.CountAsync(ct: ct),
             TestimonialCount = await _uow.Testimonials.CountAsync(ct: ct),
         };
+    }
+
+    public async Task<GoogleAnalyticsDashboardWidgetDto> GetGoogleAnalyticsWidgetAsync(
+        CancellationToken ct = default)
+    {
+        var result = await _googleAnalyticsService.GetDashboardWidgetAsync(ct);
+        return result.IsSuccess
+            ? result.Value
+            : new GoogleAnalyticsDashboardWidgetDto
+            {
+                Message = result.FirstError?.Message ?? "GA4 verisi alınamadı.",
+            };
     }
 }

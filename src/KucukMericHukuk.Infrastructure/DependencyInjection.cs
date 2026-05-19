@@ -39,6 +39,8 @@ public static class DependencyInjection
 
         // Google API ortak client (Faz 7.5). Credential env/config veya SiteSettings'ten okunur.
         services.AddScoped<IGoogleApiClient, GoogleApiClient>();
+        services.AddScoped<IAnalyticsDataReportClient, AnalyticsDataReportClient>();
+        services.AddScoped<IGoogleAnalyticsService, GoogleAnalyticsService>();
 
         return services;
     }

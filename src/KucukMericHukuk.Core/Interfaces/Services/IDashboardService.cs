@@ -1,4 +1,5 @@
 using KucukMericHukuk.Core.DTOs.Dashboard;
+using KucukMericHukuk.Core.DTOs.Google;
 
 namespace KucukMericHukuk.Core.Interfaces.Services;
 
@@ -14,4 +15,6 @@ public interface IDashboardService
 
     /// <summary>"Site Özeti" widget: 7 içerik entity'sinin aktif kayıt sayıları.</summary>
     Task<SiteSummaryWidgetDto> GetSiteSummaryAsync(CancellationToken ct = default);
+
+    Task<GoogleAnalyticsDashboardWidgetDto> GetGoogleAnalyticsWidgetAsync(CancellationToken ct = default);
 }

@@ -140,6 +140,7 @@ public static class ErrorCodes
         public const string CredentialMissing = "GoogleIntegration.CredentialMissing";
         public const string CredentialInvalid = "GoogleIntegration.CredentialInvalid";
         public const string TokenRequestFailed = "GoogleIntegration.TokenRequestFailed";
+        public const string ReportRequestFailed = "GoogleIntegration.ReportRequestFailed";
     }
 
     public static class User

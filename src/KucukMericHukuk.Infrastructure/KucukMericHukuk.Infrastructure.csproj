@@ -13,6 +13,7 @@
   <ItemGroup>
     <!-- Microsoft.Extensions.* paketleri Microsoft.AspNetCore.App framework
          referansı üzerinden transitively gelir; ayrı PackageReference NU1510. -->
+    <PackageReference Include="Google.Apis.AnalyticsData.v1beta" Version="1.74.0.3608" />
     <PackageReference Include="Google.Apis.Auth" Version="1.74.0" />
     <PackageReference Include="HtmlSanitizer" Version="9.0.892" />
     <PackageReference Include="MailKit" Version="4.16.0" />

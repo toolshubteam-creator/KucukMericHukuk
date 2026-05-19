@@ -1,15 +1,19 @@
 using FluentAssertions;
 using KucukMericHukuk.Business.Mappings;
 using KucukMericHukuk.Business.Services;
+using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.Constants;
+using KucukMericHukuk.Core.DTOs.Google;
 using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Enums;
+using KucukMericHukuk.Core.Interfaces.Services;
 using KucukMericHukuk.DataAccess.Context;
 using KucukMericHukuk.DataAccess.UnitOfWork;
 using KucukMericHukuk.Tests.Infrastructure;
 using Mapster;
 using MapsterMapper;
+using Moq;
 
 namespace KucukMericHukuk.Tests.Business;
 
@@ -27,8 +31,21 @@ public class DashboardServiceTests : IDisposable
         _mapper = new Mapper(config);
     }
 
-    private DashboardService CreateSut(AppDbContext context)
-        => new(new UnitOfWork(context), _mapper);
+    private DashboardService CreateSut(
+        AppDbContext context,
+        IGoogleAnalyticsService? googleAnalyticsService = null)
+    {
+        if (googleAnalyticsService is null)
+        {
+            var googleAnalytics = new Mock<IGoogleAnalyticsService>();
+            googleAnalytics
+                .Setup(s => s.GetDashboardWidgetAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Result.Success(new GoogleAnalyticsDashboardWidgetDto()));
+            googleAnalyticsService = googleAnalytics.Object;
+        }
+
+        return new DashboardService(new UnitOfWork(context), _mapper, googleAnalyticsService);
+    }
 
     private static void SeedArticle(
         AppDbContext context,
@@ -121,6 +138,45 @@ public class DashboardServiceTests : IDisposable
         result.PageCount.Should().Be(0);
         result.MediaCount.Should().Be(0);
         result.TestimonialCount.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetGoogleAnalyticsWidgetAsync_ReturnsGoogleAnalyticsServiceValue()
+    {
+        await using var context = _factory.CreateContext();
+        var googleAnalytics = new Mock<IGoogleAnalyticsService>();
+        googleAnalytics
+            .Setup(s => s.GetDashboardWidgetAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success(new GoogleAnalyticsDashboardWidgetDto
+            {
+                IsConfigured = true,
+                PropertyId = "123456",
+                ActiveUsers = 12,
+            }));
+
+        var sut = CreateSut(context, googleAnalytics.Object);
+        var result = await sut.GetGoogleAnalyticsWidgetAsync();
+
+        result.IsConfigured.Should().BeTrue();
+        result.PropertyId.Should().Be("123456");
+        result.ActiveUsers.Should().Be(12);
+    }
+
+    [Fact]
+    public async Task GetGoogleAnalyticsWidgetAsync_ServiceFailure_ReturnsSafeEmptyWidget()
+    {
+        await using var context = _factory.CreateContext();
+        var googleAnalytics = new Mock<IGoogleAnalyticsService>();
+        googleAnalytics
+            .Setup(s => s.GetDashboardWidgetAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Failure<GoogleAnalyticsDashboardWidgetDto>(
+                new Error(ErrorCodes.GoogleIntegration.ReportRequestFailed, "GA4 okunamadı.")));
+
+        var sut = CreateSut(context, googleAnalytics.Object);
+        var result = await sut.GetGoogleAnalyticsWidgetAsync();
+
+        result.IsConfigured.Should().BeFalse();
+        result.Message.Should().Be("GA4 okunamadı.");
     }
 
     public void Dispose() => _factory.Dispose();
