@@ -1,6 +1,8 @@
 @inject KucukMericHukuk.Core.Interfaces.Services.IJsonLdService JsonLd
+@inject Microsoft.Extensions.Options.IOptions<KucukMericHukuk.Core.Common.TurnstileOptions> TurnstileOptions
 @{
     var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
+    var turnstileEnabled = TurnstileOptions.Value.Enabled;
 }
 <!DOCTYPE html>
 <html lang="@culture">
@@ -49,6 +51,11 @@
     <script defer src="~/js/site/site.js" asp-append-version="true"></script>
     <script defer src="~/js/site/cookie-consent.js" asp-append-version="true"></script>
     <script defer src="~/js/site/subscribe-form.js" asp-append-version="true"></script>
+    @if (turnstileEnabled)
+    {
+        @* Cloudflare-maintained Turnstile loader. Public forms share this single include. *@
+        <script defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

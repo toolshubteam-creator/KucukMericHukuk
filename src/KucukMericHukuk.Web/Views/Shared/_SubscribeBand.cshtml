@@ -73,11 +73,4 @@
             </form>
         </div>
     </div>
-
-    @if (turnstileEnabled)
-    {
-        @* Turnstile JS — Cloudflare maintained, idempotent loader. DEFERRED Faz 7.2a-fix: tek noktadan
-           yukleme (_PublicLayout) ileride centralize edilecek (Turnstile centralize maddesi). *@
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-    }
 </section>

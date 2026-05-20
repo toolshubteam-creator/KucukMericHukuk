@@ -142,11 +142,3 @@
         </div>
     </div>
 </section>
-
-@section Scripts {
-    @if (turnstileEnabled)
-    {
-        @* Turnstile JS — Cloudflare maintained, sürüm pin/SRI uygulanmaz (DEFERRED notu) *@
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-    }
-}
