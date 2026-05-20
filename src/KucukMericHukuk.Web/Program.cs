@@ -249,6 +249,8 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 builder.Services.Configure<RouteOptions>(options =>
 {
     options.ConstraintMap.Add("culture", typeof(CultureRouteConstraint));
+    options.ConstraintMap.Add("trCulture", typeof(TurkishCultureRouteConstraint));
+    options.ConstraintMap.Add("enCulture", typeof(EnglishCultureRouteConstraint));
 });
 
 // MVC + Localization
