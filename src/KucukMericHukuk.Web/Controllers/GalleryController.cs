@@ -16,7 +16,8 @@ public class GalleryController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Galeri")]
+    [Route("{culture:trCulture}/galeri", Order = 0)]
+    [Route("{culture:enCulture}/gallery", Order = 0)]
     public async Task<IActionResult> Index(int page = 1, CancellationToken ct = default)
     {
         if (page < 1) page = 1;

@@ -55,7 +55,7 @@ public class TestimonialsPublicTests : IClassFixture<IntegrationTestFactory>
 
         var client = _factory.CreateClient();
 
-        var response = await client.GetAsync("/tr-TR/Referanslar");
+        var response = await client.GetAsync("/tr-TR/referanslar");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var html = await response.Content.ReadAsStringAsync();
@@ -71,7 +71,7 @@ public class TestimonialsPublicTests : IClassFixture<IntegrationTestFactory>
 
         var client = _factory.CreateClient();
 
-        var response = await client.GetAsync("/tr-TR/Referanslar");
+        var response = await client.GetAsync("/tr-TR/referanslar");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var html = await response.Content.ReadAsStringAsync();
@@ -88,7 +88,7 @@ public class TestimonialsPublicTests : IClassFixture<IntegrationTestFactory>
 
         var client = _factory.CreateClient();
 
-        var response = await client.GetAsync("/tr-TR/Referanslar");
+        var response = await client.GetAsync("/tr-TR/referanslar");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var html = await response.Content.ReadAsStringAsync();

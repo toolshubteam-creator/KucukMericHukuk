@@ -1,5 +1,6 @@
 @model KucukMericHukuk.Web.ViewModels.Attorney.AttorneyDetailViewModel
 @using KucukMericHukuk.Web.Helpers
+@using KucukMericHukuk.Core.Routing
 @inject KucukMericHukuk.Core.Interfaces.Services.IJsonLdService JsonLd
 @{
     ViewData["Title"] = !string.IsNullOrEmpty(Model.Attorney.MetaTitle)
@@ -15,11 +16,12 @@
     ViewData["OgType"] = "profile";
 
     var hasPhoto = !string.IsNullOrEmpty(Model.Attorney.ProfileImageUrl);
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
 
     ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
     {
-        new("Ana Sayfa", "/tr-TR/"),
-        new("Avukatlarımız", "/tr-TR/Attorneys"),
+        new("Ana Sayfa", PublicRouteSegments.HomePath(culture)),
+        new("Avukatlarımız", PublicRouteSegments.AttorneysPath(culture)),
         new(Model.Attorney.FullName, null)
     };
 }

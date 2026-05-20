@@ -66,7 +66,7 @@ public class AppointmentsAdminTests : IClassFixture<IntegrationTestFactory>
             AllowAutoRedirect = false
         });
 
-        var token = await TestHelpers.GetAntiForgeryTokenAsync(client, "/tr-TR/Appointment");
+        var token = await TestHelpers.GetAntiForgeryTokenAsync(client, "/tr-TR/randevu");
 
         var preferredDate = DateTime.UtcNow.Date.AddDays(10).ToString("yyyy-MM-dd");
         var formData = new List<KeyValuePair<string, string>>
@@ -82,11 +82,11 @@ public class AppointmentsAdminTests : IClassFixture<IntegrationTestFactory>
             new("__RequestVerificationToken", token),
         };
 
-        var response = await client.PostAsync("/tr-TR/Appointment/Submit",
+        var response = await client.PostAsync("/tr-TR/randevu/gonder",
             new FormUrlEncodedContent(formData));
 
         response.StatusCode.Should().Be(HttpStatusCode.Redirect);
-        response.Headers.Location?.OriginalString.Should().Contain("Appointment/ThankYou");
+        response.Headers.Location?.OriginalString.Should().Contain("randevu/tesekkurler");
 
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<AppDbContext>();

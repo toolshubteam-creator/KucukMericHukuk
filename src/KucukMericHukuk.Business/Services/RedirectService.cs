@@ -5,6 +5,7 @@ using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Interfaces;
 using KucukMericHukuk.Core.Interfaces.Services;
+using KucukMericHukuk.Core.Routing;
 using KucukMericHukuk.DataAccess.Context;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
@@ -110,7 +111,7 @@ public class RedirectService : IRedirectService
 
     private static RedirectListDto MapSlugHistory(SlugHistory h, string? currentSlug)
     {
-        var segment = UrlSegmentFor(h.EntityType);
+        var segment = UrlSegmentFor(h.EntityType, h.LanguageCode);
         // 4 entity (Article/Service/Attorney/Page) URL'ye dönüşür. Category/Tag
         // route'sız — segment null, FromPath sadece "(Kategori)/eski-slug" gibi
         // metinsel etiketle gösterilir.
@@ -147,12 +148,12 @@ public class RedirectService : IRedirectService
     /// segment. Category/Tag URL route'a sahip değil (filtre olarak görünür),
     /// SlugHistory satırlarında "—" gösterilir.
     /// </summary>
-    private static string? UrlSegmentFor(SluggedEntityType type) => type switch
+    private static string? UrlSegmentFor(SluggedEntityType type, string culture) => type switch
     {
-        SluggedEntityType.Article => "Articles",
-        SluggedEntityType.Page => "Pages",
-        SluggedEntityType.Service => "Services",
-        SluggedEntityType.Attorney => "Attorneys",
+        SluggedEntityType.Article => PublicRouteSegments.Articles(culture),
+        SluggedEntityType.Page => PublicRouteSegments.Pages(culture),
+        SluggedEntityType.Service => PublicRouteSegments.Services(culture),
+        SluggedEntityType.Attorney => PublicRouteSegments.Attorneys(culture),
         _ => null
     };
 

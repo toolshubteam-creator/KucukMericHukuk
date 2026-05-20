@@ -155,11 +155,11 @@ public class MetaTagsHelpersTests
     [Fact]
     public void MetaTags_NoCanonicalOverride_UsesBaseUrlPlusPath()
     {
-        var helper = CreateHelperMock(out var _, requestPath: "/tr-TR/Articles/test");
+        var helper = CreateHelperMock(out var _, requestPath: "/tr-TR/makaleler/test");
 
         var html = Render(helper.Object.MetaTags());
 
-        html.Should().Contain("rel=\"canonical\" href=\"https://example.com/tr-TR/Articles/test\"");
+        html.Should().Contain("rel=\"canonical\" href=\"https://example.com/tr-TR/makaleler/test\"");
     }
 
     // ─────────────────────── MetaTags() — Description ───────────────────────
@@ -220,31 +220,31 @@ public class MetaTagsHelpersTests
     [Fact]
     public void CanonicalForArticles_NoFilters_ReturnsBasePath()
     {
-        var helper = CreateHelperMock(out var _, requestPath: "/tr-TR/Articles");
+        var helper = CreateHelperMock(out var _, requestPath: "/tr-TR/makaleler");
 
         var canonical = helper.Object.CanonicalForArticles(null, 1);
 
-        canonical.Should().Be("https://example.com/tr-TR/Articles");
+        canonical.Should().Be("https://example.com/tr-TR/makaleler");
     }
 
     [Fact]
     public void CanonicalForArticles_WithCategoryAndPage_AppendsBothQueryParams()
     {
-        var helper = CreateHelperMock(out var _, requestPath: "/tr-TR/Articles");
+        var helper = CreateHelperMock(out var _, requestPath: "/tr-TR/makaleler");
 
         var canonical = helper.Object.CanonicalForArticles("ceza-hukuku", 3);
 
-        canonical.Should().Be("https://example.com/tr-TR/Articles?category=ceza-hukuku&page=3");
+        canonical.Should().Be("https://example.com/tr-TR/makaleler?category=ceza-hukuku&page=3");
     }
 
     [Fact]
     public void CanonicalForArticles_PageOne_DoesNotAppendPageQuery()
     {
-        var helper = CreateHelperMock(out var _, requestPath: "/tr-TR/Articles");
+        var helper = CreateHelperMock(out var _, requestPath: "/tr-TR/makaleler");
 
         var canonical = helper.Object.CanonicalForArticles("aile-hukuku", 1);
 
-        canonical.Should().Be("https://example.com/tr-TR/Articles?category=aile-hukuku");
+        canonical.Should().Be("https://example.com/tr-TR/makaleler?category=aile-hukuku");
     }
 
     // ─── Faz 6.16: ResolveDescription / StripHtml / TruncateToSentence ───

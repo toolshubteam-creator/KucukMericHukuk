@@ -14,7 +14,8 @@ public class PagesController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Pages/{slug}")]
+    [Route("{culture:trCulture}/sayfalar/{slug}", Order = 0)]
+    [Route("{culture:enCulture}/pages/{slug}", Order = 0)]
     public async Task<IActionResult> Detail(string slug, CancellationToken ct = default)
     {
         var lang = System.Globalization.CultureInfo.CurrentUICulture.Name;
@@ -27,5 +28,12 @@ public class PagesController : Controller
 
         var vm = new PageDetailViewModel { Page = result.Value };
         return View(vm);
+    }
+
+    [HttpGet]
+    [Route("{culture:trCulture}/Pages/{slug}", Order = 1)]
+    public IActionResult LegacyDetail(string culture, string slug)
+    {
+        return RedirectToActionPermanent(nameof(Detail), new { culture, slug });
     }
 }

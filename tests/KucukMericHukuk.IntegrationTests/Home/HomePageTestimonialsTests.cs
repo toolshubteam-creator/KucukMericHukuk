@@ -71,7 +71,7 @@ public class HomePageTestimonialsTests : IClassFixture<IntegrationTestFactory>
 
         // Section başlığı + CTA butonu (ASCII-safe assertion'lar)
         html.Should().Contain("home-testimonials-heading");
-        html.Should().Contain("/tr-TR/Referanslar"); // "Tüm yorumları gör" link href
+        html.Should().Contain("/tr-TR/referanslar"); // "Tüm yorumları gör" link href
     }
 
     [Fact]

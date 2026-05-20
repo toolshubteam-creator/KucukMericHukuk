@@ -23,7 +23,9 @@ public class SubscriberController : Controller
     }
 
     [HttpPost]
-    [Route("{culture:culture}/Subscriber/Subscribe")]
+    [Route("{culture:trCulture}/abone/abone-ol", Order = 0)]
+    [Route("{culture:enCulture}/subscriber/subscribe", Order = 0)]
+    [Route("{culture:trCulture}/Subscriber/Subscribe", Order = 1)]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting("subscribe-form")]
     public async Task<IActionResult> Subscribe(SubscriberFormViewModel vm, string? returnUrl, CancellationToken ct)
@@ -58,7 +60,8 @@ public class SubscriberController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Subscriber/Unsubscribe/{token:guid}")]
+    [Route("{culture:trCulture}/abone/abonelikten-cik/{token:guid}", Order = 0)]
+    [Route("{culture:enCulture}/subscriber/unsubscribe/{token:guid}", Order = 0)]
     public async Task<IActionResult> Unsubscribe(Guid token, CancellationToken ct)
     {
         var result = await _subscriberService.UnsubscribeByTokenAsync(token, ct);
@@ -67,6 +70,13 @@ public class SubscriberController : Controller
             ? "Aboneliğiniz iptal edildi."
             : result.FirstError?.Message ?? "Geçersiz iptal bağlantısı.";
         return View();
+    }
+
+    [HttpGet]
+    [Route("{culture:trCulture}/Subscriber/Unsubscribe/{token:guid}", Order = 1)]
+    public IActionResult LegacyUnsubscribe(string culture, Guid token)
+    {
+        return RedirectToActionPermanent(nameof(Unsubscribe), new { culture, token });
     }
 
     private bool WantsJsonResponse()

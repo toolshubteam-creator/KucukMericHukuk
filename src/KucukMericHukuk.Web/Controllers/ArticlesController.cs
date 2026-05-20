@@ -19,8 +19,8 @@ public class ArticlesController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Articles", Order = 0)]
-    [Route("{culture:culture}/Articles/Index", Order = 1)]
+    [Route("{culture:trCulture}/makaleler", Order = 0)]
+    [Route("{culture:enCulture}/articles", Order = 0)]
     public async Task<IActionResult> Index(string? category, int page = 1, CancellationToken ct = default)
     {
         var lang = System.Globalization.CultureInfo.CurrentUICulture.Name;
@@ -45,7 +45,8 @@ public class ArticlesController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Articles/{slug:regex(^(?!Index$).+)}")]
+    [Route("{culture:trCulture}/makaleler/{slug:regex(^(?!Index$).+)}", Order = 0)]
+    [Route("{culture:enCulture}/articles/{slug:regex(^(?!Index$).+)}", Order = 0)]
     public async Task<IActionResult> Detail(string slug, CancellationToken ct = default)
     {
         var lang = System.Globalization.CultureInfo.CurrentUICulture.Name;
@@ -66,5 +67,30 @@ public class ArticlesController : Controller
             RelatedArticles = related
         };
         return View(vm);
+    }
+
+    [HttpGet]
+    [Route("{culture:trCulture}/Articles", Order = 1)]
+    [Route("{culture:trCulture}/Articles/Index", Order = 2)]
+    public IActionResult LegacyIndex(string culture, string? category, int page = 1)
+    {
+        var routeValues = new Dictionary<string, object?> { ["culture"] = culture };
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            routeValues["category"] = category;
+        }
+        if (page > 1)
+        {
+            routeValues["page"] = page;
+        }
+
+        return RedirectToActionPermanent(nameof(Index), routeValues);
+    }
+
+    [HttpGet]
+    [Route("{culture:trCulture}/Articles/{slug:regex(^(?!Index$).+)}", Order = 1)]
+    public IActionResult LegacyDetail(string culture, string slug)
+    {
+        return RedirectToActionPermanent(nameof(Detail), new { culture, slug });
     }
 }

@@ -162,7 +162,7 @@ public class JsonLdServiceTests
         var items = new (string, string?)[]
         {
             ("Ana Sayfa", "/tr-TR/"),
-            ("Makaleler", "/tr-TR/Articles"),
+            ("Makaleler", "/tr-TR/makaleler"),
             ("Test Makale", null)
         };
         var json = _sut.BuildBreadcrumbList(items);

@@ -6,6 +6,7 @@ using KucukMericHukuk.Core.DTOs.Article;
 using KucukMericHukuk.Core.DTOs.Attorney;
 using KucukMericHukuk.Core.DTOs.Faq;
 using KucukMericHukuk.Core.Interfaces.Services;
+using KucukMericHukuk.Core.Routing;
 using Microsoft.Extensions.Options;
 
 namespace KucukMericHukuk.Infrastructure.Seo;
@@ -113,7 +114,7 @@ public class JsonLdService : IJsonLdService
             ["mainEntityOfPage"] = new Dictionary<string, object?>
             {
                 ["@type"] = "WebPage",
-                ["@id"] = $"{BaseUrl}/tr-TR/Articles/{article.Slug}"
+                ["@id"] = $"{BaseUrl}{PublicRouteSegments.ArticleDetailPath(article.LanguageCode, article.Slug)}"
             }
         };
         return SerializeWithoutNulls(schema);
@@ -129,7 +130,7 @@ public class JsonLdService : IJsonLdService
             ["jobTitle"] = NullIfEmpty(attorney.Title) ?? "Avukat",
             ["description"] = NullIfEmpty(attorney.MetaDescription) ?? NullIfEmpty(attorney.ShortBio),
             ["image"] = NullIfEmpty(AbsoluteUrl(attorney.ProfileImageUrl)),
-            ["url"] = $"{BaseUrl}/tr-TR/Attorneys/{attorney.Slug}",
+            ["url"] = $"{BaseUrl}{PublicRouteSegments.AttorneyDetailPath(attorney.LanguageCode, attorney.Slug)}",
             ["email"] = NullIfEmpty(attorney.Email),
             ["telephone"] = NullIfEmpty(attorney.PhoneNumber),
             ["sameAs"] = string.IsNullOrEmpty(attorney.LinkedInUrl)

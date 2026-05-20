@@ -246,10 +246,10 @@ public class RedirectServiceTests : IDisposable
         result.IsSuccess.Should().BeTrue();
         result.Value!.TotalCount.Should().Be(2);
         result.Value.Items.Should().Contain(i => i.Source == RedirectSource.Manual && i.FromPath == "/manuel-eski");
-        result.Value.Items.Should().Contain(i => i.Source == RedirectSource.SlugHistory && i.FromPath == "/tr-TR/Articles/eski-makale-slug");
+        result.Value.Items.Should().Contain(i => i.Source == RedirectSource.SlugHistory && i.FromPath == "/tr-TR/makaleler/eski-makale-slug");
 
         var slugItem = result.Value.Items.First(i => i.Source == RedirectSource.SlugHistory);
-        slugItem.ToPath.Should().Be("/tr-TR/Articles/guncel-slug", "SlugHistory satiri current slug ile resolve edilmeli");
+        slugItem.ToPath.Should().Be("/tr-TR/makaleler/guncel-slug", "SlugHistory satiri current slug ile resolve edilmeli");
         slugItem.TargetDeleted.Should().BeFalse();
         slugItem.IsReadOnly.Should().BeTrue();
     }

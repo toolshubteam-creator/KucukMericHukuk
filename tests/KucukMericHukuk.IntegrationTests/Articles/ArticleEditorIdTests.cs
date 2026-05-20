@@ -137,7 +137,7 @@ public class ArticleEditorIdTests : IClassFixture<IntegrationTestFactory>
             authorId, editorId: editorId);
         await PublishAsync(articleId);
 
-        var response = await client.GetAsync("/tr-TR/Articles/public-with-editor");
+        var response = await client.GetAsync("/tr-TR/makaleler/public-with-editor");
 
         response.IsSuccessStatusCode.Should().BeTrue();
         var html = await response.Content.ReadAsStringAsync();
@@ -159,7 +159,7 @@ public class ArticleEditorIdTests : IClassFixture<IntegrationTestFactory>
             authorId, editorId: null);
         await PublishAsync(articleId);
 
-        var response = await client.GetAsync("/tr-TR/Articles/public-no-editor");
+        var response = await client.GetAsync("/tr-TR/makaleler/public-no-editor");
 
         response.IsSuccessStatusCode.Should().BeTrue();
         var html = await response.Content.ReadAsStringAsync();
@@ -183,7 +183,7 @@ public class ArticleEditorIdTests : IClassFixture<IntegrationTestFactory>
             authorId, editorId: editorId);
         await PublishAsync(articleId);
 
-        var response = await client.GetAsync("/tr-TR/Articles/jsonld-with-editor");
+        var response = await client.GetAsync("/tr-TR/makaleler/jsonld-with-editor");
         var html = await response.Content.ReadAsStringAsync();
 
         // JSON-LD schema'da "editor": { ... "name": "Test Editor" }
@@ -206,7 +206,7 @@ public class ArticleEditorIdTests : IClassFixture<IntegrationTestFactory>
             authorId, editorId: null);
         await PublishAsync(articleId);
 
-        var response = await client.GetAsync("/tr-TR/Articles/jsonld-no-editor");
+        var response = await client.GetAsync("/tr-TR/makaleler/jsonld-no-editor");
         var html = await response.Content.ReadAsStringAsync();
 
         html.Should().NotContain("\"editor\":",

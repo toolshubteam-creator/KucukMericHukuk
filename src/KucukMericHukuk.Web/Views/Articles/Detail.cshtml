@@ -1,5 +1,6 @@
 @model KucukMericHukuk.Web.ViewModels.Article.ArticleDetailViewModel
 @using KucukMericHukuk.Web.Helpers
+@using KucukMericHukuk.Core.Routing
 @inject KucukMericHukuk.Core.Interfaces.Services.IJsonLdService JsonLd
 @{
     ViewData["Title"] = !string.IsNullOrEmpty(Model.Article.MetaTitle)
@@ -20,8 +21,8 @@
 
     ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
     {
-        new("Ana Sayfa", "/tr-TR/"),
-        new("Makaleler", "/tr-TR/Articles"),
+        new("Ana Sayfa", PublicRouteSegments.HomePath(culture)),
+        new("Makaleler", PublicRouteSegments.ArticlesPath(culture)),
         new(Model.Article.Title, null)
     };
 }

@@ -16,7 +16,8 @@ public class TestimonialsController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Referanslar")]
+    [Route("{culture:trCulture}/referanslar", Order = 0)]
+    [Route("{culture:enCulture}/testimonials", Order = 0)]
     public async Task<IActionResult> Index(int page = 1, CancellationToken ct = default)
     {
         var lang = System.Globalization.CultureInfo.CurrentUICulture.Name;

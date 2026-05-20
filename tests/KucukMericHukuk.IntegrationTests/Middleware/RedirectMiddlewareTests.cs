@@ -201,10 +201,10 @@ public class RedirectMiddlewareTests : IClassFixture<IntegrationTestFactory>
             AllowAutoRedirect = false
         });
 
-        var response = await client.GetAsync("/tr-TR/Articles/eski-makale");
+        var response = await client.GetAsync("/tr-TR/makaleler/eski-makale");
 
         response.StatusCode.Should().Be(HttpStatusCode.MovedPermanently);
-        response.Headers.Location!.ToString().Should().Be("/tr-TR/Articles/yeni-makale");
+        response.Headers.Location!.ToString().Should().Be("/tr-TR/makaleler/yeni-makale");
 
         var logs = await ReadNotFoundLogsAsync();
         logs.Should().BeEmpty("SlugHistory ile yonlendirilen URL NotFoundLog'a dusmemeli");
@@ -226,7 +226,7 @@ public class RedirectMiddlewareTests : IClassFixture<IntegrationTestFactory>
             AllowAutoRedirect = false
         });
 
-        var response = await client.GetAsync("/tr-TR/Articles/eski-silinmis");
+        var response = await client.GetAsync("/tr-TR/makaleler/eski-silinmis");
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound,
             "soft-deleted entity icin SlugHistory varsa bile redirect yapilmaz - 404 verilir");

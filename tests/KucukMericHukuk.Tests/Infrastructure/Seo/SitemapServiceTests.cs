@@ -55,11 +55,11 @@ public class SitemapServiceTests
 
         var xml = await Sut().BuildSitemapXmlAsync();
         xml.Should().Contain("<loc>https://example.com/tr-TR/</loc>");
-        xml.Should().Contain("<loc>https://example.com/tr-TR/Articles</loc>");
-        xml.Should().Contain("<loc>https://example.com/tr-TR/Services</loc>");
-        xml.Should().Contain("<loc>https://example.com/tr-TR/Attorneys</loc>");
-        xml.Should().Contain("<loc>https://example.com/tr-TR/Faqs</loc>");
-        xml.Should().Contain("<loc>https://example.com/tr-TR/Contact</loc>");
+        xml.Should().Contain("<loc>https://example.com/tr-TR/makaleler</loc>");
+        xml.Should().Contain("<loc>https://example.com/tr-TR/hizmetler</loc>");
+        xml.Should().Contain("<loc>https://example.com/tr-TR/avukatlar</loc>");
+        xml.Should().Contain("<loc>https://example.com/tr-TR/sss</loc>");
+        xml.Should().Contain("<loc>https://example.com/tr-TR/iletisim</loc>");
     }
 
     [Fact]
@@ -94,9 +94,9 @@ public class SitemapServiceTests
             .ReturnsAsync(new List<Page> { page });
 
         var xml = await Sut().BuildSitemapXmlAsync();
-        xml.Should().Contain("<loc>https://example.com/tr-TR/Articles/test-makale</loc>");
+        xml.Should().Contain("<loc>https://example.com/tr-TR/makaleler/test-makale</loc>");
         xml.Should().Contain("<lastmod>2026-05-01</lastmod>");
-        xml.Should().Contain("<loc>https://example.com/tr-TR/Pages/hakkimizda</loc>");
+        xml.Should().Contain("<loc>https://example.com/tr-TR/sayfalar/hakkimizda</loc>");
         xml.Should().Contain("<lastmod>2026-04-15</lastmod>");
     }
 
@@ -119,7 +119,7 @@ public class SitemapServiceTests
             .ReturnsAsync(new List<Article> { article });
 
         var xml = await Sut().BuildSitemapXmlAsync();
-        xml.Should().NotContain("/Articles/");
+        xml.Should().NotContain("/makaleler/");
     }
 
     [Fact]
@@ -146,7 +146,7 @@ public class SitemapServiceTests
         robots.Should().Contain("User-agent: *");
         robots.Should().Contain("Disallow: /admin/");
         robots.Should().Contain("Disallow: /Identity/");
-        robots.Should().Contain("Disallow: /Contact/ThankYou");
+        robots.Should().Contain("Disallow: /tr-TR/iletisim/tesekkurler");
         robots.Should().Contain("Disallow: /Error/");
         robots.Should().Contain("Sitemap: https://example.com/sitemap.xml");
     }
@@ -186,7 +186,7 @@ public class SitemapServiceTests
         robots.Should().Contain("User-agent: *");
         robots.Should().Contain("Disallow: /admin/");
         robots.Should().Contain("Disallow: /Identity/");
-        robots.Should().Contain("Disallow: /Contact/ThankYou");
+        robots.Should().Contain("Disallow: /tr-TR/iletisim/tesekkurler");
         robots.Should().Contain("Disallow: /Error/");
         robots.Should().Contain("Sitemap: https://example.com/sitemap.xml");
     }

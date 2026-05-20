@@ -16,8 +16,8 @@ public class ServicesController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Services", Order = 0)]
-    [Route("{culture:culture}/Services/Index", Order = 1)]
+    [Route("{culture:trCulture}/hizmetler", Order = 0)]
+    [Route("{culture:enCulture}/services", Order = 0)]
     public async Task<IActionResult> Index(CancellationToken ct = default)
     {
         var lang = System.Globalization.CultureInfo.CurrentUICulture.Name;
@@ -28,7 +28,8 @@ public class ServicesController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Services/{slug:regex(^(?!Index$).+)}")]
+    [Route("{culture:trCulture}/hizmetler/{slug:regex(^(?!Index$).+)}", Order = 0)]
+    [Route("{culture:enCulture}/services/{slug:regex(^(?!Index$).+)}", Order = 0)]
     public async Task<IActionResult> Detail(string slug, CancellationToken ct = default)
     {
         var lang = System.Globalization.CultureInfo.CurrentUICulture.Name;
@@ -50,5 +51,20 @@ public class ServicesController : Controller
             OtherServices = others
         };
         return View(vm);
+    }
+
+    [HttpGet]
+    [Route("{culture:trCulture}/Services", Order = 1)]
+    [Route("{culture:trCulture}/Services/Index", Order = 2)]
+    public IActionResult LegacyIndex(string culture)
+    {
+        return RedirectToActionPermanent(nameof(Index), new { culture });
+    }
+
+    [HttpGet]
+    [Route("{culture:trCulture}/Services/{slug:regex(^(?!Index$).+)}", Order = 1)]
+    public IActionResult LegacyDetail(string culture, string slug)
+    {
+        return RedirectToActionPermanent(nameof(Detail), new { culture, slug });
     }
 }

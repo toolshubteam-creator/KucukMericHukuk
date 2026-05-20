@@ -3,6 +3,7 @@ using System.Xml.Linq;
 using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.Interfaces.Repositories;
 using KucukMericHukuk.Core.Interfaces.Services;
+using KucukMericHukuk.Core.Routing;
 using Microsoft.Extensions.Options;
 
 namespace KucukMericHukuk.Infrastructure.Seo;
@@ -49,14 +50,14 @@ public class SitemapService : ISitemapService
         // 2) Statik liste sayfaları
         var staticPaths = new[]
         {
-            "/Articles",
-            "/Services",
-            "/Attorneys",
-            "/Faqs",
-            "/Contact"
+            PublicRouteSegments.ArticlesPath(DefaultLanguageCode),
+            PublicRouteSegments.ServicesPath(DefaultLanguageCode),
+            PublicRouteSegments.AttorneysPath(DefaultLanguageCode),
+            PublicRouteSegments.FaqsPath(DefaultLanguageCode),
+            PublicRouteSegments.ContactPath(DefaultLanguageCode)
         };
         foreach (var p in staticPaths)
-            urlset.Add(BuildUrlElement($"{BaseUrl}{CulturePrefix}{p}", today));
+            urlset.Add(BuildUrlElement($"{BaseUrl}{p}", today));
 
         // 3) Dinamik Page'ler (about, privacy, cookie, terms vb.)
         var pages = await _pages.GetAllActiveForSitemapAsync(DefaultLanguageCode, ct);
@@ -65,7 +66,7 @@ public class SitemapService : ISitemapService
             var slug = page.Translations.FirstOrDefault(t => t.LanguageCode == DefaultLanguageCode)?.Slug;
             if (string.IsNullOrEmpty(slug)) continue;
             var lastmod = (page.UpdatedAt ?? page.CreatedAt).ToString("yyyy-MM-dd");
-            urlset.Add(BuildUrlElement($"{BaseUrl}{CulturePrefix}/Pages/{slug}", lastmod));
+            urlset.Add(BuildUrlElement($"{BaseUrl}{PublicRouteSegments.PageDetailPath(DefaultLanguageCode, slug)}", lastmod));
         }
 
         // 4) Articles
@@ -75,7 +76,7 @@ public class SitemapService : ISitemapService
             var slug = article.Translations.FirstOrDefault(t => t.LanguageCode == DefaultLanguageCode)?.Slug;
             if (string.IsNullOrEmpty(slug)) continue;
             var lastmod = (article.UpdatedAt ?? article.PublishedAt ?? article.CreatedAt).ToString("yyyy-MM-dd");
-            urlset.Add(BuildUrlElement($"{BaseUrl}{CulturePrefix}/Articles/{slug}", lastmod));
+            urlset.Add(BuildUrlElement($"{BaseUrl}{PublicRouteSegments.ArticleDetailPath(DefaultLanguageCode, slug)}", lastmod));
         }
 
         // 5) Services
@@ -85,7 +86,7 @@ public class SitemapService : ISitemapService
             var slug = service.Translations.FirstOrDefault(t => t.LanguageCode == DefaultLanguageCode)?.Slug;
             if (string.IsNullOrEmpty(slug)) continue;
             var lastmod = (service.UpdatedAt ?? service.CreatedAt).ToString("yyyy-MM-dd");
-            urlset.Add(BuildUrlElement($"{BaseUrl}{CulturePrefix}/Services/{slug}", lastmod));
+            urlset.Add(BuildUrlElement($"{BaseUrl}{PublicRouteSegments.ServiceDetailPath(DefaultLanguageCode, slug)}", lastmod));
         }
 
         // 6) Attorneys
@@ -95,7 +96,7 @@ public class SitemapService : ISitemapService
             var slug = attorney.Translations.FirstOrDefault(t => t.LanguageCode == DefaultLanguageCode)?.Slug;
             if (string.IsNullOrEmpty(slug)) continue;
             var lastmod = (attorney.UpdatedAt ?? attorney.CreatedAt).ToString("yyyy-MM-dd");
-            urlset.Add(BuildUrlElement($"{BaseUrl}{CulturePrefix}/Attorneys/{slug}", lastmod));
+            urlset.Add(BuildUrlElement($"{BaseUrl}{PublicRouteSegments.AttorneyDetailPath(DefaultLanguageCode, slug)}", lastmod));
         }
 
         var xdoc = new XDocument(
@@ -126,7 +127,7 @@ public class SitemapService : ISitemapService
         sb.AppendLine("User-agent: *");
         sb.AppendLine("Disallow: /admin/");
         sb.AppendLine("Disallow: /Identity/");
-        sb.AppendLine("Disallow: /Contact/ThankYou");
+        sb.AppendLine($"Disallow: {PublicRouteSegments.ContactThankYouPath(DefaultLanguageCode)}");
         sb.AppendLine("Disallow: /Error/");
         sb.AppendLine("Allow: /");
         sb.AppendLine();

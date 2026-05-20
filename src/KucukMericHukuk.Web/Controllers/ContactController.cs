@@ -18,15 +18,17 @@ public class ContactController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Contact", Order = 0)]
-    [Route("{culture:culture}/Contact/Index", Order = 1)]
+    [Route("{culture:trCulture}/iletisim", Order = 0)]
+    [Route("{culture:enCulture}/contact", Order = 0)]
     public IActionResult Index()
     {
         return View(new ContactFormViewModel());
     }
 
     [HttpPost]
-    [Route("{culture:culture}/Contact/Submit")]
+    [Route("{culture:trCulture}/iletisim/gonder", Order = 0)]
+    [Route("{culture:enCulture}/contact/submit", Order = 0)]
+    [Route("{culture:trCulture}/Contact/Submit", Order = 1)]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting("contact-form")]
     public async Task<IActionResult> Submit(ContactFormViewModel vm, CancellationToken ct)
@@ -70,9 +72,25 @@ public class ContactController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Contact/ThankYou")]
+    [Route("{culture:trCulture}/iletisim/tesekkurler", Order = 0)]
+    [Route("{culture:enCulture}/contact/thank-you", Order = 0)]
     public IActionResult ThankYou()
     {
         return View();
+    }
+
+    [HttpGet]
+    [Route("{culture:trCulture}/Contact", Order = 1)]
+    [Route("{culture:trCulture}/Contact/Index", Order = 2)]
+    public IActionResult LegacyIndex(string culture)
+    {
+        return RedirectToActionPermanent(nameof(Index), new { culture });
+    }
+
+    [HttpGet]
+    [Route("{culture:trCulture}/Contact/ThankYou", Order = 1)]
+    public IActionResult LegacyThankYou(string culture)
+    {
+        return RedirectToActionPermanent(nameof(ThankYou), new { culture });
     }
 }

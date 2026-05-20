@@ -14,7 +14,8 @@ public class FaqsController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Faqs")]
+    [Route("{culture:trCulture}/sss", Order = 0)]
+    [Route("{culture:enCulture}/faq", Order = 0)]
     public async Task<IActionResult> Index(CancellationToken ct = default)
     {
         var lang = System.Globalization.CultureInfo.CurrentUICulture.Name;
@@ -22,5 +23,12 @@ public class FaqsController : Controller
 
         var vm = new FaqListViewModel { Faqs = faqs };
         return View(vm);
+    }
+
+    [HttpGet]
+    [Route("{culture:trCulture}/Faqs", Order = 1)]
+    public IActionResult LegacyIndex(string culture)
+    {
+        return RedirectToActionPermanent(nameof(Index), new { culture });
     }
 }

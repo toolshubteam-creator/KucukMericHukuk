@@ -50,7 +50,7 @@ public class SubscribersTests : IClassFixture<IntegrationTestFactory>
             new KeyValuePair<string, string>("__RequestVerificationToken", token),
         });
 
-        var response = await client.PostAsync("/tr-TR/Subscriber/Subscribe", formData);
+        var response = await client.PostAsync("/tr-TR/abone/abone-ol", formData);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Redirect, HttpStatusCode.Found);
 
@@ -87,7 +87,7 @@ public class SubscribersTests : IClassFixture<IntegrationTestFactory>
             AllowAutoRedirect = false
         });
 
-        var response = await client.GetAsync($"/tr-TR/Subscriber/Unsubscribe/{token}");
+        var response = await client.GetAsync($"/tr-TR/abone/abonelikten-cik/{token}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var html = await response.Content.ReadAsStringAsync();
@@ -108,7 +108,7 @@ public class SubscribersTests : IClassFixture<IntegrationTestFactory>
             AllowAutoRedirect = false
         });
 
-        var response = await client.GetAsync($"/tr-TR/Subscriber/Unsubscribe/{Guid.NewGuid()}");
+        var response = await client.GetAsync($"/tr-TR/abone/abonelikten-cik/{Guid.NewGuid()}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var html = await response.Content.ReadAsStringAsync();
@@ -162,7 +162,7 @@ public class SubscribersTests : IClassFixture<IntegrationTestFactory>
 
         var token = await TestHelpers.GetAntiForgeryTokenAsync(client, "/tr-TR/");
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/tr-TR/Subscriber/Subscribe")
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/tr-TR/abone/abone-ol")
         {
             Content = new FormUrlEncodedContent(new[]
             {
@@ -212,7 +212,7 @@ public class SubscribersTests : IClassFixture<IntegrationTestFactory>
 
         var token = await TestHelpers.GetAntiForgeryTokenAsync(client, "/tr-TR/");
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/tr-TR/Subscriber/Subscribe")
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/tr-TR/abone/abone-ol")
         {
             Content = new FormUrlEncodedContent(new[]
             {
@@ -256,7 +256,7 @@ public class SubscribersTests : IClassFixture<IntegrationTestFactory>
             new KeyValuePair<string, string>("__RequestVerificationToken", token),
         });
 
-        var response = await client.PostAsync("/tr-TR/Subscriber/Subscribe", formData);
+        var response = await client.PostAsync("/tr-TR/abone/abone-ol", formData);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Redirect, HttpStatusCode.Found);
     }

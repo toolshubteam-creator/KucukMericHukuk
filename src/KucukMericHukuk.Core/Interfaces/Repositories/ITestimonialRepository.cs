@@ -11,7 +11,7 @@ public interface ITestimonialRepository : IGenericRepository<Testimonial>
     /// <summary>Featured (öne çıkarılmış) testimonial'lar, Ana Sayfa carousel için.</summary>
     Task<IReadOnlyList<Testimonial>> GetFeaturedOrderedAsync(string languageCode, int maxCount, CancellationToken ct = default);
 
-    /// <summary>Public sayfalı liste — /tr-TR/Referanslar için.</summary>
+    /// <summary>Public sayfalı liste — /tr-TR/referanslar için.</summary>
     Task<PagedResult<Testimonial>> GetPublicPagedAsync(string languageCode, int page, int pageSize, CancellationToken ct = default);
 
     /// <summary>Admin paneli sayfalı liste — keyword filter (Translation.Content), silinmiş dahil opsiyonu.</summary>
