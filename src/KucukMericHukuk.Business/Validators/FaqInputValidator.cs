@@ -1,4 +1,5 @@
 using FluentValidation;
+using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.DTOs.Faq;
 
 namespace KucukMericHukuk.Business.Validators;
@@ -11,9 +12,18 @@ public class FaqInputValidator : AbstractValidator<FaqInputDto>
             .GreaterThanOrEqualTo(0).WithMessage("Sıra numarası 0 veya pozitif olmalıdır.");
 
         RuleFor(x => x.Translations)
-            .NotEmpty().WithMessage("En az bir dil için içerik girilmelidir.");
+            .Must(list => list != null && list.Any(t => LanguageCodes.IsDefault(t.LanguageCode) && IsActive(t)))
+            .WithMessage("Türkçe içerik zorunludur.");
 
-        RuleForEach(x => x.Translations).SetValidator(new FaqTranslationInputValidator());
+        RuleForEach(x => x.Translations)
+            .Where(IsActive)
+            .SetValidator(new FaqTranslationInputValidator());
+    }
+
+    private static bool IsActive(FaqTranslationInputDto t)
+    {
+        return !string.IsNullOrWhiteSpace(t.Question)
+            || !string.IsNullOrWhiteSpace(t.Answer);
     }
 }
 
@@ -23,7 +33,8 @@ public class FaqTranslationInputValidator : AbstractValidator<FaqTranslationInpu
     {
         RuleFor(x => x.LanguageCode)
             .NotEmpty().WithMessage("Dil kodu zorunludur.")
-            .MaximumLength(10);
+            .MaximumLength(10)
+            .Must(LanguageCodes.IsSupported).WithMessage("Geçersiz dil kodu.");
 
         RuleFor(x => x.Question)
             .NotEmpty().WithMessage("Soru zorunludur.")

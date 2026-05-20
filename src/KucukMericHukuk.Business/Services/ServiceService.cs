@@ -97,7 +97,8 @@ public class ServiceService : IServiceService
         if (attorneyResult.IsFailure)
             return Result.Failure<int>(attorneyResult.Errors);
 
-        var slugResult = await ResolveSlugsAsync(input.Translations, excludeId: null, ct);
+        var activeTranslations = input.Translations.Where(IsActiveTranslation).ToList();
+        var slugResult = await ResolveSlugsAsync(activeTranslations, excludeId: null, ct);
         if (slugResult.IsFailure)
             return Result.Failure<int>(slugResult.Errors);
 
@@ -110,7 +111,7 @@ public class ServiceService : IServiceService
             CreatedAt = DateTime.UtcNow,
         };
 
-        foreach (var t in input.Translations)
+        foreach (var t in activeTranslations)
         {
             svc.Translations.Add(new ServiceTranslation
             {
@@ -174,7 +175,8 @@ public class ServiceService : IServiceService
         if (attorneyResult.IsFailure)
             return attorneyResult;
 
-        var slugResult = await ResolveSlugsAsync(input.Translations, excludeId: input.Id.Value, ct);
+        var activeTranslations = input.Translations.Where(IsActiveTranslation).ToList();
+        var slugResult = await ResolveSlugsAsync(activeTranslations, excludeId: input.Id.Value, ct);
         if (slugResult.IsFailure)
             return slugResult;
 
@@ -185,7 +187,7 @@ public class ServiceService : IServiceService
         svc.UpdatedAt = DateTime.UtcNow;
 
         // Faz 7.1.2: Translation diff-based merge (Id + CreatedAt korunur).
-        var incomingTranslations = input.Translations.Select(t => new ServiceTranslation
+        var incomingTranslations = activeTranslations.Select(t => new ServiceTranslation
         {
             LanguageCode = t.LanguageCode,
             Name = t.Name,
@@ -336,4 +338,13 @@ public class ServiceService : IServiceService
         return errors.Count > 0 ? Result.Failure(errors) : Result.Success();
     }
 
+    private static bool IsActiveTranslation(ServiceTranslationInputDto t)
+    {
+        return !string.IsNullOrWhiteSpace(t.Name)
+            || !string.IsNullOrWhiteSpace(t.Slug)
+            || !string.IsNullOrWhiteSpace(t.ShortDescription)
+            || !string.IsNullOrWhiteSpace(t.FullDescription)
+            || !string.IsNullOrWhiteSpace(t.MetaTitle)
+            || !string.IsNullOrWhiteSpace(t.MetaDescription);
+    }
 }

@@ -85,7 +85,8 @@ public class TagService : ITagService
         if (!validation.IsValid)
             return validation.ToFailureResult<int>();
 
-        var slugResult = await ResolveSlugsAsync(input.Translations, excludeId: null, ct);
+        var activeTranslations = input.Translations.Where(IsActiveTranslation).ToList();
+        var slugResult = await ResolveSlugsAsync(activeTranslations, excludeId: null, ct);
         if (slugResult.IsFailure)
             return Result.Failure<int>(slugResult.Errors);
 
@@ -95,7 +96,7 @@ public class TagService : ITagService
             CreatedAt = DateTime.UtcNow,
         };
 
-        foreach (var t in input.Translations)
+        foreach (var t in activeTranslations)
         {
             tag.Translations.Add(new TagTranslation
             {
@@ -144,7 +145,8 @@ public class TagService : ITagService
                 ErrorCodes.Tag.NotFound, "Etiket bulunamadı."));
         }
 
-        var slugResult = await ResolveSlugsAsync(input.Translations, excludeId: input.Id.Value, ct);
+        var activeTranslations = input.Translations.Where(IsActiveTranslation).ToList();
+        var slugResult = await ResolveSlugsAsync(activeTranslations, excludeId: input.Id.Value, ct);
         if (slugResult.IsFailure)
             return slugResult;
 
@@ -152,7 +154,7 @@ public class TagService : ITagService
         tag.UpdatedAt = DateTime.UtcNow;
 
         // Faz 7.1.2: Translation diff-based merge (Id + CreatedAt korunur).
-        var incomingTranslations = input.Translations.Select(t => new TagTranslation
+        var incomingTranslations = activeTranslations.Select(t => new TagTranslation
         {
             LanguageCode = t.LanguageCode,
             Name = t.Name,
@@ -275,4 +277,9 @@ public class TagService : ITagService
         return errors.Count > 0 ? Result.Failure(errors) : Result.Success();
     }
 
+    private static bool IsActiveTranslation(TagTranslationInputDto t)
+    {
+        return !string.IsNullOrWhiteSpace(t.Name)
+            || !string.IsNullOrWhiteSpace(t.Slug);
+    }
 }

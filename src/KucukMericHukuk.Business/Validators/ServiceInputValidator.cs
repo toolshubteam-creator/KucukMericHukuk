@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using FluentValidation;
+using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.DTOs.Service;
 
 namespace KucukMericHukuk.Business.Validators;
@@ -18,15 +19,28 @@ public class ServiceInputValidator : AbstractValidator<ServiceInputDto>
             .MaximumLength(500).WithMessage("Öne çıkan görsel yolu en fazla 500 karakter olabilir.");
 
         RuleFor(x => x.Translations)
-            .NotEmpty().WithMessage("En az bir dil için içerik girilmelidir.");
+            .Must(list => list != null && list.Any(t => LanguageCodes.IsDefault(t.LanguageCode) && IsActive(t)))
+            .WithMessage("Türkçe içerik zorunludur.");
 
-        RuleForEach(x => x.Translations).SetValidator(new ServiceTranslationInputValidator());
+        RuleForEach(x => x.Translations)
+            .Where(IsActive)
+            .SetValidator(new ServiceTranslationInputValidator());
 
         When(x => x.AttorneyIds != null && x.AttorneyIds.Count > 0, () =>
         {
             RuleForEach(x => x.AttorneyIds)
                 .GreaterThan(0).WithMessage("Geçersiz avukat ID.");
         });
+    }
+
+    private static bool IsActive(ServiceTranslationInputDto t)
+    {
+        return !string.IsNullOrWhiteSpace(t.Name)
+            || !string.IsNullOrWhiteSpace(t.Slug)
+            || !string.IsNullOrWhiteSpace(t.ShortDescription)
+            || !string.IsNullOrWhiteSpace(t.FullDescription)
+            || !string.IsNullOrWhiteSpace(t.MetaTitle)
+            || !string.IsNullOrWhiteSpace(t.MetaDescription);
     }
 }
 
@@ -39,7 +53,8 @@ public class ServiceTranslationInputValidator : AbstractValidator<ServiceTransla
     public ServiceTranslationInputValidator()
     {
         RuleFor(x => x.LanguageCode)
-            .NotEmpty().WithMessage("Dil kodu zorunludur.");
+            .NotEmpty().WithMessage("Dil kodu zorunludur.")
+            .Must(LanguageCodes.IsSupported).WithMessage("Geçersiz dil kodu.");
 
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Hizmet adı zorunludur.")

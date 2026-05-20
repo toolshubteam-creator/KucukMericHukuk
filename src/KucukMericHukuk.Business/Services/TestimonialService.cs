@@ -97,7 +97,8 @@ public class TestimonialService : ITestimonialService
             CreatedAt = DateTime.UtcNow,
         };
 
-        foreach (var t in input.Translations)
+        var activeTranslations = input.Translations.Where(IsActiveTranslation).ToList();
+        foreach (var t in activeTranslations)
         {
             entity.Translations.Add(new TestimonialTranslation
             {
@@ -145,7 +146,8 @@ public class TestimonialService : ITestimonialService
         // Faz 7.1.2: Translation diff-based merge (Id + CreatedAt korunur).
         // Önceki "full-replace (Faq pattern)" yorumu: DEFERRED'daki "Translation full-replace
         // stratejisi" maddesi Faz 7.1.2'de kapatıldı, helper'a geçildi.
-        var incomingTranslations = input.Translations.Select(t => new TestimonialTranslation
+        var activeTranslations = input.Translations.Where(IsActiveTranslation).ToList();
+        var incomingTranslations = activeTranslations.Select(t => new TestimonialTranslation
         {
             LanguageCode = t.LanguageCode,
             Content = t.Content.Trim(),
@@ -202,5 +204,10 @@ public class TestimonialService : ITestimonialService
         _uow.Testimonials.HardDelete(entity);
         await _uow.SaveChangesAsync(ct);
         return Result.Success();
+    }
+
+    private static bool IsActiveTranslation(TestimonialTranslationInputDto t)
+    {
+        return !string.IsNullOrWhiteSpace(t.Content);
     }
 }

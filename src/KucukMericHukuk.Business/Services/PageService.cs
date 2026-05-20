@@ -116,7 +116,8 @@ public class PageService : IPageService
                 field: nameof(input.PageKey)));
         }
 
-        var slugResult = await ResolveSlugsAsync(input.Translations, excludeId: null, cancellationToken);
+        var activeTranslations = input.Translations.Where(IsActiveTranslation).ToList();
+        var slugResult = await ResolveSlugsAsync(activeTranslations, excludeId: null, cancellationToken);
         if (slugResult.IsFailure)
             return Result.Failure<int>(slugResult.Errors);
 
@@ -129,7 +130,7 @@ public class PageService : IPageService
             CreatedAt = DateTime.UtcNow,
         };
 
-        foreach (var t in input.Translations)
+        foreach (var t in activeTranslations)
         {
             page.Translations.Add(new PageTranslation
             {
@@ -190,7 +191,8 @@ public class PageService : IPageService
                 field: nameof(input.PageKey)));
         }
 
-        var slugResult = await ResolveSlugsAsync(input.Translations, excludeId: input.Id.Value, cancellationToken);
+        var activeTranslations = input.Translations.Where(IsActiveTranslation).ToList();
+        var slugResult = await ResolveSlugsAsync(activeTranslations, excludeId: input.Id.Value, cancellationToken);
         if (slugResult.IsFailure)
             return slugResult;
 
@@ -201,7 +203,7 @@ public class PageService : IPageService
         page.UpdatedAt = DateTime.UtcNow;
 
         // Faz 7.1.2: Translation diff-based merge (Id + CreatedAt korunur).
-        var incomingTranslations = input.Translations.Select(t => new PageTranslation
+        var incomingTranslations = activeTranslations.Select(t => new PageTranslation
         {
             LanguageCode = t.LanguageCode,
             Title = t.Title,
@@ -330,4 +332,12 @@ public class PageService : IPageService
         return errors.Count > 0 ? Result.Failure(errors) : Result.Success();
     }
 
+    private static bool IsActiveTranslation(PageTranslationInputDto t)
+    {
+        return !string.IsNullOrWhiteSpace(t.Title)
+            || !string.IsNullOrWhiteSpace(t.Slug)
+            || !string.IsNullOrWhiteSpace(t.Content)
+            || !string.IsNullOrWhiteSpace(t.MetaTitle)
+            || !string.IsNullOrWhiteSpace(t.MetaDescription);
+    }
 }

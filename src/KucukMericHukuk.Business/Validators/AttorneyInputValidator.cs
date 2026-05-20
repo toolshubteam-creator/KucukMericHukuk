@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using FluentValidation;
+using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.DTOs.Attorney;
 
 namespace KucukMericHukuk.Business.Validators;
@@ -20,32 +21,27 @@ public class AttorneyInputValidator : AbstractValidator<AttorneyInputDto>
 
         When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber), () =>
         {
-            RuleFor(x => x.PhoneNumber)
-                .MaximumLength(50);
+            RuleFor(x => x.PhoneNumber).MaximumLength(50);
         });
 
         When(x => !string.IsNullOrWhiteSpace(x.LinkedInUrl), () =>
         {
-            RuleFor(x => x.LinkedInUrl)
-                .MaximumLength(500);
+            RuleFor(x => x.LinkedInUrl).MaximumLength(500);
         });
 
         When(x => !string.IsNullOrWhiteSpace(x.BarRegistrationNumber), () =>
         {
-            RuleFor(x => x.BarRegistrationNumber)
-                .MaximumLength(50);
+            RuleFor(x => x.BarRegistrationNumber).MaximumLength(50);
         });
 
         When(x => !string.IsNullOrWhiteSpace(x.BarName), () =>
         {
-            RuleFor(x => x.BarName)
-                .MaximumLength(150);
+            RuleFor(x => x.BarName).MaximumLength(150);
         });
 
         When(x => !string.IsNullOrWhiteSpace(x.ProfileImageUrl), () =>
         {
-            RuleFor(x => x.ProfileImageUrl)
-                .MaximumLength(500);
+            RuleFor(x => x.ProfileImageUrl).MaximumLength(500);
         });
 
         When(x => x.ServiceIds != null && x.ServiceIds.Count > 0, () =>
@@ -55,9 +51,25 @@ public class AttorneyInputValidator : AbstractValidator<AttorneyInputDto>
         });
 
         RuleFor(x => x.Translations)
-            .NotEmpty().WithMessage("En az bir dil için içerik girilmelidir.");
+            .Must(list => list != null && list.Any(t => LanguageCodes.IsDefault(t.LanguageCode) && IsActive(t)))
+            .WithMessage("Türkçe içerik zorunludur.");
 
-        RuleForEach(x => x.Translations).SetValidator(new AttorneyTranslationInputValidator());
+        RuleForEach(x => x.Translations)
+            .Where(IsActive)
+            .SetValidator(new AttorneyTranslationInputValidator());
+    }
+
+    private static bool IsActive(AttorneyTranslationInputDto t)
+    {
+        return !string.IsNullOrWhiteSpace(t.FullName)
+            || !string.IsNullOrWhiteSpace(t.Title)
+            || !string.IsNullOrWhiteSpace(t.Slug)
+            || !string.IsNullOrWhiteSpace(t.ShortBio)
+            || !string.IsNullOrWhiteSpace(t.FullBio)
+            || !string.IsNullOrWhiteSpace(t.Education)
+            || !string.IsNullOrWhiteSpace(t.Publications)
+            || !string.IsNullOrWhiteSpace(t.MetaTitle)
+            || !string.IsNullOrWhiteSpace(t.MetaDescription);
     }
 }
 
@@ -70,7 +82,8 @@ public class AttorneyTranslationInputValidator : AbstractValidator<AttorneyTrans
     public AttorneyTranslationInputValidator()
     {
         RuleFor(x => x.LanguageCode)
-            .NotEmpty().WithMessage("Dil kodu zorunludur.");
+            .NotEmpty().WithMessage("Dil kodu zorunludur.")
+            .Must(LanguageCodes.IsSupported).WithMessage("Geçersiz dil kodu.");
 
         RuleFor(x => x.FullName)
             .NotEmpty().WithMessage("Ad Soyad zorunludur.")
@@ -83,8 +96,7 @@ public class AttorneyTranslationInputValidator : AbstractValidator<AttorneyTrans
         {
             RuleFor(x => x.Slug)
                 .MaximumLength(200)
-                .Matches(SlugRegex).WithMessage(
-                    "Slug yalnızca küçük harf, rakam ve tire içerebilir.");
+                .Matches(SlugRegex).WithMessage("Slug yalnızca küçük harf, rakam ve tire içerebilir.");
         });
 
         RuleFor(x => x.ShortBio)
@@ -96,10 +108,7 @@ public class AttorneyTranslationInputValidator : AbstractValidator<AttorneyTrans
         RuleFor(x => x.Publications)
             .MaximumLength(2000).WithMessage("Yayınlar en fazla 2000 karakter olabilir.");
 
-        RuleFor(x => x.MetaTitle)
-            .MaximumLength(200);
-
-        RuleFor(x => x.MetaDescription)
-            .MaximumLength(500);
+        RuleFor(x => x.MetaTitle).MaximumLength(200);
+        RuleFor(x => x.MetaDescription).MaximumLength(500);
     }
 }
