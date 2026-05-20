@@ -89,8 +89,8 @@ Kanıt-temelli kontroller — her birini gör + işaretle:
 - [ ] Network sekmesi → ana sayfa response header → `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload` GÖRÜNÜYOR
 - [ ] `/admin/account/login` → form açılıyor, Turnstile widget render oluyor (demo değil, gerçek Cloudflare widget — Natro IP'sini Cloudflare tanıyor mu)
 - [ ] Admin login (`Seed__` env-var ile set edilen parola) → `/admin` dashboard açılıyor
-- [ ] `/tr-TR/Contact` → iletişim formu submit → `admin@kucukmerichukuk.av.tr`'ye e-posta geliyor
-- [ ] `/tr-TR/Appointment` → randevu formu submit → e-posta + admin'de görünüyor
+- [ ] `/tr-TR/iletisim` → iletişim formu submit → `admin@kucukmerichukuk.av.tr`'ye e-posta geliyor
+- [ ] `/tr-TR/randevu` → randevu formu submit → e-posta + admin'de görünüyor
 - [ ] `/sitemap.xml` ve `/robots.txt` → erişilebilir, doğru içerik
 - [ ] `https://www.ssllabs.com/ssltest/analyze.html?d=kucukmerichukuk.av.tr` → A veya A+ skoru
 - [ ] `https://securityheaders.com/?q=kucukmerichukuk.av.tr` → A veya üzeri (HSTS preload, CSP, X-Frame, vb.)

@@ -15,21 +15,50 @@
 | 4 | Frontend tasarım & geliştirme | 3 hafta | ✅ Tamamlandı |
 | 5 | SEO, entegrasyon, güvenlik | 1 hafta | ✅ Tamamlandı |
 | 6 | Test, düzeltme, yayına alma | 1 hafta | 🔄 Devam ediyor |
-| 7 | Admin Zenginleştirme (Aktivite Logu + Aboneler + 404 + Redirect + GA4 + Search Console) | 3 hafta | 🔄 Devam ediyor |
+| 7 | Admin Zenginleştirme (Aktivite Logu + Aboneler + 404 + Redirect + GA4 + Search Console) | 3 hafta | ✅ Tamamlandı |
+| 8 | Yayın Öncesi Stabilizasyon & Cila | Esnek | 🔄 Devam ediyor |
 
 **Toplam:** 10 hafta (+2 hafta tampon önerisi)
 
 ---
 
-## FAZ 7 — Admin Zenginleştirme — 🔄 DEVAM EDİYOR
+## FAZ 8 — Yayın Öncesi Stabilizasyon & Cila — 🔄 DEVAM EDİYOR
 
 **Status:** 🔄 Devam ediyor
+**Başlangıç:** 20.05.2026
+**Hedef:** Yayın tarihi beklerken düşük riskli teknik borçları kapatmak; URL/SEO/UX borcu doğurabilecek kararları yayın öncesinde netleştirmek.
+
+### Tamamlanan / Devam Eden Maddeler
+
+| Madde | Durum | Not |
+| --- | --- | --- |
+| Admin topbar dropdown | ✅ Tamamlandı | `_AdminTopbar` kullanıcı menüsü için explicit Bootstrap Dropdown toggle eklendi (`wwwroot/js/admin/admin-topbar.js`). Sidebar bypass korunuyor. |
+| Turnstile JS tek yükleme | ✅ Tamamlandı | Public layout tek loader noktası oldu; Contact/Appointment/Subscribe içindeki duplicate loader'lar kaldırıldı. Admin login kendi layout'unda ayrı kalır. |
+| SEO meta alanları UI keşfi | ✅ Tamamlandı | Page/Service/Category/Attorney/Article admin formlarında meta title/description UI zaten mevcut. Tag/Faq/Testimonial entity/DTO'da meta alanı yok; eski DEFERRED maddesi kapatıldı. |
+| Public route dili + i18n açılışı | ✅ Tamamlandı | Canonical public route'lar culture-aware oldu. `tr-TR`: `/iletisim`, `/randevu`, `/makaleler`, `/hizmetler`, `/avukatlar`, `/sayfalar`, `/sss`, `/galeri`, `/referanslar`, `/abone/...`; `en-US`: `/contact`, `/appointment`, `/articles`, `/services`, `/attorneys`, `/pages`, `/faq`, `/gallery`, `/testimonials`, `/subscriber/...`. Eski İngilizce controller route'ları sadece `tr-TR` için 301 ile Türkçe canonical URL'lere taşınır. |
+
+### Doğrulama
+
+- `dotnet build src/KucukMericHukuk.Web/KucukMericHukuk.Web.csproj --no-restore -p:OutDir=C:/Users/Esat/Desktop/Project/KucukMericHukuk/.verify/build/`: **0 warning / 0 error** (normal `bin` build'i çalışan Web process'i DLL kilidi nedeniyle kullanılmadı)
+- `dotnet test --no-restore -p:OutDir=C:/Users/Esat/Desktop/Project/KucukMericHukuk/.verify/test/`: **671 PASSED**
+- Unit testler: **501 PASSED**
+- Integration testler: **170 PASSED**
+- Toplam doğrulanan test: **671 PASSED** (501 unit + 170 integration)
+- Yeni integration smoke testleri: Turnstile public loader tekil render, admin topbar fix script/attribute render.
+- Yeni route testleri: 16 legacy GET 301 redirect + 8 canonical Türkçe + 8 canonical İngilizce route smoke testi.
+
+---
+
+## FAZ 7 — Admin Zenginleştirme — ✅ TAMAMLANDI
+
+**Status:** ✅ Tamamlandı
 **Başlangıç:** 16.05.2026
+**Tamamlanma:** 20.05.2026
 **Hedef:** Admin panele operasyonel zenginleştirme — sunum öncesi tamamlanması istenen modüller. Faz 6 deploy'u (6.26.3-6.26.4) Faz 7 tamamlanıp onay alındıktan sonra Faz 6 + Faz 7 birlikte yapılır.
 
 ### Kapsam
 
-DEFERRED'daki "Faz 7 → Admin Zenginleştirme" maddesinin (6.22-keşif raporundan) plan'a dönüşmüş hali. Hafriyat referans projesi keşfedildi: aynı framework ailesi ama farklı mimari (tek-proje, Business katmanı yok, soft-delete/i18n yok) — kod drop-in kopya değil, her özellik Küçükmeriç katmanlarına re-home (~%30 kavram/şema, ~%70 yeniden yazım).
+Başlangıçta DEFERRED'da tutulan "Faz 7 → Admin Zenginleştirme" maddesinin (6.22-keşif raporundan) plan'a dönüşmüş hali. Hafriyat referans projesi keşfedildi: aynı framework ailesi ama farklı mimari (tek-proje, Business katmanı yok, soft-delete/i18n yok) — kod drop-in kopya değil, her özellik Küçükmeriç katmanlarına re-home (~%30 kavram/şema, ~%70 yeniden yazım).
 
 ### Alt-Adım Planı
 
@@ -45,7 +74,7 @@ DEFERRED'daki "Faz 7 → Admin Zenginleştirme" maddesinin (6.22-keşif raporund
 | ✅ 7.5 | Grup B ortak altyapı — Google.Apis.Auth 1.74.0 + credential okuma (`IGoogleApiClient`) + admin Site Ayarları → Google API Ayarları tab (19.05.2026) | — | YOK, sıfırdan | ~2 alt-adım |
 | ✅ 7.6 | GA4 Data API widget (dashboard) — Google.Apis.AnalyticsData.v1beta + son 28 gün metrik kartı + Property ID/credential boş-state (19.05.2026) | 7.5 | YOK | ~2 alt-adım |
 | ✅ 7.7 | Search Console API widget (dashboard) — Google.Apis.SearchConsole.v1 + son 28 gün organik arama metrik kartı + Site URL/credential boş-state (19.05.2026) | 7.5 | YOK | ~2 alt-adım |
-| 7.8 | Faz 7 kapanış — doc senkron + DEFERRED temizlik + Faz 6 ile birlikte tag `v0.7.0` hazırlığı | tüm | — | ~1 alt-adım |
+| ✅ 7.8 | Faz 7 kapanış — doc senkron + DEFERRED temizlik + Faz 6 ile birlikte tag `v0.7.0` hazırlığı (20.05.2026) | tüm | — | ~1 alt-adım |
 
 ### Önemli Kararlar
 
@@ -59,12 +88,13 @@ DEFERRED'daki "Faz 7 → Admin Zenginleştirme" maddesinin (6.22-keşif raporund
 - **GA4 dashboard widget kapandı.** Admin Kontrol Paneli'ne son 28 gün için aktif kullanıcı, yeni kullanıcı, oturum, sayfa görüntüleme ve etkinlik metrikleri eklendi. `GoogleAnalyticsPropertyId` veya credential yoksa kart güvenli boş-state gösterir; domain/Google Cloud hazır olduğunda ayarlar girilerek veri çekmeye başlar.
 - **Search Console dashboard widget kapandı.** Admin Kontrol Paneli'ne son 28 gün için organik tıklama, gösterim, CTR ve ortalama pozisyon metrikleri eklendi. `GoogleSearchConsoleSiteUrl` veya credential yoksa kart güvenli boş-state gösterir; service account Search Console property'ye yetkilendirilince veri çekmeye başlar.
 
-### Faz 7 Sonu Hedefleri
+### Faz 7 Kapanış Sonuçları
 
-- 8 alt-adım merged
-- Test sayısı 474 → ~520+ (her modül ~5-10 yeni test)
-- DEFERRED.md "Faz 7 → Admin Zenginleştirme" bölümü kapatılır
-- Faz 6 + Faz 7 birlikte deploy (6.26.3) sonrası tag `v0.7.0` + `main` merge
+- Tüm Faz 7 alt-adımları tamamlandı: Aktivite Logu, Translation merge, Aboneler+Bülten, 404 Takibi, Redirect, Google ortak altyapı, GA4 widget, Search Console widget ve kapanış dokümantasyonu.
+- Test sayısı 474 → **637 PASSED** (501 unit + 136 integration).
+- `dotnet build --no-restore`: **0 warning / 0 error**.
+- DEFERRED.md "Faz 7 → Admin Zenginleştirme" aktif plan bölümü kapatıldı; Faz 7 sonrası kalan iyileştirmeler ayrı DEFERRED maddeleri olarak bırakıldı.
+- Faz 6 + Faz 7 birlikte deploy (6.26.3) sonrası tag `v0.7.0` + `main` merge sıradaki yayın adımı olarak kaldı.
 
 ---
 
@@ -172,13 +202,9 @@ Faz 6'nın geri kalan adımları üç başlık altında ilerledi: belge senkroni
 
 ### DEFERRED Notları
 
-Faz 6 boyunca çok sayıda DEFERRED maddesi kapatıldı (MetaTagsHelpers testi, Testimonial, Galeri, Faq cila, ContactMessage reply, kullanıcı yönetimi, lockout reset, Editor/Author authz, admin form binding audit, production seed credentials, LocalDB→SQL Server, SiteInfo, Google Fonts self-host, CDN self-host, CI SRI doğrulama, kısa meta descriptions). Faz 7'ye / belirsiz zamanlamaya taşınan başlıca maddeler:
+Faz 6 boyunca çok sayıda DEFERRED maddesi kapatıldı (MetaTagsHelpers testi, Testimonial, Galeri, Faq cila, ContactMessage reply, kullanıcı yönetimi, lockout reset, Editor/Author authz, admin form binding audit, production seed credentials, LocalDB→SQL Server, SiteInfo, Google Fonts self-host, CDN self-host, CI SRI doğrulama, kısa meta descriptions). Faz 6 sonunda Faz 7'ye taşınan operasyonel paket (aktivite logu, aboneler/bülten, 404 takibi, redirect, GA4 ve Search Console) Faz 7.8 kapanışıyla tamamlandı. Belirsiz zamanlamaya kalan başlıca maddeler:
 
-- **Randevu modülü** (Spec 2.1) — entity + DTO + service + repository + public form + admin yönetim + e-posta bildirim. 6.15'te "Randevu Alın" geçici Contact yönlendirmesi yapıldı.
-- **Dashboard widget genişletme** (Spec 5.1) — son makaleler / 404 sayısı / aktivite logları / ziyaretçi özeti; data DB'de mevcut, sadece UI gerek.
 - **Bütüncül tasarım cila turu (v0.4.1)** — Faz 4'ten ertelenmiş UX turu.
-- **Token DRY refactor** — admin + public ortak `tokens.css`.
-- **HSTS preload** — SSL/HTTPS production hazır olunca.
 - **Admin topbar dropdown bug** — uzun debug seansı sonuçsuz, sidebar bypass çalışıyor.
 - **Pre-commit hook FluentValidator kontrolü**, **müşteri içeriği tamamlanınca meta description revize**, ve production deploy tarafı (SSL, hosting, Search Console gönderimi).
 
@@ -791,7 +817,7 @@ Bkz. DEFERRED.md — Faz 3 kapanışında 7 yeni madde eklendi.
   - **Core:**
     - `BaseEntity` (audit kolonları + soft delete: `Id`, `CreatedAt`, `UpdatedAt`, `IsDeleted`, `DeletedAt`)
     - `ITranslatable<T>` + `ITranslation` interface'leri (çok dilli altyapı)
-    - `LanguageCodes` constants (`tr-TR`, `en-US`, `de-DE`; şu an sadece `tr-TR` Supported)
+    - `LanguageCodes` constants (`tr-TR`, `en-US`, `de-DE`; şu an `tr-TR` + `en-US` Supported)
     - `ApplicationUser : IdentityUser<int>` (FullName + audit + soft delete)
     - `ApplicationRole : IdentityRole<int>` (Description + audit)
     - `Microsoft.Extensions.Identity.Stores 10.0.0` paketi (EF bağımlılığı olmadan Identity model sınıfları)

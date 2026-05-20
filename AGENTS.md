@@ -1,6 +1,6 @@
-# CLAUDE.md — Küçükmeriç Hukuk Bürosu Web Projesi
+# AGENTS.md — Küçükmeriç Hukuk Bürosu Web Projesi
 
-> Bu dosya Claude Code tarafından her oturum başında okunur. Proje boyunca tutarlı geliştirme yapabilmek için kodlama standartları, mimari kararlar ve faz durumu burada tutulur. Karar değişikliklerinde bu dosya güncellenmelidir.
+> Bu dosya Codex tarafından her oturum başında okunur. Proje boyunca tutarlı geliştirme yapabilmek için kodlama standartları, mimari kararlar ve faz durumu burada tutulur. Karar değişikliklerinde bu dosya güncellenmelidir.
 
 ---
 
@@ -50,7 +50,7 @@ KucukMericHukuk/
 ├── tests/
 │   └── KucukMericHukuk.Tests
 ├── docs/                                → Dökümanlar
-├── CLAUDE.md                            → Bu dosya
+├── AGENTS.md                            → Bu dosya
 ├── PROGRESS.md                          → Faz ilerleme kayıtları
 └── README.md
 ```
@@ -424,9 +424,9 @@ Faz tamamlama detayları için `PROGRESS.md` dosyasına bakınız.
 
 ---
 
-## 12. Önemli Hatırlatmalar (Claude Code için)
+## 12. Önemli Hatırlatmalar (Codex için)
 
-1. **CLAUDE.md ve PROGRESS.md değişiklik gerektirir mi?** — Yeni mimari karar veya bağımlılık eklendiğinde güncelle.
+1. **AGENTS.md ve PROGRESS.md değişiklik gerektirir mi?** — Yeni mimari karar veya bağımlılık eklendiğinde güncelle.
 2. **Kod yazmadan önce klasör yapısını kontrol et** — Yanlış katmana kod koyma.
 3. **EF Core sorgu yazarken `.Include()` ve `.AsNoTracking()` kullanımına dikkat** — Performans için.
 4. **Frontend'de inline JS minimuma** — Tüm JS `wwwroot/js/` altında modüler dosyalarda.
