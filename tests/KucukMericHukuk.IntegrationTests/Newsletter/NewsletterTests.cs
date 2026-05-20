@@ -174,6 +174,6 @@ public class NewsletterTests : IClassFixture<IntegrationTestFactory>
         var html = await response.Content.ReadAsStringAsync();
         html.Should().Contain("Onizleme Test Yazi");
         html.Should().Contain("Devam"); // "Devamını oku" buton (ASCII-safe)
-        html.Should().Contain("Unsubscribe"); // KVKK unsubscribe linki
+        html.Should().Contain("/tr-TR/abone/abonelikten-cik/"); // KVKK abonelikten çıkma linki
     }
 }

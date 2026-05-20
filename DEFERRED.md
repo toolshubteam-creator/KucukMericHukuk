@@ -9,14 +9,6 @@
 
 ---
 
-## Faz 3 → İçerik Yönetimi
-
-- **SEO meta alanları UI**
-  - Entity'lerde alanlar var (Faz 1)
-  - Admin form bileşeni Faz 3 (her modülde tekrar kullanılan partial)
-
----
-
 ## Faz 4 → Frontend (sonraki adımlar)
 
 - **Article AuthorId seed bağı (opsiyonel)**
@@ -227,93 +219,6 @@
   - Service detay zaten LegalService'in bir parçası; ayrı schema marjinal ek değer
   - Tetik: Faz 5.4 breadcrumb turunda yeniden değerlendir
 
-- **Admin topbar dropdown click bug** (Faz 6+ / UI cleanup)
-  - Faz 6.8 manuel teyit sırasında tespit edildi: sağ üst kullanıcı avatarına tıklamada dropdown açılmıyor
-  - Veri toplandı: Bootstrap yüklü, instance kayıtlı, manuel `dd.show()` çalışıyor, ama doğal click event element'e ulaşmıyor (document capture listener bile yakalamıyor)
-  - Denenen fix'ler: CSP `connect-src` genişletme (Bootstrap source map fetch için), `<a href="#">` → `<button type="button">` migration — ikisi de çözmedi
-  - Kök sebep belirsiz: muhtemelen Tabler theme + Bootstrap entegrasyon detayı, browser-level event capture problemi, veya başka subtle bir konflikt
-  - Geçici çözüm: Sidebar'a Profilim + Çıkış Yap item'ları eklendi (`_AdminSidebar.cshtml`, dropdown bypass) — kullanıcı pratik olarak logout'a erişebilir
-  - **Faz 6.24 (15.05.2026) teşhis turu — kök sebep HÂLÂ belirsiz, ek kanıtlar:**
-    * Bootstrap engine sağlam: `bootstrap.Dropdown.VERSION` 5.3.3, manuel `toggle()` çalışıyor (dropdown açılıyor, `show` class ekleniyor)
-    * Doğal click sırasında toggle element'ine `focus` class'ı geliyor ama `show` eklenmiyor
-    * Document'a kayıtlı 20+ click listener var: Bootstrap `event-handler.js` + `tabler.min.js`
-    * **Hipotez TEST EDİLDİ:** `tabler.min.js` geçici devre dışı bırakıldı → dropdown hâlâ açılmadı. Yani Tabler JS dropdown delegation çakışması DEĞİL.
-    * **Yan kazanım:** Tabler JS olmadan da admin tab geçişi, modal, SweetAlert, sidebar toggle çalışıyor — Bootstrap kendi başına yeterli (gelecekte Tabler JS'i tamamen kaldırma değerlendirme konusu olabilir, ama bu maddenin kapsamı değil)
-  - **Sonraki teşhis turu için ipuçları:**
-    * Bootstrap'in iç delegation'ı (`event-handler.js:91` + `.js:103`) neden `show` eklemiyor — `Dropdown.prototype.toggle()` içinde bir guard mı (örn. `_isShown` state tutarsızlığı, `_parent` null mu)
-    * Browser-level: `pointer-events`, `::before`/`::after` overlay, `z-index` örtüşmesi (Faz 6.24'te adım 10 atlandı, ama adım 9 hiç çalışmadığı için bu yön incelenmedi)
-    * Bootstrap 5.3.3'te bilinen bir bug var mı (issue/changelog tarama)
-  - Tetik: yeni bir admin sayfasında benzer dropdown gerektiğinde, veya cila kalanı turunda
-
-- **Dashboard widget genişletme — kalan widget'lar** (Spec madde 5.1, Faz 7)
-  - Faz 6.21'de eklendi: "Son Makaleler" + "Site Özeti" widget'ları (`IDashboardService` + 2 DTO + view card)
-  - KALAN widget'lar (404 sayısı, aktivite logları, ziyaretçi özeti) altyapı gerektiriyor —
-    bkz. **Faz 7 → Admin Zenginleştirme** (Grup A: 404 Takibi + Aktivite Logu; Grup B: ziyaretçi/GA4)
-  - Faz 6.21 keşfi netleştirdi: bu widget'lar "UI işi" değil; ilgili entity/middleware/audit
-    altyapısı kurulduktan sonra dashboard'a kart eklemek marjinal kalır
-
----
-
-## Faz 7 → Admin Zenginleştirme (plan'a dönüştü — bkz. PROGRESS.md)
-
-> **Bu bölüm artık aktif plan.** PROGRESS.md Faz 7 → Alt-Adım Planı tablosunda
-> 8 alt-adıma bölündü (7.1 Aktivite Logu → 7.8 kapanış). PageSpeed kapsam dışı,
-> Grup B (GA4 + Search Console) domain-bağımsız geliştirilir. Bu bölüm Faz 7
-> sonu (7.8) kapanışta tamamen silinecek; o güne kadar Hafriyat referans envanteri
-> yapılaşırken kaynak olarak burada kalıyor.
-
-> Kaynak: 6.22-keşif turu (Hafriyat panel referans incelemesi). Hafriyat ile
-> Küçükmeriç aynı framework ailesi ama farklı mimari (Hafriyat tek-proje,
-> Business katmanı/soft-delete/i18n yok) — kod drop-in kopyalanamaz, her
-> özellik Küçükmeriç katmanlarına re-home edilir (~%30 şema/kavram taşınır,
-> ~%70 yeniden yazım).
-
-### Grup A — İç araçlar (Hafriyat'ta kısmen var, dış bağımlılık yok)
-
-- **✅ 404 Takibi** — Faz 7.3'te tamamlandı (18.05.2026)
-  - 7.3.1: NotFoundLog entity (aggregate Url + HitCount + LastSeenAt) + race-safe upsert repo + migration
-  - 7.3.2a: NotFoundLoggingMiddleware (UseStatusCodePagesWithReExecute'ten ÖNCE, IStatusCodeReExecuteFeature.OriginalPath ile orijinal URL yakalama, filtreler: asset/admin/Error/GET-only, 850+ truncate)
-  - 7.3.2b: NotFoundService + admin "404 Kayıtları" liste (filtre/sort) + Temizle (tek + tümü, hard-delete)
-  - 17 yeni test (7 repo + 9 integration + 5 service), 569 total PASSED
-  - "Tek-tık 301 kur" akışı 7.4.3b'de NotFoundLog → Redirect köprüsüyle kapatıldı
-
-- **✅ Aktivite Logu** — Faz 7.1'de tamamlandı (15.05.2026)
-  - AuditLog entity + AuditSaveChangesInterceptor + ICurrentUserAccessor + admin liste/detay
-  - Ignore listesi: Identity, AuditLog, ContactMessage/Appointment/Subscriber (public formlar)
-  - Modified delta, soft-delete→Deleted, restore→Restored mantığı çalışıyor
-  - 14 yeni test (6 unit + 8 integration), 488 total PASSED
-
-- **✅ Aboneler+Bülten** — Tam tamamlandı (Faz 7.2a + 7.2b-1 + 7.2b-2, 16.05.2026)
-  - 7.2a: Subscriber entity + public abone formu (footer band, Turnstile/honeypot/KVKK/rate-limit) + admin liste/sil + token ile iptal
-  - 7.2b-1: NewsletterJob entity + Article.NewsletterSentAt flag + mail HTML şablonu + admin "Bülten" modülü (bekleyen liste + önizleme + Pending job oluşturma)
-  - 7.2b-2: NewsletterService.ProcessJobAsync batch motor + NewsletterDispatcher (Task.Run + IServiceScopeFactory) + admin "Gönder" buton + SMTP rate limit + abone-bazlı hata toleransı + Article.NewsletterSentAt Completed'da set, Failed'da set ETMEZ
-
-### Grup B — Dış API entegrasyonu (Hafriyat'ta HİÇ YOK — sıfırdan + müşteri-bağımlı)
-
-- **✅ Ortak Google altyapı** — Faz 7.5'te tamamlandı (19.05.2026): Google.Apis.Auth + `IGoogleApiClient` + credential okuma + SiteSettings Google API Ayarları tab
-- **✅ GA4 Data API widget** — Faz 7.6'da tamamlandı (19.05.2026): `Google.Apis.AnalyticsData.v1beta` + dashboard son 28 gün metrik kartı + Property ID/credential boş-state
-- **✅ Search Console API widget** — Faz 7.7'de tamamlandı (19.05.2026): `Google.Apis.SearchConsole.v1` + dashboard son 28 gün organik arama metrik kartı + Site URL/credential boş-state
-- **PageSpeed Insights widget** — Faz 7 kapsamı dışı (kullanıcı kararı; PROGRESS.md karar notu)
-- Ortak blocker: Google Cloud projesi ve service account yetkileri — müşteri tarafı kurulum gerektirir
-- Hafriyat'ta adapte edilecek kaynak kod SIFIR — tamamı yeni entegrasyon
-- 7.6/7.7 Google API paketleri eklendi (`Google.Apis.AnalyticsData.v1beta`, `Google.Apis.SearchConsole.v1`)
-
-### Grup C — Yönlendirmeler (Küçükmeriç'te HİÇ YOK — sıfırdan, Hafriyat iyi referans)
-
-- **✅ Redirect modülü** — Faz 7.4'te tamamlandı (19.05.2026)
-  - ✅ 7.4.1 (18.05.2026): Redirect + SlugHistory entity + repo + migration
-  - ✅ 7.4.2 (18.05.2026): RedirectMiddleware (pipeline NotFoundLogging'den önce) + IMemoryCache + POC
-  - ✅ 7.4.3a (18.05.2026): SlugHistoryService + 6 servis update kanca (Article pilot + Page/Service/Attorney/Category/Tag) + RedirectController admin CRUD + insert-time cycle validation (max 10 hop) + AJAX loop-check + cache invalidation + Yönlendirmeler birleşik liste (Manuel + SlugHistory Tür kolonu)
-  - ✅ 7.4.3b (18.05.2026): NotFoundLog → "Redirect Kur" tek-tık köprü (7.3↔7.4 birleşme tamam) — SweetAlert2 input modal, başarıda 404 satırı çözüldü silinir
-  - ✅ 7.4.4 (19.05.2026): Faz 7.4 kapanış — DEFERRED + PROGRESS + CLAUDE senkron; `SluggedEntityType` taşıma teyidi kapatıldı
-
-### Notlar
-
-- Grup C'deki diğer kalemler (Site Ayarları, Dashboard, Mesajlar/Medya/Galeri):
-  Küçükmeriç zaten eşdeğer/üstün — yapılacak bir şey yok
-- Tetik: Faz 6 tamamlanıp site yayına çıktıktan sonra; Faz 7 başında bu
-  bölüm sıralı alt-adım planına dönüştürülür
-
 ---
 
 ## 404 Takibi — UA/Bot Filtresi (opsiyonel iyileştirme)
@@ -324,18 +229,6 @@
   - User-Agent regex filtresi (örn. `bot|crawler|spider|googlebot|bingbot`) — appsettings veya admin Site Ayarları'nda toggle
   - 30 günlük TTL otomatik temizlik job — admin "Temizle" tuşunu manuel iş yapıyor şu an
 - **Tetik:** Admin "404 Kayıtları" sayfasında gürültü rahatsız ederse, veya 7.4 Redirect modülünden sonra "hangi URL gerçekten kullanıcı, hangisi crawler" ayrımı önem kazanırsa.
-
----
-
-## Route Dili Tutarsızlığı (TR/EN karışık)
-
-- **Sorun:** Public route'lar çoğunlukla İngilizce (`/Contact`, `/Appointment`, `/Articles`, `/Services`, `/Attorneys`, `/Pages`...) ama Referanslar + Galeri Türkçe route kullanıyor. Kullanıcı `/tr-TR/` kültüründe ama URL segmentleri dil karışık — tutarsız.
-- **ÖNCE KEŞİF GEREK:** neden 2 sayfa TR diğerleri EN — kasıt mı (örn. SEO için belirli sayfalar TR) yoksa tutarsızlık mı (Faz 4 routing kararı). DEFERRED'da veya kod yorumunda kasıt notu olabilir — kontrol edilmeli.
-- **SEO etkisi:** Route değişirse eski URL'ler kırılır → 301 redirect gerekir. Faz 7.4 Redirect modülü ile entegre düşünülmeli (canonical URL'ler + slug history).
-- **Tahmini:** önce keşif (~30 dk), sonra karar — kapsam keşfe bağlı. Tüm İngilizce'ye/Türkçe'ye taşıma ise ~5-10 dosya + 301 mapping.
-- **Tetik:** 7.2b sonrası ayrı keşif adımı (veya kullanıcı önceliklendirir).
-
----
 
 ## SmtpEmailSender Connection Reuse (Bülten Optimizasyonu) — Faz 7.2b-2'den ertelendi
 
@@ -348,16 +241,11 @@
 
 ---
 
-## Turnstile JS Tek Yükleme (Centralize) — Faz 7.2a-fix'ten ertelendi
+## CLAUDE.md ↔ AGENTS.md Senkron Borcu
 
-- **Sorun:** Turnstile JS şu an 3 farklı yerden yükleniyor:
-  - `Views/Contact/Index.cshtml` (@section Scripts)
-  - `Views/Appointment/Index.cshtml` (@section Scripts)
-  - `Views/Shared/_SubscribeBand.cshtml` (her public sayfada render)
-- Cloudflare `api.js` idempotent (`window.turnstile` set ediyor, double-init yok) ama **network request duplicate** — Contact/Appointment sayfalarında 2 kez yüklenme
-- **Çözüm:** `_PublicLayout` body sonunda conditional (TurnstileOptions.Enabled) tek yükleme; Contact/Appointment + _SubscribeBand'dan @section Scripts/inline script kaldır
-- **Tahmini:** ~4 dosya edit, ~10 satır, 1 PR (~30 dk)
-- **Tetik:** 7.2a-fix sonrası ayrı küçük refactor (veya Faz 6.23 cila kalan turuyla birlikte)
+- **AGENTS.md** (Faz 8'de eklendi) `CLAUDE.md`'nin Codex/AI-agent kopyası — ~%99 duplike içerik (sadece başlık + §3 dosya adı + §12 hitap farkı).
+- Her mimari karar / bağımlılık değişikliğinde **iki dosya birlikte** güncellenmeli; yoksa zamanla ayrışır.
+- **Tetik:** İleride `CLAUDE.md` değişikliğinin `AGENTS.md`'ye yansımadığı fark edilirse veya tek kaynağa sentezleme (ortak include / sembolik bağ) zamanı geldiğinde.
 
 ---
 
@@ -372,12 +260,3 @@
 - **AppClaimTypes constants sınıfı**
   - Şu an "FullName" claim adı string sabit (Faz 2.3)
   - Yeni claim tipleri eklendikçe `Core/Constants/AppClaimTypes.cs` oluşturulur
-
-- **PROGRESS.md Faz 6 tablosu senkron borcu** (Faz 6 kapanışı / 6.26)
-  - PROGRESS.md "Tamamlanan Adımlar" tablosu 6.17/#33'te duruyor — 6.18-6.22
-    satırları işlenmemiş (6.18 belge senkron, 6.19 turnstile, 6.20 csp nonce,
-    6.21 dashboard widget, 6.22 randevu modülü)
-  - Tek tek eklemek yerine Faz 6 kapanışında (6.26) toplu doc-sync turunda
-    tablo güncellenir
-  - CLAUDE.md §11 + DEFERRED.md güncel — sadece PROGRESS.md tablosu geride
-  - Tetik: Faz 6 kapanış adımı (6.26)

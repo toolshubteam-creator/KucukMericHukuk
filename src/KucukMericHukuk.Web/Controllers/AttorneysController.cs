@@ -21,8 +21,8 @@ public class AttorneysController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Attorneys", Order = 0)]
-    [Route("{culture:culture}/Attorneys/Index", Order = 1)]
+    [Route("{culture:trCulture}/avukatlar", Order = 0)]
+    [Route("{culture:enCulture}/attorneys", Order = 0)]
     public async Task<IActionResult> Index(CancellationToken ct = default)
     {
         var lang = System.Globalization.CultureInfo.CurrentUICulture.Name;
@@ -33,7 +33,8 @@ public class AttorneysController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Attorneys/{slug:regex(^(?!Index$).+)}")]
+    [Route("{culture:trCulture}/avukatlar/{slug:regex(^(?!Index$).+)}", Order = 0)]
+    [Route("{culture:enCulture}/attorneys/{slug:regex(^(?!Index$).+)}", Order = 0)]
     public async Task<IActionResult> Detail(string slug, CancellationToken ct = default)
     {
         var lang = System.Globalization.CultureInfo.CurrentUICulture.Name;
@@ -59,5 +60,20 @@ public class AttorneysController : Controller
             AuthorArticles = authorArticles
         };
         return View(vm);
+    }
+
+    [HttpGet]
+    [Route("{culture:trCulture}/Attorneys", Order = 1)]
+    [Route("{culture:trCulture}/Attorneys/Index", Order = 2)]
+    public IActionResult LegacyIndex(string culture)
+    {
+        return RedirectToActionPermanent(nameof(Index), new { culture });
+    }
+
+    [HttpGet]
+    [Route("{culture:trCulture}/Attorneys/{slug:regex(^(?!Index$).+)}", Order = 1)]
+    public IActionResult LegacyDetail(string culture, string slug)
+    {
+        return RedirectToActionPermanent(nameof(Detail), new { culture, slug });
     }
 }

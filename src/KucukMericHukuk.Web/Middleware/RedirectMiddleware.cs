@@ -3,6 +3,7 @@ using KucukMericHukuk.Core.Common;
 using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Entities.Translations;
 using KucukMericHukuk.Core.Interfaces;
+using KucukMericHukuk.Core.Routing;
 using KucukMericHukuk.DataAccess.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -38,10 +39,14 @@ public class RedirectMiddleware
     public const string CacheKeyPrefix = "redirect:";
     private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
 
+    private static readonly Regex CaseOnlyLegacyPathRegex = new(
+        @"^/(?<culture>[a-z]{2}-[A-Z]{2})/(?<segment>Galeri|Referanslar)/?$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
     /// <summary>Slug-bazlı sayfalar — path regex (culture + segment + slug).</summary>
     private static readonly Regex SluggedPathRegex = new(
-        @"^/(?<culture>[a-z]{2}-[A-Z]{2})/(?<segment>Articles|Services|Attorneys|Pages)/(?<slug>[^/]+?)/?$",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        @"^/(?<culture>[a-z]{2}-[A-Z]{2})/(?<segment>makaleler|hizmetler|avukatlar|sayfalar|articles|services|attorneys|pages)/(?<slug>[^/]+?)/?$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
     /// <summary>NotFoundLogging ile aynı filtre seti — gürültü engelleme.</summary>
     private static readonly string[] IgnoredPathPrefixes =
@@ -79,6 +84,11 @@ public class RedirectMiddleware
 
         try
         {
+            if (TryHandleCaseOnlyLegacyRedirect(context, path))
+            {
+                return;
+            }
+
             if (await TryHandleManualRedirectAsync(context, path))
             {
                 return;
@@ -97,6 +107,24 @@ public class RedirectMiddleware
         }
 
         await _next(context);
+    }
+
+    private static bool TryHandleCaseOnlyLegacyRedirect(HttpContext context, string path)
+    {
+        var match = CaseOnlyLegacyPathRegex.Match(path);
+        if (!match.Success) return false;
+
+        var culture = match.Groups["culture"].Value;
+        var segment = match.Groups["segment"].Value switch
+        {
+            "Galeri" => "galeri",
+            "Referanslar" => "referanslar",
+            _ => null
+        };
+        if (segment is null) return false;
+
+        IssueRedirect(context, $"/{culture}/{segment}{context.Request.QueryString}", 301);
+        return true;
     }
 
     private async Task<bool> TryHandleManualRedirectAsync(HttpContext context, string path)
@@ -199,17 +227,21 @@ public class RedirectMiddleware
         var segment = m.Groups["segment"].Value;
         var slug = m.Groups["slug"].Value;
 
-        SluggedEntityType? type = segment switch
+        var normalizedSegment = segment.ToLowerInvariant();
+        SluggedEntityType? type = normalizedSegment switch
         {
-            "Articles" => SluggedEntityType.Article,
-            "Services" => SluggedEntityType.Service,
-            "Attorneys" => SluggedEntityType.Attorney,
-            "Pages" => SluggedEntityType.Page,
+            "makaleler" or "articles" => SluggedEntityType.Article,
+            "hizmetler" or "services" => SluggedEntityType.Service,
+            "avukatlar" or "attorneys" => SluggedEntityType.Attorney,
+            "sayfalar" or "pages" => SluggedEntityType.Page,
             _ => null
         };
-        if (type is null) return null;
+        if (type is null || !PublicRouteSegments.TryGetSluggedSegment(segment, lang, out var canonicalSegment))
+        {
+            return null;
+        }
 
-        var pathPrefix = $"/{lang}/{segment}";
+        var pathPrefix = $"/{lang}/{canonicalSegment}";
         return (type.Value, lang, slug, pathPrefix);
     }
 

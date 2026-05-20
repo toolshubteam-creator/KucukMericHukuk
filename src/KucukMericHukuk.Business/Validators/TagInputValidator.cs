@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using FluentValidation;
+using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.DTOs.Tag;
 
 namespace KucukMericHukuk.Business.Validators;
@@ -9,9 +10,18 @@ public class TagInputValidator : AbstractValidator<TagInputDto>
     public TagInputValidator()
     {
         RuleFor(x => x.Translations)
-            .NotEmpty().WithMessage("En az bir dil için içerik girilmelidir.");
+            .Must(list => list != null && list.Any(t => LanguageCodes.IsDefault(t.LanguageCode) && IsActive(t)))
+            .WithMessage("Türkçe içerik zorunludur.");
 
-        RuleForEach(x => x.Translations).SetValidator(new TagTranslationInputValidator());
+        RuleForEach(x => x.Translations)
+            .Where(IsActive)
+            .SetValidator(new TagTranslationInputValidator());
+    }
+
+    private static bool IsActive(TagTranslationInputDto t)
+    {
+        return !string.IsNullOrWhiteSpace(t.Name)
+            || !string.IsNullOrWhiteSpace(t.Slug);
     }
 }
 
@@ -24,7 +34,8 @@ public class TagTranslationInputValidator : AbstractValidator<TagTranslationInpu
     public TagTranslationInputValidator()
     {
         RuleFor(x => x.LanguageCode)
-            .NotEmpty().WithMessage("Dil kodu zorunludur.");
+            .NotEmpty().WithMessage("Dil kodu zorunludur.")
+            .Must(LanguageCodes.IsSupported).WithMessage("Geçersiz dil kodu.");
 
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Etiket adı zorunludur.")

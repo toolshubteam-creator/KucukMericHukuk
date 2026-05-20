@@ -3,6 +3,7 @@ using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.Enums;
 using KucukMericHukuk.Core.Interfaces;
 using KucukMericHukuk.Core.Interfaces.Services;
+using KucukMericHukuk.Core.Routing;
 using KucukMericHukuk.Infrastructure.Email.Templates;
 using KucukMericHukuk.Web.Areas.Admin.ViewModels.Newsletter;
 using Microsoft.AspNetCore.Authorization;
@@ -81,8 +82,8 @@ public class NewsletterController : Controller
             ArticleTitle: translation?.Title ?? "(başlık yok)",
             ArticleExcerpt: translation?.Excerpt,
             FeaturedImageUrl: ComposeAbsoluteUrl(article.FeaturedImageUrl, baseUrl),
-            ArticleUrl: $"{baseUrl}/{LanguageCodes.Default}/Articles/{slug}",
-            UnsubscribeUrl: $"{baseUrl}/{LanguageCodes.Default}/Subscriber/Unsubscribe/00000000-0000-0000-0000-000000000000",
+            ArticleUrl: $"{baseUrl}{PublicRouteSegments.ArticleDetailPath(LanguageCodes.Default, slug)}",
+            UnsubscribeUrl: $"{baseUrl}{PublicRouteSegments.UnsubscribePath(LanguageCodes.Default, Guid.Empty)}",
             SiteName: _siteInfo.Name);
 
         var html = NewsletterEmailTemplate.Render(model);

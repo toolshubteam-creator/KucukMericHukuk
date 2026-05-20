@@ -23,9 +23,17 @@ public class TestimonialInputValidator : AbstractValidator<TestimonialInputDto>
             .GreaterThanOrEqualTo(0).WithMessage("Sıra numarası 0 veya pozitif olmalıdır.");
 
         RuleFor(x => x.Translations)
-            .NotEmpty().WithMessage("En az bir dil için içerik girilmelidir.");
+            .Must(list => list != null && list.Any(t => LanguageCodes.IsDefault(t.LanguageCode) && IsActive(t)))
+            .WithMessage("Türkçe içerik zorunludur.");
 
-        RuleForEach(x => x.Translations).SetValidator(new TestimonialTranslationInputValidator());
+        RuleForEach(x => x.Translations)
+            .Where(IsActive)
+            .SetValidator(new TestimonialTranslationInputValidator());
+    }
+
+    private static bool IsActive(TestimonialTranslationInputDto t)
+    {
+        return !string.IsNullOrWhiteSpace(t.Content);
     }
 }
 
@@ -36,7 +44,7 @@ public class TestimonialTranslationInputValidator : AbstractValidator<Testimonia
         RuleFor(x => x.LanguageCode)
             .NotEmpty().WithMessage("Dil kodu zorunludur.")
             .MaximumLength(10)
-            .Must(code => LanguageCodes.Supported.Contains(code))
+            .Must(LanguageCodes.IsSupported)
             .WithMessage("Desteklenmeyen dil kodu.");
 
         RuleFor(x => x.Content)

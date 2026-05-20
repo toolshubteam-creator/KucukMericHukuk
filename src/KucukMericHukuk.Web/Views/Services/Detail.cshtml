@@ -1,5 +1,6 @@
 @model KucukMericHukuk.Web.ViewModels.Service.ServiceDetailViewModel
 @using KucukMericHukuk.Web.Helpers
+@using KucukMericHukuk.Core.Routing
 @{
     ViewData["Title"] = !string.IsNullOrEmpty(Model.Service.MetaTitle)
         ? Model.Service.MetaTitle
@@ -13,11 +14,12 @@
     ViewData["OgImage"] = Model.Service.FeaturedImage;
 
     var iconName = string.IsNullOrEmpty(Model.Service.Icon) ? "scale" : Model.Service.Icon;
+    var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
 
     ViewData["Breadcrumbs"] = new List<BreadcrumbItem>
     {
-        new("Ana Sayfa", "/tr-TR/"),
-        new("Hizmet Alanlarımız", "/tr-TR/Services"),
+        new("Ana Sayfa", PublicRouteSegments.HomePath(culture)),
+        new("Hizmet Alanlarımız", PublicRouteSegments.ServicesPath(culture)),
         new(Model.Service.Name, null)
     };
 }

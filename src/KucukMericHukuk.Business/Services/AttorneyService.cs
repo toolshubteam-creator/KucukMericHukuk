@@ -94,7 +94,8 @@ public class AttorneyService : IAttorneyService
         var serviceResult = await ValidateServiceIdsAsync(input.ServiceIds, ct);
         if (serviceResult.IsFailure) return Result.Failure<int>(serviceResult.Errors);
 
-        var slugResult = await ResolveSlugsAsync(input.Translations, excludeId: null, ct);
+        var activeTranslations = input.Translations.Where(IsActiveTranslation).ToList();
+        var slugResult = await ResolveSlugsAsync(activeTranslations, excludeId: null, ct);
         if (slugResult.IsFailure) return Result.Failure<int>(slugResult.Errors);
 
         var attorney = new Attorney
@@ -111,7 +112,7 @@ public class AttorneyService : IAttorneyService
             CreatedAt = DateTime.UtcNow,
         };
 
-        foreach (var t in input.Translations)
+        foreach (var t in activeTranslations)
         {
             attorney.Translations.Add(BuildTranslation(t));
         }
@@ -166,7 +167,8 @@ public class AttorneyService : IAttorneyService
         var serviceResult = await ValidateServiceIdsAsync(input.ServiceIds, ct);
         if (serviceResult.IsFailure) return serviceResult;
 
-        var slugResult = await ResolveSlugsAsync(input.Translations, excludeId: input.Id.Value, ct);
+        var activeTranslations = input.Translations.Where(IsActiveTranslation).ToList();
+        var slugResult = await ResolveSlugsAsync(activeTranslations, excludeId: input.Id.Value, ct);
         if (slugResult.IsFailure) return slugResult;
 
         attorney.UserId = input.UserId;
@@ -181,7 +183,7 @@ public class AttorneyService : IAttorneyService
         attorney.UpdatedAt = DateTime.UtcNow;
 
         // Faz 7.1.2: Translation diff-based merge (Id + CreatedAt korunur).
-        var incomingTranslations = input.Translations.Select(BuildTranslation).ToList();
+        var incomingTranslations = activeTranslations.Select(BuildTranslation).ToList();
 
         // Faz 7.4.3a: slug-change snapshot.
         var oldSlugsByLang = attorney.Translations
@@ -353,4 +355,16 @@ public class AttorneyService : IAttorneyService
         };
     }
 
+    private static bool IsActiveTranslation(AttorneyTranslationInputDto t)
+    {
+        return !string.IsNullOrWhiteSpace(t.FullName)
+            || !string.IsNullOrWhiteSpace(t.Title)
+            || !string.IsNullOrWhiteSpace(t.Slug)
+            || !string.IsNullOrWhiteSpace(t.ShortBio)
+            || !string.IsNullOrWhiteSpace(t.FullBio)
+            || !string.IsNullOrWhiteSpace(t.Education)
+            || !string.IsNullOrWhiteSpace(t.Publications)
+            || !string.IsNullOrWhiteSpace(t.MetaTitle)
+            || !string.IsNullOrWhiteSpace(t.MetaDescription);
+    }
 }

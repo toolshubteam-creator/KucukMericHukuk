@@ -49,7 +49,7 @@ public class FaqsPublicTests : IClassFixture<IntegrationTestFactory>
 
         var client = _factory.CreateClient();
 
-        var response = await client.GetAsync("/tr-TR/Faqs");
+        var response = await client.GetAsync("/tr-TR/sss");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var html = await response.Content.ReadAsStringAsync();
@@ -72,7 +72,7 @@ public class FaqsPublicTests : IClassFixture<IntegrationTestFactory>
 
         var client = _factory.CreateClient();
 
-        var response = await client.GetAsync("/tr-TR/Faqs");
+        var response = await client.GetAsync("/tr-TR/sss");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var html = await response.Content.ReadAsStringAsync();
@@ -97,7 +97,7 @@ public class FaqsPublicTests : IClassFixture<IntegrationTestFactory>
 
         var client = _factory.CreateClient();
 
-        var response = await client.GetAsync("/tr-TR/Faqs");
+        var response = await client.GetAsync("/tr-TR/sss");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var html = await response.Content.ReadAsStringAsync();

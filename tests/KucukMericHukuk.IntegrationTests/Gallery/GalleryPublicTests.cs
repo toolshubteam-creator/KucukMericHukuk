@@ -58,7 +58,7 @@ public class GalleryPublicTests : IClassFixture<IntegrationTestFactory>
 
         var client = _factory.CreateClient();
 
-        var response = await client.GetAsync("/tr-TR/Galeri");
+        var response = await client.GetAsync("/tr-TR/galeri");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var html = await response.Content.ReadAsStringAsync();
@@ -78,7 +78,7 @@ public class GalleryPublicTests : IClassFixture<IntegrationTestFactory>
 
         var client = _factory.CreateClient();
 
-        var response = await client.GetAsync("/tr-TR/Galeri");
+        var response = await client.GetAsync("/tr-TR/galeri");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var html = await response.Content.ReadAsStringAsync();
@@ -97,7 +97,7 @@ public class GalleryPublicTests : IClassFixture<IntegrationTestFactory>
 
         var client = _factory.CreateClient();
 
-        var response = await client.GetAsync("/tr-TR/Galeri");
+        var response = await client.GetAsync("/tr-TR/galeri");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var html = await response.Content.ReadAsStringAsync();

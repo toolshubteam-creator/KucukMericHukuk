@@ -18,15 +18,17 @@ public class AppointmentController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Appointment", Order = 0)]
-    [Route("{culture:culture}/Appointment/Index", Order = 1)]
+    [Route("{culture:trCulture}/randevu", Order = 0)]
+    [Route("{culture:enCulture}/appointment", Order = 0)]
     public IActionResult Index()
     {
         return View(new AppointmentFormViewModel());
     }
 
     [HttpPost]
-    [Route("{culture:culture}/Appointment/Submit")]
+    [Route("{culture:trCulture}/randevu/gonder", Order = 0)]
+    [Route("{culture:enCulture}/appointment/submit", Order = 0)]
+    [Route("{culture:trCulture}/Appointment/Submit", Order = 1)]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting("appointment-form")]
     public async Task<IActionResult> Submit(AppointmentFormViewModel vm, CancellationToken ct)
@@ -72,9 +74,25 @@ public class AppointmentController : Controller
     }
 
     [HttpGet]
-    [Route("{culture:culture}/Appointment/ThankYou")]
+    [Route("{culture:trCulture}/randevu/tesekkurler", Order = 0)]
+    [Route("{culture:enCulture}/appointment/thank-you", Order = 0)]
     public IActionResult ThankYou()
     {
         return View();
+    }
+
+    [HttpGet]
+    [Route("{culture:trCulture}/Appointment", Order = 1)]
+    [Route("{culture:trCulture}/Appointment/Index", Order = 2)]
+    public IActionResult LegacyIndex(string culture)
+    {
+        return RedirectToActionPermanent(nameof(Index), new { culture });
+    }
+
+    [HttpGet]
+    [Route("{culture:trCulture}/Appointment/ThankYou", Order = 1)]
+    public IActionResult LegacyThankYou(string culture)
+    {
+        return RedirectToActionPermanent(nameof(ThankYou), new { culture });
     }
 }

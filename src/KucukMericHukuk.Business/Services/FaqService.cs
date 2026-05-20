@@ -77,7 +77,8 @@ public class FaqService : IFaqService
             CreatedAt = DateTime.UtcNow,
         };
 
-        foreach (var t in input.Translations)
+        var activeTranslations = input.Translations.Where(IsActiveTranslation).ToList();
+        foreach (var t in activeTranslations)
         {
             faq.Translations.Add(new FaqTranslation
             {
@@ -122,7 +123,8 @@ public class FaqService : IFaqService
         // Faz 7.1.2: Translations.Clear()+Add() yerine diff-based merge.
         // LanguageCode bazlı eşleşme → mevcut translation Id + CreatedAt korunur,
         // audit log Modified delta olarak görünür (önceki Deleted+Added gürültüsü temizlendi).
-        var incomingTranslations = input.Translations.Select(t => new FaqTranslation
+        var activeTranslations = input.Translations.Where(IsActiveTranslation).ToList();
+        var incomingTranslations = activeTranslations.Select(t => new FaqTranslation
         {
             LanguageCode = t.LanguageCode,
             Question = t.Question.Trim(),
@@ -218,5 +220,11 @@ public class FaqService : IFaqService
 
         await _uow.SaveChangesAsync(ct);
         return Result.Success();
+    }
+
+    private static bool IsActiveTranslation(FaqTranslationInputDto t)
+    {
+        return !string.IsNullOrWhiteSpace(t.Question)
+            || !string.IsNullOrWhiteSpace(t.Answer);
     }
 }

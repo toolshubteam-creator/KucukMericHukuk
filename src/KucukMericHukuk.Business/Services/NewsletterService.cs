@@ -6,6 +6,7 @@ using KucukMericHukuk.Core.Entities;
 using KucukMericHukuk.Core.Enums;
 using KucukMericHukuk.Core.Interfaces;
 using KucukMericHukuk.Core.Interfaces.Services;
+using KucukMericHukuk.Core.Routing;
 using KucukMericHukuk.Infrastructure.Email.Templates;
 using MapsterMapper;
 using Microsoft.Extensions.Logging;
@@ -235,7 +236,7 @@ public class NewsletterService : INewsletterService
         var slug = translation?.Slug ?? string.Empty;
         var excerpt = translation?.Excerpt;
         var baseUrl = (_siteInfo.BaseUrl ?? string.Empty).TrimEnd('/');
-        var articleUrl = $"{baseUrl}/{LanguageCodes.Default}/Articles/{slug}";
+        var articleUrl = $"{baseUrl}{PublicRouteSegments.ArticleDetailPath(LanguageCodes.Default, slug)}";
         var featuredImageUrl = ComposeAbsoluteUrl(article.FeaturedImageUrl, baseUrl);
         var subject = $"[{_siteInfo.Name}] {title}";
         var errorSamples = new List<string>();
@@ -247,7 +248,7 @@ public class NewsletterService : INewsletterService
 
             try
             {
-                var unsubUrl = $"{baseUrl}/{LanguageCodes.Default}/Subscriber/Unsubscribe/{sub.UnsubscribeToken}";
+                var unsubUrl = $"{baseUrl}{PublicRouteSegments.UnsubscribePath(LanguageCodes.Default, sub.UnsubscribeToken)}";
                 var model = new NewsletterEmailModel(
                     ArticleTitle: title,
                     ArticleExcerpt: excerpt,

@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using FluentValidation;
+using KucukMericHukuk.Core.Constants;
 using KucukMericHukuk.Core.DTOs.Category;
 
 namespace KucukMericHukuk.Business.Validators;
@@ -11,16 +12,27 @@ public class CategoryInputValidator : AbstractValidator<CategoryInputDto>
         RuleFor(x => x.DisplayOrder)
             .GreaterThanOrEqualTo(0).WithMessage("Sıra numarası 0 veya pozitif olmalıdır.");
 
-        // Self-reference: ParentCategoryId == Id YASAK
         RuleFor(x => x).Must(x =>
             !x.Id.HasValue || x.ParentCategoryId != x.Id.Value)
             .WithMessage("Kategori kendi üst kategorisi olamaz.")
             .OverridePropertyName(nameof(CategoryInputDto.ParentCategoryId));
 
         RuleFor(x => x.Translations)
-            .NotEmpty().WithMessage("En az bir dil için içerik girilmelidir.");
+            .Must(list => list != null && list.Any(t => LanguageCodes.IsDefault(t.LanguageCode) && IsActive(t)))
+            .WithMessage("Türkçe içerik zorunludur.");
 
-        RuleForEach(x => x.Translations).SetValidator(new CategoryTranslationInputValidator());
+        RuleForEach(x => x.Translations)
+            .Where(IsActive)
+            .SetValidator(new CategoryTranslationInputValidator());
+    }
+
+    private static bool IsActive(CategoryTranslationInputDto t)
+    {
+        return !string.IsNullOrWhiteSpace(t.Name)
+            || !string.IsNullOrWhiteSpace(t.Slug)
+            || !string.IsNullOrWhiteSpace(t.Description)
+            || !string.IsNullOrWhiteSpace(t.MetaTitle)
+            || !string.IsNullOrWhiteSpace(t.MetaDescription);
     }
 }
 
@@ -33,7 +45,8 @@ public class CategoryTranslationInputValidator : AbstractValidator<CategoryTrans
     public CategoryTranslationInputValidator()
     {
         RuleFor(x => x.LanguageCode)
-            .NotEmpty().WithMessage("Dil kodu zorunludur.");
+            .NotEmpty().WithMessage("Dil kodu zorunludur.")
+            .Must(LanguageCodes.IsSupported).WithMessage("Geçersiz dil kodu.");
 
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Kategori adı zorunludur.")
@@ -43,8 +56,7 @@ public class CategoryTranslationInputValidator : AbstractValidator<CategoryTrans
         {
             RuleFor(x => x.Slug)
                 .MaximumLength(150).WithMessage("Slug en fazla 150 karakter olabilir.")
-                .Matches(SlugRegex).WithMessage(
-                    "Slug yalnızca küçük harf, rakam ve tire içerebilir.");
+                .Matches(SlugRegex).WithMessage("Slug yalnızca küçük harf, rakam ve tire içerebilir.");
         });
 
         RuleFor(x => x.Description)
